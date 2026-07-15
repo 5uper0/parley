@@ -1,0 +1,103 @@
+{
+  "title": "End a fixed-term lease without double recovery",
+  "options": [
+    {
+      "id": "balanced-replacement",
+      "label": "One-month notice + replacement tenant",
+      "exit_delay_months": 1,
+      "deposit_return_pct": 85,
+      "landlord_rent_coverage_months": 1,
+      "replacement_ready": true,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+    },
+    {
+      "id": "consume-deposit",
+      "label": "Stay two months and consume the deposit",
+      "exit_delay_months": 2,
+      "deposit_return_pct": 0,
+      "landlord_rent_coverage_months": 2,
+      "replacement_ready": false,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+    },
+    {
+      "id": "penalty-and-relet",
+      "label": "Charge an exit penalty and re-let immediately",
+      "exit_delay_months": 1,
+      "deposit_return_pct": 35,
+      "landlord_rent_coverage_months": 2,
+      "replacement_ready": true,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": true,
+      "double_recovery": true
+    },
+    {
+      "id": "walk-away",
+      "label": "Immediate exit with full deposit return",
+      "exit_delay_months": 0,
+      "deposit_return_pct": 100,
+      "landlord_rent_coverage_months": 0,
+      "replacement_ready": false,
+      "documented_costs_paid": false,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+    }
+  ],
+  "parties": [
+    {
+      "owner": "Tenant (ratified)",
+      "hard": [
+        {"attr": "early_exit_penalty", "op": "==", "value": false},
+        {"attr": "double_recovery", "op": "==", "value": false},
+        {"attr": "documented_costs_paid", "op": "==", "value": true},
+        {"attr": "insurance_credited", "op": "==", "value": true}
+      ],
+      "utility": [
+        {"attr": "deposit_return_pct", "weight": 3, "direction": "higher", "lo": 0, "hi": 100},
+        {"attr": "exit_delay_months", "weight": 2, "direction": "lower", "lo": 0, "hi": 2}
+      ]
+    },
+    {
+      "owner": "Landlord (inferred)",
+      "hard": [
+        {"attr": "landlord_rent_coverage_months", "op": ">=", "value": 1},
+        {"attr": "documented_costs_paid", "op": "==", "value": true}
+      ],
+      "utility": [
+        {"attr": "landlord_rent_coverage_months", "weight": 3, "direction": "higher", "lo": 0, "hi": 2},
+        {"attr": "replacement_ready", "weight": 2, "prefer": true}
+      ]
+    }
+  ],
+  "presentation": {
+    "situation": "A tenant loses the job supporting a fixed-term lease and gives advance notice. The landlord has an interested replacement. Can they end the lease without vacancy, an exit penalty, or charging two tenants for the same period?",
+    "parties": {
+      "Tenant (ratified)": {
+        "blurb": "needs to leave early and recover the deposit after real costs",
+        "redlines": ["no exit penalty", "no double recovery", "invoices for damage", "insurance payout credited"]
+      },
+      "Landlord (inferred)": {
+        "blurb": "wants continuous rent and proven property costs covered",
+        "redlines": ["at least one month of rent coverage", "documented damage is paid"]
+      }
+    },
+    "options": {
+      "balanced-replacement": {"plain": "One-month notice; replacement moves in; return the deposit after documented costs"},
+      "consume-deposit": {"plain": "Tenant stays two more months solely to consume the deposit"},
+      "penalty-and-relet": {"plain": "Keep an exit penalty while a replacement tenant also pays", "tempting": true},
+      "walk-away": {"plain": "Immediate departure with no vacancy protection or damage settlement"}
+    },
+    "attrs": [
+      {"key": "deposit_return_pct", "label": "deposit returned %"},
+      {"key": "exit_delay_months", "label": "months before exit"}
+    ],
+    "outcome": "One month of notice protects the landlord from vacancy, the replacement prevents lost rent, and the tenant receives the deposit back after documented costs. The option that charges both an exit penalty and replacement rent is blocked as double recovery."
+  }
+}

@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+
+# Local secrets — voice stack (ElevenLabs, Zadarma) etc. Never commit.
+.env
+.env.*
+!.env.example
+
+# Codex agent mirrors (local tooling; the source of truth is .claude/)
+.agents/

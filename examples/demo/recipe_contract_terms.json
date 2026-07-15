@@ -1,0 +1,28 @@
+{
+  "title": "Negotiate enterprise contract clauses",
+  "options": [
+    {"id": "balanced",        "label": "Balanced terms",        "liability_cap": 5, "sla": 99, "data_residency_ok": true,  "auto_renew": false},
+    {"id": "customer-favored","label": "Customer-favored",      "liability_cap": 8, "sla": 99, "data_residency_ok": true,  "auto_renew": false},
+    {"id": "vendor-lockin",   "label": "Vendor lock-in, low SLA", "liability_cap": 2, "sla": 95, "data_residency_ok": false, "auto_renew": true}
+  ],
+  "parties": [
+    {"owner": "Customer", "hard": [{"attr": "sla", "op": ">=", "value": 99}], "utility": [{"attr": "liability_cap", "direction": "higher", "lo": 0, "hi": 10}]},
+    {"owner": "Vendor",   "hard": [], "utility": [{"attr": "liability_cap", "direction": "lower", "lo": 0, "hi": 10}]},
+    {"owner": "Legal",    "hard": [{"attr": "data_residency_ok", "op": "==", "value": true}], "utility": [{"attr": "auto_renew", "prefer": false}]}
+  ],
+  "presentation": {
+    "situation": "You and a client are agreeing on contract terms — neither wants to show their real bottom line.",
+    "parties": {
+      "Customer": {"blurb": "needs a real uptime guarantee", "redlines": ["at least 99% uptime (SLA)"]},
+      "Vendor":   {"blurb": "wants to cap how much it can be on the hook for", "redlines": []},
+      "Legal":    {"blurb": "won't let customer data leave the region", "redlines": ["data must stay in-region"]}
+    },
+    "options": {
+      "balanced":        {"plain": "Balanced terms both sides can live with"},
+      "customer-favored":{"plain": "Terms that favor the customer"},
+      "vendor-lockin":   {"plain": "Lock-in, weak uptime, data sent offshore", "tempting": true}
+    },
+    "attrs": [{"key": "sla", "label": "uptime %"}, {"key": "liability_cap", "label": "liability cap"}],
+    "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor — with a receipt."
+  }
+}

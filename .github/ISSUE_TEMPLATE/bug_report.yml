@@ -1,0 +1,47 @@
+name: Bug report
+description: Something in the core, net layer, or a demo behaves incorrectly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping harden Parley. The whole point is that its guarantees are *checkable* —
+        so the most useful bug reports come with a way to reproduce the wrong verdict, decision, or
+        transcript.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you observe, and what did you expect instead?
+      placeholder: "The engine picked X, but option Y should have been infeasible because…"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: A recipe JSON, a snippet, or the exact command. Smallest case that shows it.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Output of `git rev-parse --short HEAD` or the release tag.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "core: preferences / red lines"
+        - "core: consensus / max-min"
+        - "core: transcript / verification"
+        - "net: bot / client / signing"
+        - "demo / examples"
+        - "docs"
+        - "other"
+    validations:
+      required: true

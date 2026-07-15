@@ -1,0 +1,25 @@
+{
+  "title": "Apportion a claim across three carriers",
+  "options": [
+    {"id": "even",     "label": "Even split (34/33/33)",   "a_share": 34, "b_share": 33, "c_share": 33},
+    {"id": "weighted", "label": "Weighted (50/30/20)",     "a_share": 50, "b_share": 30, "c_share": 20},
+    {"id": "heavy-c",  "label": "Dump on C (20/20/60)",    "a_share": 20, "b_share": 20, "c_share": 60}
+  ],
+  "parties": [
+    {
+      "owner": "Carrier A",
+      "hard": [{"attr": "a_share", "op": "<=", "value": 55}],
+      "utility": [{"attr": "a_share", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 100}]
+    },
+    {
+      "owner": "Carrier B",
+      "hard": [{"attr": "b_share", "op": "<=", "value": 40}],
+      "utility": [{"attr": "b_share", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 100}]
+    },
+    {
+      "owner": "Carrier C",
+      "hard": [{"attr": "c_share", "op": "<=", "value": 40}],
+      "utility": [{"attr": "c_share", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 100}]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "title": "Allocate the DAO treasury",
+  "options": [
+    {"id": "conservative", "label": "Conservative",           "dev": 3, "runway": 24, "emission": false, "marketing": 1},
+    {"id": "balanced",     "label": "Balanced",               "dev": 5, "runway": 18, "emission": false, "marketing": 3},
+    {"id": "aggressive",   "label": "Aggressive (mint + burn runway)", "dev": 9, "runway": 9, "emission": true, "marketing": 8}
+  ],
+  "parties": [
+    {
+      "owner": "Builders",
+      "hard": [{"attr": "dev", "op": ">=", "value": 3}],
+      "utility": [{"attr": "dev", "weight": 1.0, "direction": "higher", "lo": 0, "hi": 9}]
+    },
+    {
+      "owner": "Investors",
+      "hard": [{"attr": "emission", "op": "==", "value": false}],
+      "utility": [{"attr": "runway", "weight": 1.0, "direction": "higher", "lo": 0, "hi": 24}]
+    },
+    {
+      "owner": "Community",
+      "hard": [{"attr": "runway", "op": ">=", "value": 12}],
+      "utility": [{"attr": "runway", "weight": 1.0, "direction": "higher", "lo": 0, "hi": 24}]
+    }
+  ]
+}

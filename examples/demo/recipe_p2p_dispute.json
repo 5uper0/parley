@@ -1,0 +1,30 @@
+{
+  "title": "Resolve a P2P trade dispute (escrow)",
+  "options": [
+    {"id": "to-seller", "label": "Release to seller (0/100)", "buyer": 0,   "seller": 100, "evidence_ok": true},
+    {"id": "split",     "label": "Split the escrow (50/50)",  "buyer": 50,  "seller": 50,  "evidence_ok": true},
+    {"id": "to-buyer",  "label": "Refund the buyer (100/0)",  "buyer": 100, "seller": 0,   "evidence_ok": true},
+    {"id": "instant",   "label": "Instant refund, skip evidence", "buyer": 100, "seller": 0, "evidence_ok": false}
+  ],
+  "parties": [
+    {"owner": "Buyer",    "hard": [], "utility": [{"attr": "buyer",  "direction": "higher", "lo": 0, "hi": 100}]},
+    {"owner": "Seller",   "hard": [], "utility": [{"attr": "seller", "direction": "higher", "lo": 0, "hi": 100}]},
+    {"owner": "Platform", "hard": [{"attr": "evidence_ok", "op": "==", "value": true}], "utility": []}
+  ],
+  "presentation": {
+    "situation": "You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?",
+    "parties": {
+      "Buyer":    {"blurb": "wants their money back", "redlines": []},
+      "Seller":   {"blurb": "wants to be paid for what they shipped", "redlines": []},
+      "Platform": {"blurb": "won't release the money without checking the evidence", "redlines": ["never skip the evidence check"]}
+    },
+    "options": {
+      "to-seller": {"plain": "Pay the seller in full"},
+      "split":     {"plain": "Split it 50/50"},
+      "to-buyer":  {"plain": "Refund the buyer in full"},
+      "instant":   {"plain": "Instant refund, skip the evidence check", "tempting": true}
+    },
+    "attrs": [{"key": "buyer", "label": "buyer gets"}, {"key": "seller", "label": "seller gets"}],
+    "outcome": "The fairest call everyone accepts is a 50/50 split — nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."
+  }
+}

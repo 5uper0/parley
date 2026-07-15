@@ -1,0 +1,19 @@
+# Alternative one-file deploy for the hosted money-shot demo (Render is the primary path — see render.yaml).
+# Fly deploys the existing Dockerfile as-is; Railway works from the same Dockerfile too.
+# Rename `app` before first deploy (must be globally unique).
+app = "parley-demo"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0        # scale to zero when idle — a demo needn't cost anything at rest
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"                # the core is stdlib; the server is tiny

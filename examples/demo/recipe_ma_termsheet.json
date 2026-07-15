@@ -1,0 +1,13 @@
+{
+  "title": "Agree an investment term sheet",
+  "options": [
+    {"id": "founder-friendly", "label": "Founder-friendly", "valuation": 8, "liq_pref": 1, "board_control": false, "pool": 10},
+    {"id": "market",           "label": "Market terms",     "valuation": 6, "liq_pref": 1, "board_control": false, "pool": 12},
+    {"id": "investor-grab",    "label": "Investor control grab", "valuation": 4, "liq_pref": 3, "board_control": true, "pool": 20}
+  ],
+  "parties": [
+    {"owner": "Founder",  "hard": [{"attr": "board_control", "op": "==", "value": false}], "utility": [{"attr": "valuation", "direction": "higher", "lo": 0, "hi": 10}]},
+    {"owner": "Investor", "hard": [], "utility": [{"attr": "valuation", "direction": "lower", "lo": 0, "hi": 10}]},
+    {"owner": "Existing shareholders", "hard": [{"attr": "liq_pref", "op": "<=", "value": 2}], "utility": [{"attr": "liq_pref", "direction": "lower", "lo": 0, "hi": 5}]}
+  ]
+}

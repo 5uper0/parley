@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question / discussion
+    url: https://github.com/5uper0/parley/discussions
+    about: Ask how Parley works, share a recipe, or propose a research direction.
+  - name: Security disclosure
+    url: https://github.com/5uper0/parley/security/advisories/new
+    about: Report a vulnerability privately (see SECURITY.md). Do not open a public issue.

@@ -1,0 +1,13 @@
+{
+  "title": "Select a vendor across departments",
+  "options": [
+    {"id": "vendor-a",     "label": "Vendor A",              "cost": 6, "security_cert": true,  "delivery": 8,  "data_local": true},
+    {"id": "vendor-b",     "label": "Vendor B",              "cost": 4, "security_cert": true,  "delivery": 12, "data_local": true},
+    {"id": "vendor-cheap", "label": "Cheap vendor, no cert", "cost": 2, "security_cert": false, "delivery": 4,  "data_local": false}
+  ],
+  "parties": [
+    {"owner": "Security", "hard": [{"attr": "security_cert", "op": "==", "value": true}, {"attr": "data_local", "op": "==", "value": true}], "utility": [{"attr": "data_local", "prefer": true}]},
+    {"owner": "Finance",  "hard": [], "utility": [{"attr": "cost", "direction": "lower", "lo": 0, "hi": 10}]},
+    {"owner": "Business", "hard": [], "utility": [{"attr": "delivery", "direction": "lower", "lo": 0, "hi": 16}]}
+  ]
+}

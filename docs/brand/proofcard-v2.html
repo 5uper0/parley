@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parley proof-card — calibrated</title>
+<!--
+  Calibration exemplar (Linear-benchmarked, docs/brand/calibration-linear.md). Real P2P escrow run.
+  Deep cool-dark surface · hairline + big ambient shadow · faint line-grid · refined light display
+  weights · our signal colors + the red-line / mono-receipt / ✓-seal signature. Screenshot-native.
+-->
+<style>
+  :root{
+    --bg:#0A0B0D; --grid:rgba(255,255,255,.022);
+    --card:#121316; --card-top:#16181C; --hair:rgba(255,255,255,.08);
+    --ink:#F4F6F7; --muted:#9AA0A9; --dim:#6A6F78;
+    --indigo:#6E79E0; --verify:#1FB98A; --verify-bg:rgba(31,185,138,.08); --verify-hair:rgba(31,185,138,.22);
+    --red:#F0555B; --red-bg:rgba(240,85,91,.07); --red-hair:rgba(240,85,91,.24);
+    --sans:'Inter',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{margin:0;box-sizing:border-box}
+  body{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:56px 24px;
+    font-family:var(--sans);color:var(--ink);
+    background:
+      radial-gradient(120% 90% at 50% -20%, rgba(110,121,224,.10), transparent 55%),
+      linear-gradient(180deg,#0C0D10,#08090A);
+  }
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;
+    background:
+      repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 44px),
+      repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 44px);
+    mask-image:radial-gradient(80% 60% at 50% 40%, #000 30%, transparent 100%);}
+  .card{position:relative;width:680px;max-width:100%;border-radius:16px;padding:34px 36px 30px;
+    background:linear-gradient(180deg,var(--card-top),var(--card));
+    border:1px solid var(--hair);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.4),
+      0 40px 90px -30px rgba(0,0,0,.8),
+      inset 0 1px 0 rgba(255,255,255,.04);}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+  .logo{font-size:25px;font-weight:560;letter-spacing:-.02em;color:var(--ink)}
+  .logo .d{color:var(--red)}
+  .hook{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.01em}
+  .rule{height:0;border:none;border-top:2px solid var(--red);margin:17px 0 22px;width:100%;opacity:.92}
+  .scn{font-size:23px;font-weight:540;letter-spacing:-.015em;line-height:1.08;color:var(--ink)}
+  .parties{margin-top:9px;font-size:13px;color:var(--dim);letter-spacing:.01em}
+  .parties b{color:var(--muted);font-weight:500}
+  .row{display:flex;gap:14px;align-items:flex-start;padding:15px 17px;border-radius:12px;margin-top:15px}
+  .row.block{background:var(--red-bg);border:1px solid var(--red-hair)}
+  .row.ok{background:var(--verify-bg);border:1px solid var(--verify-hair)}
+  .mk{font-family:var(--mono);font-weight:700;font-size:17px;line-height:1.5;flex:none}
+  .row.block .mk{color:var(--red)} .row.ok .mk{color:var(--verify)}
+  .row .t{font-size:15px;font-weight:540;color:var(--ink);letter-spacing:-.005em}
+  .row .s{margin-top:3px;font-size:13px;color:var(--muted);line-height:1.45}
+  .row .t .q{color:var(--ink)}
+  .receipt{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+    margin-top:20px;padding:13px 16px;border-radius:10px;background:#0C0D10;border:1px solid var(--hair);
+    font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .receipt .k{color:var(--dim)}
+  .receipt .v{color:var(--verify);font-weight:700}
+  .foot{margin-top:18px;font-size:12px;color:var(--dim);letter-spacing:.01em}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <span class="logo">parley<span class="d">.</span></span>
+      <span class="hook">AI that can't lie — and you can check</span>
+    </div>
+    <hr class="rule">
+    <div class="scn">Resolve a P2P trade dispute (escrow)</div>
+    <div class="parties">3 rival parties: <b>Buyer · Seller · Platform</b> — each with private red lines</div>
+
+    <div class="row block">
+      <span class="mk">✕</span>
+      <div><div class="t">One agent pushed <span class="q">"Instant refund, skip evidence"</span></div>
+        <div class="s">BLOCKED by a red line — rejected in code, not negotiated away.</div></div>
+    </div>
+
+    <div class="row ok">
+      <span class="mk">✓</span>
+      <div><div class="t">Agreed: <span class="q">"Split the escrow (50/50)"</span></div>
+        <div class="s">max-min consensus — the least-happy party lifted from 0 to 0.5. No one was betrayed.</div></div>
+    </div>
+
+    <div class="receipt">
+      <span><span class="k">sha256</span> b41b05954802aa4f5d83…</span>
+      <span class="v">✓ verified · tamper-evident · every red line held</span>
+    </div>
+    <div class="foot">parley — provable fairness for multi-party decisions · self-hosted · no crypto · replay it yourself</div>
+  </div>
+</body>
+</html>

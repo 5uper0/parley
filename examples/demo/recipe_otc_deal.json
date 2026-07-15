@@ -1,0 +1,13 @@
+{
+  "title": "Agree terms for a large OTC crypto trade",
+  "options": [
+    {"id": "fair",         "label": "Fair terms",              "discount": 5, "sanctions_ok": true,  "escrow": true},
+    {"id": "buyer-favored","label": "Buyer-favored",           "discount": 8, "sanctions_ok": true,  "escrow": true},
+    {"id": "fast-noescrow","label": "Fast, no escrow, no screen", "discount": 3, "sanctions_ok": false, "escrow": false}
+  ],
+  "parties": [
+    {"owner": "Buyer",      "hard": [{"attr": "escrow", "op": "==", "value": true}], "utility": [{"attr": "discount", "direction": "higher", "lo": 0, "hi": 10}]},
+    {"owner": "Seller",     "hard": [], "utility": [{"attr": "discount", "direction": "lower", "lo": 0, "hi": 10}]},
+    {"owner": "Compliance", "hard": [{"attr": "sanctions_ok", "op": "==", "value": true}], "utility": [{"attr": "escrow", "prefer": true}]}
+  ]
+}

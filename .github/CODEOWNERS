@@ -1,0 +1,8 @@
+# Default owner for everything in the repo.
+* @5uper0
+
+# The core guarantees — extra scrutiny on any change here.
+/parley/consensus.py    @5uper0
+/parley/preferences.py  @5uper0
+/parley/transcript.py   @5uper0
+/parley/net/            @5uper0

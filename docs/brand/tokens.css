@@ -1,0 +1,256 @@
+/* Parley design tokens — three-layer (primitive → semantic → component).
+ * Canonical source of truth for every Parley surface (demo, landing, pitch).
+ * Light is default; [data-theme="dark"] and prefers-color-scheme override the semantic layer.
+ * The three signal colors map 1:1 to the product: indigo = the neutral engine,
+ * verify-green = a proven/signed verdict (✓), red-line-red = a deterministic BLOCK,
+ * masked-amber = a hidden/pending verdict. Use the semantic/component layers in code —
+ * never the raw primitives. Established 2026-07-08; Linear-calibrated 2026-07-09
+ * (deeper cool-dark, line-grid + ambient tokens, refined display weight — see calibration-linear.md).
+ * Dark is the preferred default for public surfaces; light stays a first-class override.
+ */
+
+:root {
+  /* ─────────────────────────── PRIMITIVES (raw values) ─────────────────────────── */
+
+  /* Brand — "Parley indigo": the neutral referee / the engine. Deep, trustworthy, not crypto-neon. */
+  --indigo-50:  #EEF0FB;
+  --indigo-100: #DCE0F6;
+  --indigo-200: #B9C1ED;
+  --indigo-300: #8E9BE1;
+  --indigo-400: #6675D3;
+  --indigo-500: #4A57C0;
+  --indigo-600: #3A45B0; /* brand primary */
+  --indigo-700: #2F3890;
+  --indigo-800: #262D72;
+  --indigo-900: #1D2255;
+
+  /* Verify green — a signed/proven verdict, the receipt ✓. Muted, credible, not garish. */
+  --verify-50:  #E7F6EF;
+  --verify-100: #C6EADB;
+  --verify-300: #6FCBA8;
+  --verify-500: #14A473;
+  --verify-600: #0E8F63; /* verify primary */
+  --verify-700: #0B6F4E;
+
+  /* Red-line red — a deterministic BLOCK. Deliberate, serious; never decorative. */
+  --redline-50:  #FCEAEA;
+  --redline-100: #F8CACA;
+  --redline-300: #EC8A8A;
+  --redline-500: #D93A3A;
+  --redline-600: #C42121; /* red-line primary */
+  --redline-700: #9E1818;
+
+  /* Masked amber — a hidden / pending / masked verdict. Neutral warning, not alarm. */
+  --amber-50:  #FBF2E1;
+  --amber-100: #F6E2BC;
+  --amber-500: #D9971C;
+  --amber-600: #B87C15; /* masked primary */
+
+  /* Neutral — cool slate. Surfaces, text, borders. */
+  --neutral-0:   #FFFFFF;
+  --neutral-50:  #F7F8FA;
+  --neutral-100: #EDEFF3;
+  --neutral-200: #DCE0E8;
+  --neutral-300: #C2C8D4;
+  --neutral-400: #99A1B3;
+  --neutral-500: #6B7383;
+  --neutral-600: #4A5163;
+  --neutral-700: #333A49;
+  --neutral-800: #20242F;
+  --neutral-900: #12151C;
+  --neutral-950: #0B0D13; /* ink */
+
+  /* Typography primitives */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Cascadia Code", monospace;
+
+  --text-xs:   0.75rem;   /* 12 */
+  --text-sm:   0.875rem;  /* 14 */
+  --text-base: 1rem;      /* 16 */
+  --text-lg:   1.125rem;  /* 18 */
+  --text-xl:   1.25rem;   /* 20 */
+  --text-2xl:  1.5rem;    /* 24 */
+  --text-3xl:  1.875rem;  /* 30 */
+  --text-4xl:  2.25rem;   /* 36 */
+  --text-5xl:  3rem;      /* 48 */
+  --text-6xl:  3.75rem;   /* 60 */
+
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  --leading-tight:   1.15;
+  --leading-snug:    1.35;
+  --leading-normal:  1.55;
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+
+  /* Spacing — 4px base */
+  --space-0: 0;      --space-1: 0.25rem; --space-2: 0.5rem;  --space-3: 0.75rem;
+  --space-4: 1rem;   --space-5: 1.25rem; --space-6: 1.5rem;  --space-8: 2rem;
+  --space-10: 2.5rem;--space-12: 3rem;   --space-16: 4rem;   --space-20: 5rem;  --space-24: 6rem;
+
+  /* Radius — moderate; serious infra, not pill-heavy */
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px; --radius-full: 9999px;
+
+  /* Elevation — subtle, cool-tinted */
+  --shadow-sm: 0 1px 2px rgba(18, 21, 28, 0.06);
+  --shadow-md: 0 4px 12px rgba(18, 21, 28, 0.08);
+  --shadow-lg: 0 12px 32px rgba(18, 21, 28, 0.12);
+
+  /* Motion — fast, precise */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 320ms;
+
+  /* Signature motif — the "red line" as a graphic device (thin deliberate rule) */
+  --redline-rule: 2px solid var(--redline-600);
+
+  /* Linear-calibrated additions (docs/brand/calibration-linear.md, 2026-07-09) */
+  --font-weight-display: 560;          /* refined display — premium, not loud (was 700) */
+  --grid-line: rgba(18, 21, 28, 0.03); /* faint ledger line; dark overrides below */
+  --motif-grid: repeating-linear-gradient(to right, var(--grid-line) 0 1px, transparent 1px 46px),
+                repeating-linear-gradient(to bottom, var(--grid-line) 0 1px, transparent 1px 46px);
+  --shadow-ambient: 0 1px 0 rgba(255,255,255,.03) inset, 0 20px 48px -30px rgba(18,21,28,.30);
+
+  /* ─────────────────────────── SEMANTIC (purpose aliases) — LIGHT ─────────────────────────── */
+  --color-bg:            var(--neutral-50);
+  --color-surface:       var(--neutral-0);
+  --color-surface-raised:var(--neutral-0);
+  --color-surface-sunken:var(--neutral-100);
+
+  --color-text:          var(--neutral-900);
+  --color-text-muted:    var(--neutral-600);
+  --color-text-subtle:   var(--neutral-500);
+  --color-text-inverse:  var(--neutral-0);
+
+  --color-border:        var(--neutral-200);
+  --color-border-strong: var(--neutral-300);
+
+  --color-primary:       var(--indigo-600);
+  --color-primary-hover: var(--indigo-700);
+  --color-primary-subtle:var(--indigo-50);
+  --color-on-primary:    var(--neutral-0);
+
+  --color-verify:        var(--verify-600);
+  --color-verify-subtle: var(--verify-50);
+  --color-on-verify:     var(--neutral-0);
+
+  --color-redline:       var(--redline-600);
+  --color-redline-subtle:var(--redline-50);
+  --color-on-redline:    var(--neutral-0);
+
+  --color-masked:        var(--amber-600);
+  --color-masked-subtle: var(--amber-50);
+
+  --color-focus-ring:    var(--indigo-400);
+}
+
+:root[data-theme="dark"] {
+  /* Calibrated near-black cool surfaces (deeper than the neutral ramp for the audited-terminal feel) */
+  --color-bg:            #0A0B0D;
+  --color-surface:       #121316;
+  --color-surface-raised:#16181C;
+  --color-surface-sunken:#0C0D10;
+
+  --color-text:          #F4F6F7;
+  --color-text-muted:    var(--neutral-400);
+  --color-text-subtle:   var(--neutral-500);
+  --color-text-inverse:  #0A0B0D;
+
+  --color-border:        rgba(255,255,255,.08);
+  --color-border-strong: rgba(255,255,255,.14);
+
+  --grid-line:           rgba(255,255,255,.022);
+  --shadow-ambient:      0 1px 0 rgba(255,255,255,.03) inset, 0 26px 60px -34px rgba(0,0,0,.8);
+
+  --color-primary:       var(--indigo-400);
+  --color-primary-hover: var(--indigo-300);
+  --color-primary-subtle:rgba(74, 87, 192, 0.16);
+  --color-on-primary:    var(--neutral-950);
+
+  --color-verify:        var(--verify-500);
+  --color-verify-subtle: rgba(20, 164, 115, 0.16);
+  --color-on-verify:     var(--neutral-950);
+
+  --color-redline:       var(--redline-500);
+  --color-redline-subtle:rgba(217, 58, 58, 0.16);
+  --color-on-redline:    var(--neutral-0);
+
+  --color-masked:        var(--amber-500);
+  --color-masked-subtle: rgba(217, 151, 28, 0.16);
+
+  --color-focus-ring:    var(--indigo-400);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:            var(--neutral-950);
+    --color-surface:       var(--neutral-900);
+    --color-surface-raised:var(--neutral-800);
+    --color-surface-sunken:#080A0F;
+    --color-text:          var(--neutral-100);
+    --color-text-muted:    var(--neutral-400);
+    --color-text-subtle:   var(--neutral-500);
+    --color-text-inverse:  var(--neutral-950);
+    --color-border:        var(--neutral-800);
+    --color-border-strong: var(--neutral-700);
+    --color-primary:       var(--indigo-400);
+    --color-primary-hover: var(--indigo-300);
+    --color-primary-subtle:rgba(74, 87, 192, 0.16);
+    --color-on-primary:    var(--neutral-950);
+    --color-verify:        var(--verify-500);
+    --color-verify-subtle: rgba(20, 164, 115, 0.16);
+    --color-on-verify:     var(--neutral-950);
+    --color-redline:       var(--redline-500);
+    --color-redline-subtle:rgba(217, 58, 58, 0.16);
+    --color-on-redline:    var(--neutral-0);
+    --color-masked:        var(--amber-500);
+    --color-masked-subtle: rgba(217, 151, 28, 0.16);
+    --color-focus-ring:    var(--indigo-400);
+  }
+}
+
+/* ─────────────────────────── COMPONENT (component-specific) ─────────────────────────── */
+:root {
+  /* Button */
+  --btn-primary-bg:       var(--color-primary);
+  --btn-primary-bg-hover: var(--color-primary-hover);
+  --btn-primary-fg:       var(--color-on-primary);
+  --btn-ghost-fg:         var(--color-primary);
+  --btn-radius:           var(--radius-md);
+  --btn-pad-y:            var(--space-2);
+  --btn-pad-x:            var(--space-4);
+
+  /* Delegate card — one party's stance (red lines + prefs) */
+  --delegate-bg:      var(--color-surface);
+  --delegate-border:  var(--color-border);
+  --delegate-radius:  var(--radius-lg);
+  --delegate-pad:     var(--space-5);
+  --delegate-shadow:  var(--shadow-sm);
+
+  /* Verdict badge — masked outcome the coordinator sees */
+  --verdict-ok-bg:      var(--color-verify-subtle);
+  --verdict-ok-fg:      var(--color-verify);
+  --verdict-block-bg:   var(--color-redline-subtle);
+  --verdict-block-fg:   var(--color-redline);
+  --verdict-masked-bg:  var(--color-masked-subtle);
+  --verdict-masked-fg:  var(--color-masked);
+  --verdict-radius:     var(--radius-full);
+  --verdict-font:       var(--font-mono);
+
+  /* Receipt / transcript — mono, ledger feel, the "proof" artifact */
+  --receipt-bg:       var(--color-surface-sunken);
+  --receipt-fg:       var(--color-text-muted);
+  --receipt-font:     var(--font-mono);
+  --receipt-border:   var(--color-border);
+  --receipt-radius:   var(--radius-md);
+  --receipt-verified: var(--color-verify);
+
+  /* Max-min viz — the egalitarian bars; "floor" is the lifted least-happy party, "winner" is the pick */
+  --viz-bar:    var(--indigo-300);
+  --viz-winner: var(--color-primary);
+  --viz-floor:  var(--color-verify);
+  --viz-track:  var(--color-surface-sunken);
+}

@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: parley-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: PARLEY_HOST
+        value: 0.0.0.0

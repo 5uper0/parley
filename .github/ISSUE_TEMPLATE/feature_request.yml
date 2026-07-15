@@ -1,0 +1,31 @@
+name: Feature request / idea
+description: Propose a capability, a recipe, or a research direction.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Parley's core is small **on purpose** — the guarantees (deterministic red lines, max-min
+        consensus over masked verdicts, verifiable non-betrayal) are the product. Proposals that
+        keep the core zero-dependency and don't weaken those properties land fastest.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem / use-case
+      description: What multi-party decision are you trying to make provable? Who are the rival parties?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed direction
+      description: What would you add or change? If it needs a dependency, note whether it can live behind an optional extra.
+    validations:
+      required: false
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Design constraints understood
+      options:
+        - label: This keeps the `parley/` core zero-dependency (crypto/LLM stays behind extras).
+        - label: This does not weaken red lines, masking, max-min, or the verifiable transcript.

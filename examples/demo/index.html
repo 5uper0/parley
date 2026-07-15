@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parley — a decision your agents can't lie about</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Linear-calibrated (docs/brand/calibration-linear.md): deep cool-dark, line-grid, hairline+ambient,
+   refined display weights, tight radii — our signal colors + red-line/receipt/✓ signature intact.
+   The docker self-host build vendors the fonts. */
+:root{
+  --indigo:#6E79E0; --indigo-dim:#4A54B8; --verify:#1FB98A; --red:#F0555B; --amber:#D69B2E;
+  --verify-bg:rgba(31,185,138,.09); --verify-hair:rgba(31,185,138,.24);
+  --red-bg:rgba(240,85,91,.08); --red-hair:rgba(240,85,91,.26);
+  --bg:#0A0B0D; --surface:#121316; --surface-top:#16181C; --sunken:#0C0D10;
+  --ink:#F4F6F7; --muted:#9AA0A9; --dim:#6A6F78; --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.14);
+  --grid:rgba(255,255,255,.022);
+  --sans:"Inter",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --r:10px; --r-lg:14px; --r-full:9999px; --ease:cubic-bezier(.16,1,.3,1);
+  --ambient:0 1px 0 rgba(255,255,255,.03) inset, 0 30px 70px -34px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+  --indigo:#3A45B0; --indigo-dim:#8E9BE1; --verify:#0E8F63; --red:#C42121; --amber:#B87C15;
+  --verify-bg:#E7F6EF; --verify-hair:#BFE6D6; --red-bg:#FCEAEA; --red-hair:#F2CFCF;
+  --bg:#F6F7FB; --surface:#FFFFFF; --surface-top:#FFFFFF; --sunken:#EEF0F5;
+  --ink:#12151C; --muted:#535A68; --dim:#8A909C; --hair:#E3E6EF; --hair2:#D3D7E1;
+  --grid:rgba(18,21,28,.03); --ambient:0 1px 2px rgba(18,21,28,.05), 0 12px 28px -18px rgba(18,21,28,.25);
+}
+*{box-sizing:border-box;margin:0}
+button,.toggle,.btn,.vbtn,.seg b{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:var(--r)}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;transition:background .25s var(--ease),color .25s var(--ease)}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:40px 22px 90px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column;gap:3px}
+.logo{font-size:27px;font-weight:560;letter-spacing:-.025em}.logo .d{color:var(--red)}
+.tag{color:var(--dim);font-size:13.5px;letter-spacing:.01em}
+.toggle{border:1px solid var(--hair2);background:var(--surface);color:var(--muted);border-radius:var(--r-full);
+  padding:7px 15px;font:inherit;font-size:12.5px;cursor:pointer;transition:.2s var(--ease)}
+.toggle:hover{color:var(--ink);border-color:var(--indigo)}
+.toggle:active{transform:scale(.97)}
+.redrule{border:none;border-top:2px solid var(--red);margin:20px 0 24px;opacity:.9}
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-full);padding:4px}
+.seg b{font-weight:540;font-size:13px;color:var(--muted);padding:7px 14px;border-radius:var(--r-full);cursor:pointer;transition:.2s var(--ease)}
+.seg b:hover{color:var(--ink)}
+.seg b.on{background:var(--indigo);color:#fff}
+.plainck{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+.plainck input{accent-color:var(--indigo);width:16px;height:16px}
+.plainck.act{color:var(--ink)}
+.situation{font-size:17px;color:var(--ink);font-weight:500;max-width:66ch;line-height:1.5;margin-bottom:4px}
+.situation.tech{font-size:15px;color:var(--muted);font-weight:400}
+h2{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  margin:38px 0 16px;display:flex;align-items:center;gap:10px}
+h2::after{content:"";flex:1;height:1px;background:var(--hair)}
+.grid{display:grid;gap:14px}.cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.party{background:var(--surface-top);border:1px solid var(--hair);
+  border-radius:var(--r-lg);padding:18px 19px;box-shadow:var(--ambient)}
+.party .who{font-weight:560;font-size:15.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.party .blurb{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+.party .sub{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;margin-top:13px}
+.party ul{list-style:none;padding:0;margin:6px 0 0;font-size:13px;color:var(--muted)}
+.party li{padding:2.5px 0;display:flex;gap:9px;align-items:flex-start}
+.party li.red::before{content:"";width:15px;height:2px;background:var(--red);flex:none;border-radius:2px;margin-top:8px}
+.party li.none{color:var(--dim);font-style:italic}
+.btn{border:none;border-radius:var(--r);padding:12px 24px;font:inherit;font-weight:560;font-size:14.5px;cursor:pointer;
+  background:var(--indigo);color:#fff;transition:.2s var(--ease);box-shadow:0 0 0 1px rgba(110,121,224,.3),0 8px 24px -10px rgba(110,121,224,.6)}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.985);filter:brightness(1.02)}
+.opt{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);padding:15px 17px;margin:11px 0;transition:.25s var(--ease)}
+.opt .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.opt .name{font-weight:540;font-size:15px}
+.opt .attrs{color:var(--muted);font-size:13px;font-weight:400;font-family:var(--mono)}
+.opt.blocked{border-color:var(--red-hair);background:var(--red-bg)}
+.opt.winner{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo),0 12px 30px -16px rgba(110,121,224,.5)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:11px;font-weight:500;border-radius:var(--r-full);padding:2.5px 10px;
+  display:inline-flex;gap:5px;align-items:center;background:var(--sunken);color:var(--muted);border:1px solid var(--hair)}
+.chip.ok{background:var(--verify-bg);color:var(--verify);border-color:var(--verify-hair)}
+.chip.no{background:var(--red-bg);color:var(--red);border-color:var(--red-hair)}
+.tagline-sm{font-size:12.5px;margin-top:9px;color:var(--dim)}
+.tagline-sm.block{color:var(--red);font-weight:500}
+.tagline-sm.win{color:var(--indigo);font-weight:560}
+.muted{color:var(--muted);font-size:13px}
+.bar{display:grid;grid-template-columns:170px 1fr 70px;align-items:center;gap:14px;margin:9px 0}
+.bar .lbl{font-size:13px;color:var(--muted)}
+.track{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-full);height:14px;overflow:hidden}
+.fill{height:100%;background:var(--indigo);border-radius:var(--r-full);transition:width .6s var(--ease)}
+.bar.win .fill{background:var(--indigo)}
+.bar .v{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
+.outcome{background:var(--verify-bg);border:1px solid var(--verify-hair);border-radius:var(--r);padding:15px 18px;
+  margin:16px 0 0;font-size:15px;color:var(--ink);line-height:1.5;display:none}
+.outcome.show{display:block}
+.outcome .seal{font-family:var(--mono);font-weight:700;color:var(--verify)}
+.receipt{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r);padding:16px 18px;
+  font-family:var(--mono);font-size:12.5px;color:var(--muted);line-height:1.75;overflow-x:auto;box-shadow:var(--ambient)}
+.receipt .k{color:var(--dim)}
+.verify{margin-top:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.vbtn{border:1px solid var(--hair2);background:var(--surface);color:var(--ink);border-radius:var(--r);
+  padding:9px 16px;font:inherit;font-size:13px;cursor:pointer;transition:.2s var(--ease)}
+.vbtn:hover{border-color:var(--verify);color:var(--verify)}
+.vbtn:active{transform:scale(.97)}
+.vok{color:var(--verify);font-weight:540;font-size:13.5px;display:none;align-items:center;gap:8px;max-width:62ch;line-height:1.5}
+.seal{font-family:var(--mono);font-weight:700}
+.techonly{display:block}
+
+/* ─── candy layer: hero, cinematic reveal, celebration ─────────────────────────── */
+
+/* hero */
+.hero{margin:26px 0 8px;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);
+  background:rgba(110,121,224,.10);
+  border:1px solid rgba(110,121,224,.28);border-radius:var(--r-full);padding:6px 13px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--verify)}
+.hero h1{font-size:clamp(30px,6.2vw,50px);line-height:1.04;letter-spacing:-.033em;font-weight:560;
+  margin:18px 0 0;max-width:16ch}
+.hero h1 .g{color:var(--indigo)}
+.hero .sub{margin:18px 0 0;font-size:clamp(15px,2.4vw,18px);line-height:1.55;color:var(--muted);max-width:60ch}
+.hero .sub b{color:var(--ink);font-weight:600}
+.hero-actions{display:flex;flex-wrap:wrap;gap:13px;align-items:center;margin-top:26px}
+.cta{position:relative;overflow:hidden;border:none;border-radius:var(--r);padding:14px 26px;font:inherit;font-weight:640;
+  font-size:15px;cursor:pointer;color:#fff;background:var(--indigo);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);transition:.2s var(--ease)}
+.cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.cta:active{transform:translateY(0) scale(.98)}
+.trustrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.pill{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted);background:var(--sunken);
+  border:1px solid var(--hair);border-radius:var(--r-full);padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
+.pill svg{width:12px;height:12px;flex:none}
+.pill.v{color:var(--verify);border-color:var(--verify-hair);background:var(--verify-bg)}
+.pill.r{color:var(--red);border-color:var(--red-hair);background:var(--red-bg)}
+
+/* numbered section badges (how-it-works cadence) */
+.wrap{counter-reset:sec}
+h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;height:22px;border-radius:6px;
+  display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;
+  color:var(--indigo);background:rgba(110,121,224,.1);border:1px solid rgba(110,121,224,.28)}
+
+/* cinematic entrance — cards, options, bars rise + fade, staggered */
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.party,.opt,.bar{animation:riseIn .5s var(--ease) both}
+#parties .party:nth-child(2){animation-delay:.06s}
+#parties .party:nth-child(3){animation-delay:.12s}
+#parties .party:nth-child(4){animation-delay:.18s}
+#options .opt:nth-child(2){animation-delay:.05s}
+#options .opt:nth-child(3){animation-delay:.10s}
+#options .opt:nth-child(4){animation-delay:.15s}
+.party{transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.party:hover{transform:translateY(-2px);border-color:var(--hair2)}
+
+/* the two money moments: winner glows in, blocked flashes red */
+.opt.winner{animation:winPulse 1.1s var(--ease) 1}
+@keyframes winPulse{0%{box-shadow:0 0 0 1px var(--indigo),0 0 0 0 rgba(110,121,224,.55)}
+  55%{box-shadow:0 0 0 1px var(--indigo),0 0 34px 3px rgba(110,121,224,.45)}
+  100%{box-shadow:0 0 0 1px var(--indigo),0 12px 30px -16px rgba(110,121,224,.5)}}
+.opt.blocked{animation:blockFlash .5s var(--ease) 1}
+@keyframes blockFlash{0%{background:rgba(240,85,91,.22)}100%{background:var(--red-bg)}}
+.opt.blocked .name{text-decoration:line-through;text-decoration-color:var(--red-hair)}
+
+/* verify celebration */
+.vok{animation:pop .45s var(--ease) both}
+@keyframes pop{0%{opacity:0;transform:scale(.94)}60%{transform:scale(1.02)}100%{opacity:1;transform:none}}
+.vok .seal{text-shadow:0 0 14px rgba(31,185,138,.5)}
+.vbtn:hover .seal{text-shadow:0 0 12px rgba(31,185,138,.55)}
+
+@media (max-width:560px){.hero h1{max-width:20ch}.hero-actions{gap:10px}}
+@media (prefers-reduced-motion:reduce){
+  .eyebrow .dot{animation:none}
+  .party,.opt,.bar,.vok,.opt.winner,.opt.blocked{animation:none}
+  *{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="logo">parley<span class="d">.</span></div>
+      <div class="tag">a group decision your agents can't lie about — and you can check</div></div>
+    <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow"><span class="dot"></span>Live · provable AI consensus</span>
+    <h1>Your AI speaks for you. <span class="g">Prove it never sold you out.</span></h1>
+    <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>none of them can rig</b> — and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>, live.</p>
+    <div class="hero-actions">
+      <button class="cta" onclick="run()">Run a live decision ↓</button>
+      <span class="muted" style="font-size:13px">pick a real-world scenario below, then hit Run</span>
+    </div>
+    <div class="trustrow">
+      <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg>no crypto · self-hosted</span>
+      <span class="pill v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>you verify locally</span>
+      <span class="pill r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>red lines enforced in code</span>
+    </div>
+  </section>
+
+  <hr class="redrule">
+
+  <div class="controls">
+    <div class="seg" id="picker"></div>
+    <label class="plainck act" id="plainlabel"><input type="checkbox" id="plain" checked> plain language</label>
+  </div>
+
+  <p class="situation" id="situation">…</p>
+
+  <h2 id="h-parties" class="step">The people involved — each keeps its position private</h2>
+  <div class="grid cards" id="parties"></div>
+
+  <h2 id="h-options" class="step">The options on the table</h2>
+  <div id="options"></div>
+  <p class="muted" id="masknote" style="margin-top:8px">Each chip is a <em>masked</em> verdict — the coordinator sees only who accepted, never which limit was crossed.</p>
+
+  <div style="margin:30px 0 8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <button class="btn" onclick="run()">Run it ↻</button>
+    <span class="muted" style="font-size:13px">runs the real engine — watch the cheat get blocked</span>
+  </div>
+
+  <h2 id="h-viz" class="step">The fair answer — lift the least-happy party</h2>
+  <div id="viz"></div>
+  <div class="outcome" id="outcome"></div>
+
+  <h2 id="h-receipt" class="step">The receipt — a tamper-evident, replayable transcript</h2>
+  <div class="receipt" id="receipt">running…</div>
+  <div class="verify">
+    <button class="vbtn" onclick="doVerify()">Verify transcript <span class="seal">✓</span></button>
+    <span class="vok" id="vok"><span class="seal">✓ verified</span> — every party replayed its own limits against the decision; none crossed. Tamper-evident (SHA-256).</span>
+  </div>
+</div>
+
+<script>
+const FALLBACK = {"recipes":[{"key":"p2p","title":"Resolve a P2P trade dispute (escrow)","situation":"You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?"},{"key":"estate","title":"Split an inherited estate","situation":"Two heirs split an inheritance. Neither wants to reveal how badly they want each piece — and it has to be legally clean."},{"key":"contract","title":"Negotiate enterprise contract clauses","situation":"You and a client are agreeing on contract terms — neither wants to show their real bottom line."},{"key":"kyc","title":"Onboard a new counterparty","situation":"A new business wants to sign up. Three teams have to agree whether — and how — to let them in, without ignoring the checks."}],"runs":{"p2p":{"title":"Resolve a P2P trade dispute (escrow)","parties":[{"owner":"Buyer","redlines":[]},{"owner":"Seller","redlines":[]},{"owner":"Platform","redlines":["evidence_ok == True"]}],"entries":[{"option":{"id":"to-seller","label":"Release to seller (0/100)","buyer":0,"seller":100,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"split","label":"Split the escrow (50/50)","buyer":50,"seller":50,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"to-buyer","label":"Refund the buyer (100/0)","buyer":100,"seller":0,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"instant","label":"Instant refund, skip evidence","buyer":100,"seller":0,"evidence_ok":false},"verdicts":[{"owner":"Buyer","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Platform","acceptable":false,"score":0.5,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"split","label":"Split the escrow (50/50)","buyer":50,"seller":50,"evidence_ok":true},"status":"agreed","hash":"b41b05954802aa4f5d83d7034484c31d51ede45f879dd79c62f32ad6e98d9718","non_betrayal":{"Buyer":true,"Seller":true,"Platform":true},"presentation":{"situation":"You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?","parties":{"Buyer":{"blurb":"wants their money back","redlines":[]},"Seller":{"blurb":"wants to be paid for what they shipped","redlines":[]},"Platform":{"blurb":"won't release the money without checking the evidence","redlines":["never skip the evidence check"]}},"options":{"to-seller":{"plain":"Pay the seller in full"},"split":{"plain":"Split it 50/50"},"to-buyer":{"plain":"Refund the buyer in full"},"instant":{"plain":"Instant refund, skip the evidence check","tempting":true}},"attrs":[{"key":"buyer","label":"buyer gets"},{"key":"seller","label":"seller gets"}],"outcome":"The fairest call everyone accepts is a 50/50 split — nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."}},"estate":{"title":"Split an inherited estate","parties":[{"owner":"Heir 1","redlines":[]},{"owner":"Heir 2","redlines":["heir2 >= 30"]},{"owner":"Executor","redlines":["legal_ok == True"]}],"entries":[{"option":{"id":"equal","label":"Equal split (50/50)","heir1":50,"heir2":50,"legal_ok":true},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Heir 2","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Executor","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"weighted","label":"Weighted (60/40)","heir1":60,"heir2":40,"legal_ok":true},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.6,"reason":"ok"},{"owner":"Heir 2","acceptable":true,"score":0.4,"reason":"ok"},{"owner":"Executor","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.4},{"option":{"id":"grab","label":"Grab (90/10), title unclear","heir1":90,"heir2":10,"legal_ok":false},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.9,"reason":"ok"},{"owner":"Heir 2","acceptable":false,"score":0.1,"reason":"red-line"},{"owner":"Executor","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"equal","label":"Equal split (50/50)","heir1":50,"heir2":50,"legal_ok":true},"status":"agreed","hash":"4cab6338c3d426c4a3ed9117d7cfc19af662afee3005661e8f779ff904a8adb5","non_betrayal":{"Heir 1":true,"Heir 2":true,"Executor":true},"presentation":{"situation":"Two heirs split an inheritance. Neither wants to reveal how badly they want each piece — and it has to be legally clean.","parties":{"Heir 1":{"blurb":"wants the larger share","redlines":[]},"Heir 2":{"blurb":"won't accept less than a fair third","redlines":["at least a third of the estate"]},"Executor":{"blurb":"won't sign off on anything not legally clean","redlines":["the title must be legally clean"]}},"options":{"equal":{"plain":"Split it equally (50/50)"},"weighted":{"plain":"Weighted split (60/40)"},"grab":{"plain":"One heir grabs 90/10 — title left unclear","tempting":true}},"attrs":[{"key":"heir1","label":"heir 1 gets"},{"key":"heir2","label":"heir 2 gets"}],"outcome":"The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. No family fight — and a record everyone can check."}},"contract":{"title":"Negotiate enterprise contract clauses","parties":[{"owner":"Customer","redlines":["sla >= 99"]},{"owner":"Vendor","redlines":[]},{"owner":"Legal","redlines":["data_residency_ok == True"]}],"entries":[{"option":{"id":"balanced","label":"Balanced terms","liability_cap":5,"sla":99,"data_residency_ok":true,"auto_renew":false},"verdicts":[{"owner":"Customer","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Vendor","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Legal","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"customer-favored","label":"Customer-favored","liability_cap":8,"sla":99,"data_residency_ok":true,"auto_renew":false},"verdicts":[{"owner":"Customer","acceptable":true,"score":0.8,"reason":"ok"},{"owner":"Vendor","acceptable":true,"score":0.2,"reason":"ok"},{"owner":"Legal","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.2},{"option":{"id":"vendor-lockin","label":"Vendor lock-in, low SLA","liability_cap":2,"sla":95,"data_residency_ok":false,"auto_renew":true},"verdicts":[{"owner":"Customer","acceptable":false,"score":0.2,"reason":"red-line"},{"owner":"Vendor","acceptable":true,"score":0.8,"reason":"ok"},{"owner":"Legal","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"balanced","label":"Balanced terms","liability_cap":5,"sla":99,"data_residency_ok":true,"auto_renew":false},"status":"agreed","hash":"694ab0be896944662ffeffbcdd3f033690f4b802ff64e6f7cf08120e6a5c0c6a","non_betrayal":{"Customer":true,"Vendor":true,"Legal":true},"presentation":{"situation":"You and a client are agreeing on contract terms — neither wants to show their real bottom line.","parties":{"Customer":{"blurb":"needs a real uptime guarantee","redlines":["at least 99% uptime (SLA)"]},"Vendor":{"blurb":"wants to cap how much it can be on the hook for","redlines":[]},"Legal":{"blurb":"won't let customer data leave the region","redlines":["data must stay in-region"]}},"options":{"balanced":{"plain":"Balanced terms both sides can live with"},"customer-favored":{"plain":"Terms that favor the customer"},"vendor-lockin":{"plain":"Lock-in, weak uptime, data sent offshore","tempting":true}},"attrs":[{"key":"sla","label":"uptime %"},{"key":"liability_cap","label":"liability cap"}],"outcome":"The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor — with a receipt."}},"kyc":{"title":"Onboard a new counterparty","parties":[{"owner":"Compliance","redlines":["sanctions_ok == True","edd_done == True"]},{"owner":"Risk","redlines":["risk <= 7"]},{"owner":"Business","redlines":[]}],"entries":[{"option":{"id":"reject","label":"Reject","revenue":0,"risk":0,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.0,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"approve-basic","label":"Approve — basic tier","revenue":3,"risk":3,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":0.667,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":0.571,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.3,"reason":"ok"}],"feasible":true,"floor":0.3},{"option":{"id":"approve-full","label":"Approve — full tier","revenue":8,"risk":6,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":0.333,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":0.143,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.8,"reason":"ok"}],"feasible":true,"floor":0.143},{"option":{"id":"approve-fast","label":"Approve — fast-track","revenue":10,"risk":9,"sanctions_ok":false,"edd_done":false},"verdicts":[{"owner":"Compliance","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Risk","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Business","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":false,"floor":null}],"decision":{"id":"approve-basic","label":"Approve — basic tier","revenue":3,"risk":3,"sanctions_ok":true,"edd_done":true},"status":"agreed","hash":"c24f335b38005c351fcb2595c0e8b44cd0c0025e29c9fcb5f068c53c07b9ca30","non_betrayal":{"Compliance":true,"Risk":true,"Business":true},"presentation":{"situation":"A new business wants to sign up. Three teams have to agree whether — and how — to let them in, without ignoring the checks.","parties":{"Compliance":{"blurb":"won't approve anyone who isn't screened and checked","redlines":["sanctions screening done","enhanced due-diligence done"]},"Risk":{"blurb":"won't take on too much risk","redlines":["risk score no higher than 7"]},"Business":{"blurb":"wants the revenue","redlines":[]}},"options":{"reject":{"plain":"Turn them down"},"approve-basic":{"plain":"Approve — basic tier"},"approve-full":{"plain":"Approve — full tier"},"approve-fast":{"plain":"Fast-track — skip the checks","tempting":true}},"attrs":[{"key":"revenue","label":"revenue"},{"key":"risk","label":"risk"}],"outcome":"The tier every team can accept is picked; the fast-track that skips sanctions and due-diligence was blocked by a red line. The revenue team never sees the others' private limits — and there's an audit-ready receipt."}}}};
+let DATA = null, RECIPE = "p2p", PLAIN = true, RAN = false;
+
+// The answer (verdicts, max-min pick, receipt) is held back until "Run it" — otherwise the
+// button is a no-op because everything is already on screen. These are the reveal targets.
+const REVEAL_IDS = ['h-viz','viz','h-receipt','receipt'];
+function setRevealed(on){
+  REVEAL_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display = on ? '' : 'none'; });
+  const v = document.querySelector('.verify'); if(v) v.style.display = on ? '' : 'none';
+}
+
+function plain(){ return document.getElementById('plain').checked; }
+
+async function fetchRecipes(){
+  try{ const r = await fetch('/api/recipes'); if(!r.ok) throw 0; return await r.json(); }
+  catch(e){ return FALLBACK.recipes; }
+}
+async function fetchRun(key){
+  try{ const r = await fetch('/api/run?recipe='+encodeURIComponent(key)); if(!r.ok) throw 0; return await r.json(); }
+  catch(e){ return FALLBACK.runs[key]; }
+}
+
+async function initPicker(){
+  const recipes = await fetchRecipes();
+  document.getElementById('picker').innerHTML = recipes.map(r=>
+    `<b data-key="${r.key}" class="${r.key===RECIPE?'on':''}" title="${(r.title||'').replace(/"/g,'&quot;')}">${shortName(r.key)}</b>`).join('');
+  document.getElementById('picker').querySelectorAll('b').forEach(el=>{
+    el.onclick=()=>{ RECIPE=el.dataset.key; document.querySelectorAll('#picker b').forEach(x=>x.classList.toggle('on',x.dataset.key===RECIPE)); load(); };
+  });
+}
+function shortName(k){ return {p2p:"Marketplace", estate:"Inheritance", contract:"Agency deal", kyc:"Onboarding"}[k] || k; }
+
+async function load(){          // load a scenario in its "before" state — the answer stays hidden until Run
+  DATA = await fetchRun(RECIPE);
+  RAN = false;
+  render();
+}
+
+async function run(){           // Run it: compute + reveal the verdicts, the max-min pick, and the receipt
+  if(!DATA) DATA = await fetchRun(RECIPE);
+  RAN = true;
+  render();
+  const h = document.getElementById('h-viz');
+  if(h) h.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function pres(){ return (DATA && DATA.presentation) || {}; }
+function optMeta(id){ return (pres().options||{})[id] || {}; }
+function partyMeta(owner){ return (pres().parties||{})[owner] || {}; }
+
+function chip(v){ return `<span class="chip ${v.acceptable?'ok':'no'}">${v.owner}${v.acceptable?' ✓':' ✗'}</span>`; }
+
+function render(){
+  const d = DATA, P = plain(); PLAIN = P;
+  document.getElementById('plainlabel').classList.toggle('act', P);
+  const pr = pres();
+
+  setRevealed(RAN);
+  document.getElementById('masknote').style.display = RAN ? '' : 'none';
+
+  // situation
+  const sit = document.getElementById('situation');
+  sit.textContent = P ? (pr.situation || d.title) : d.title;
+  sit.className = 'situation' + (P ? '' : ' tech');
+
+  // parties
+  document.getElementById('parties').innerHTML = d.parties.map(p=>{
+    const held = d.non_betrayal[p.owner];
+    const chipEl = RAN ? `<span class="chip ${held?'ok':'no'}">${held?'held ✓':'crossed ✗'}</span>` : '';
+    const meta = partyMeta(p.owner);
+    let body;
+    if(P){
+      const rl = (meta.redlines||[]);
+      body = (meta.blurb?`<div class="blurb">${meta.blurb}</div>`:'')
+        + (rl.length?`<div class="sub">won't cross</div><ul>${rl.map(r=>`<li class="red">${r}</li>`).join('')}</ul>`
+                    :`<div class="sub">limits</div><ul><li class="none">no hard limits — just preferences</li></ul>`);
+    } else {
+      const rl = p.redlines||[];
+      body = `<div class="sub">red lines</div><ul>${rl.length?rl.map(r=>`<li class="red">${r}</li>`).join(''):'<li class="none">— none —</li>'}</ul>`;
+    }
+    return `<div class="party"><div class="who">${p.owner} ${chipEl}</div>${body}</div>`;
+  }).join('');
+
+  // options
+  const win = (RAN && d.decision) ? d.decision.id : null;
+  const attrs = pr.attrs || [];
+  document.getElementById('options').innerHTML = d.entries.map(e=>{
+    const o=e.option, blocked=RAN && !e.feasible, isWin=o.id===win, m=optMeta(o.id);
+    const label = P ? (m.plain || o.label) : o.label;
+    const attrStr = attrs.length ? ' · ' + attrs.map(a=>`${a.label} ${o[a.key]}`).join(' · ') : '';
+    let note='';
+    if(blocked) note = `<div class="tagline-sm block">✕ ${P?'this would cheat someone → blocked by a red line':'crosses a red line — rejected in code, not negotiated away'}</div>`;
+    else if(isWin) note = `<div class="tagline-sm win">✓ ${P?'the fair pick everyone accepts':'max-min pick — clears every red line, lifts the least-happy party'}</div>`;
+    else if(RAN && !P) note = `<div class="tagline-sm">feasible — floor ${e.floor.toFixed(2)}</div>`;
+    const chips = RAN ? e.verdicts.map(chip).join('') : '';
+    return `<div class="opt ${blocked?'blocked':''} ${isWin?'winner':''}">
+      <div class="top"><span class="name">${label}<span class="attrs">${attrStr}</span></span>
+      <span class="chips">${chips}</span></div>${note}</div>`;
+  }).join('');
+
+  // viz
+  const feas = d.entries.filter(e=>e.feasible);
+  document.getElementById('viz').innerHTML = feas.map(e=>{
+    const isWin=d.decision && e.option.id===d.decision.id, m=optMeta(e.option.id);
+    const label = P ? (m.plain || e.option.label) : e.option.label;
+    const pct = Math.round(e.floor*100);
+    return `<div class="bar ${isWin?'win':''}"><span class="lbl">${label}</span>
+      <div class="track"><div class="fill" data-w="${pct}" style="width:0"></div></div>
+      <span class="v">${P?(isWin?'fairest':''):('floor '+e.floor.toFixed(2))}</span></div>`;
+  }).join('');
+  requestAnimationFrame(()=>document.querySelectorAll('#viz .fill').forEach(f=>{ f.style.width = f.dataset.w + '%'; }));
+
+  // outcome (plain only)
+  const oc = document.getElementById('outcome');
+  if(RAN && P && pr.outcome){ oc.innerHTML = pr.outcome; oc.classList.add('show'); }
+  else oc.classList.remove('show');
+
+  // receipt (always technical — it's the proof)
+  document.getElementById('receipt').innerHTML =
+    `<span class="k">decision</span> ${d.decision?d.decision.label:'DEADLOCK'}   <span class="k">status</span> ${d.status}<br>`
+    + d.entries.filter(e=>e.option.id===(d.decision&&d.decision.id)).flatMap(e=>e.verdicts).map(v=>
+        `<span class="k">${v.owner.padEnd(12)}</span> acceptable=${v.acceptable}  score=${v.score.toFixed(2)}  <span class="k">reason</span> ${v.reason}`
+      ).join('<br>')
+    + `<br><span class="k">sha256</span> ${d.hash}`;
+  document.getElementById('vok').style.display='none';
+
+  // section headings adapt a touch
+  document.getElementById('h-parties').firstChild.textContent = P ? 'The people involved — each keeps its position private' : 'The parties — each keeps its sheet private';
+}
+
+function doVerify(){
+  if(!DATA) return;
+  const allHeld = Object.values(DATA.non_betrayal).every(Boolean);
+  document.getElementById('vok').style.display = allHeld ? 'inline-block' : 'none';
+}
+
+document.getElementById('plain').addEventListener('change', render);
+initPicker().then(load);
+</script>
+</body>
+</html>

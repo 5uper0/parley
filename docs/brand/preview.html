@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parley — visual identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Tokens inlined so this page renders standalone; canonical source is tokens.css. */
+:root{
+  --indigo-50:#EEF0FB;--indigo-100:#DCE0F6;--indigo-300:#8E9BE1;--indigo-400:#6675D3;--indigo-500:#4A57C0;--indigo-600:#3A45B0;--indigo-700:#2F3890;--indigo-800:#262D72;--indigo-900:#1D2255;
+  --verify-50:#E7F6EF;--verify-300:#6FCBA8;--verify-500:#14A473;--verify-600:#0E8F63;--verify-700:#0B6F4E;
+  --redline-50:#FCEAEA;--redline-300:#EC8A8A;--redline-500:#D93A3A;--redline-600:#C42121;--redline-700:#9E1818;
+  --amber-50:#FBF2E1;--amber-500:#D9971C;--amber-600:#B87C15;
+  --neutral-0:#FFFFFF;--neutral-50:#F7F8FA;--neutral-100:#EDEFF3;--neutral-200:#DCE0E8;--neutral-300:#C2C8D4;--neutral-400:#99A1B3;--neutral-500:#6B7383;--neutral-600:#4A5163;--neutral-700:#333A49;--neutral-800:#20242F;--neutral-900:#12151C;--neutral-950:#0B0D13;
+  --font-sans:"Inter",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace;
+  --radius-md:8px;--radius-lg:12px;--radius-full:9999px;
+  --shadow-sm:0 1px 2px rgba(18,21,28,.06);--shadow-md:0 4px 12px rgba(18,21,28,.08);
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --color-bg:var(--neutral-50);--color-surface:var(--neutral-0);--color-surface-sunken:var(--neutral-100);
+  --color-text:var(--neutral-900);--color-text-muted:var(--neutral-600);--color-text-subtle:var(--neutral-500);
+  --color-border:var(--neutral-200);--color-border-strong:var(--neutral-300);
+  --color-primary:var(--indigo-600);--color-primary-hover:var(--indigo-700);--color-primary-subtle:var(--indigo-50);--color-on-primary:var(--neutral-0);
+  --color-verify:var(--verify-600);--color-verify-subtle:var(--verify-50);
+  --color-redline:var(--redline-600);--color-redline-subtle:var(--redline-50);
+  --color-masked:var(--amber-600);--color-masked-subtle:var(--amber-50);
+}
+:root[data-theme="dark"]{
+  --color-bg:var(--neutral-950);--color-surface:var(--neutral-900);--color-surface-sunken:#080A0F;
+  --color-text:var(--neutral-100);--color-text-muted:var(--neutral-400);--color-text-subtle:var(--neutral-500);
+  --color-border:var(--neutral-800);--color-border-strong:var(--neutral-700);
+  --color-primary:var(--indigo-400);--color-primary-hover:var(--indigo-300);--color-primary-subtle:rgba(74,87,192,.16);--color-on-primary:var(--neutral-950);
+  --color-verify:var(--verify-500);--color-verify-subtle:rgba(20,164,115,.16);
+  --color-redline:var(--redline-500);--color-redline-subtle:rgba(217,58,58,.16);
+  --color-masked:var(--amber-500);--color-masked-subtle:rgba(217,151,28,.16);
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--color-bg);color:var(--color-text);font-family:var(--font-sans);line-height:1.55;-webkit-font-smoothing:antialiased;transition:background .2s var(--ease-out),color .2s var(--ease-out)}
+.wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brandline{display:flex;align-items:baseline;gap:14px}
+.logo{font-size:34px;font-weight:600;letter-spacing:-.02em}
+.logo .dot{color:var(--color-redline)}
+.tagline{color:var(--color-text-subtle);font-size:14px}
+.redrule{height:0;border:none;border-top:2px solid var(--color-redline);width:100%;margin:28px 0 40px;opacity:.9}
+h2{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-subtle);margin:44px 0 18px}
+.toggle{border:1px solid var(--color-border-strong);background:var(--color-surface);color:var(--color-text);border-radius:var(--radius-full);padding:8px 16px;font:inherit;font-size:13px;cursor:pointer}
+.grid{display:grid;gap:14px}
+.sig{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.sigcard{border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-surface)}
+.sigcard .chip{height:66px}
+.sigcard .body{padding:12px 14px}
+.sigcard .name{font-weight:600;font-size:14px}
+.sigcard .hex{font-family:var(--font-mono);font-size:12px;color:var(--color-text-subtle)}
+.sigcard .mean{font-size:12.5px;color:var(--color-text-muted);margin-top:4px}
+.ramp{display:flex;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--color-border)}
+.ramp span{flex:1;height:40px}
+.ramplabel{font-family:var(--font-mono);font-size:11px;color:var(--color-text-subtle);margin:6px 2px 22px}
+.type div{margin:2px 0}
+.mono{font-family:var(--font-mono)}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:var(--radius-md);padding:10px 18px;font:inherit;font-weight:500;cursor:pointer}
+.btn-primary{background:var(--color-primary);color:var(--color-on-primary)}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-ghost{background:transparent;color:var(--color-primary);border:1px solid var(--color-border-strong)}
+.cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.delegate{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm)}
+.delegate .who{font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.delegate ul{list-style:none;padding:0;margin:12px 0 0;font-size:13px;color:var(--color-text-muted)}
+.delegate li{padding:3px 0;display:flex;gap:8px;align-items:center}
+.delegate li::before{content:"";width:14px;height:2px;background:var(--color-redline);flex:none}
+.delegate li.pref::before{background:var(--color-border-strong)}
+.badge{font-family:var(--font-mono);font-size:12px;font-weight:500;border-radius:var(--radius-full);padding:3px 11px;display:inline-flex;align-items:center;gap:6px}
+.badge.ok{background:var(--color-verify-subtle);color:var(--color-verify)}
+.badge.block{background:var(--color-redline-subtle);color:var(--color-redline)}
+.badge.masked{background:var(--color-masked-subtle);color:var(--color-masked)}
+.viz{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px}
+.bar{display:grid;grid-template-columns:90px 1fr 46px;align-items:center;gap:12px;margin:9px 0}
+.bar .lbl{font-size:13px;color:var(--color-text-muted)}
+.bar .track{background:var(--color-surface-sunken);border-radius:var(--radius-full);height:14px;overflow:hidden}
+.bar .fill{height:100%;background:var(--indigo-300);border-radius:var(--radius-full)}
+.bar.winner .fill{background:var(--color-primary)}
+.bar .val{font-family:var(--font-mono);font-size:12px;color:var(--color-text-subtle);text-align:right}
+.floornote{font-size:12.5px;color:var(--color-verify);margin-top:10px;display:flex;gap:7px;align-items:center}
+.receipt{background:var(--color-surface-sunken);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px 18px;font-family:var(--font-mono);font-size:12.5px;color:var(--color-text-muted);line-height:1.7;overflow-x:auto}
+.receipt .verified{color:var(--color-verify);font-weight:700}
+.receipt .k{color:var(--color-text-subtle)}
+.blocked-demo{display:flex;align-items:center;gap:12px;background:var(--color-redline-subtle);border:1px solid var(--color-redline);border-radius:var(--radius-md);padding:12px 16px;font-size:14px;color:var(--color-redline);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brandline">
+      <div class="logo">parley<span class="dot">.</span></div>
+      <div class="tagline">group decisions your agents can't lie about</div>
+    </div>
+    <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
+  </header>
+  <hr class="redrule">
+
+  <h2>Signal colors — each means something</h2>
+  <div class="grid sig">
+    <div class="sigcard"><div class="chip" style="background:var(--indigo-600)"></div><div class="body"><div class="name">Parley indigo</div><div class="hex">#3A45B0 · --color-primary</div><div class="mean">the neutral engine / the referee</div></div></div>
+    <div class="sigcard"><div class="chip" style="background:var(--verify-600)"></div><div class="body"><div class="name">Verify green</div><div class="hex">#0E8F63 · --color-verify</div><div class="mean">a signed, proven verdict — the receipt ✓</div></div></div>
+    <div class="sigcard"><div class="chip" style="background:var(--redline-600)"></div><div class="body"><div class="name">Red-line red</div><div class="hex">#C42121 · --color-redline</div><div class="mean">a deterministic BLOCK — never decorative</div></div></div>
+    <div class="sigcard"><div class="chip" style="background:var(--amber-600)"></div><div class="body"><div class="name">Masked amber</div><div class="hex">#B87C15 · --color-masked</div><div class="mean">a hidden / pending / masked verdict</div></div></div>
+  </div>
+
+  <h2>Neutral slate</h2>
+  <div class="ramp">
+    <span style="background:var(--neutral-50)"></span><span style="background:var(--neutral-100)"></span><span style="background:var(--neutral-200)"></span><span style="background:var(--neutral-300)"></span><span style="background:var(--neutral-400)"></span><span style="background:var(--neutral-500)"></span><span style="background:var(--neutral-600)"></span><span style="background:var(--neutral-700)"></span><span style="background:var(--neutral-800)"></span><span style="background:var(--neutral-900)"></span><span style="background:var(--neutral-950)"></span>
+  </div>
+  <div class="ramplabel">50 · 100 · 200 · 300 · 400 · 500 · 600 · 700 · 800 · 900 · 950</div>
+
+  <h2>Typography — Inter + JetBrains Mono</h2>
+  <div class="type">
+    <div style="font-size:var(--text-5xl,3rem);font-weight:700;letter-spacing:-.02em;line-height:1.15">Provably fair</div>
+    <div style="font-size:var(--text-2xl,1.5rem);font-weight:600">Consensus for agents that don't trust each other</div>
+    <div style="font-size:1rem;color:var(--color-text-muted);max-width:60ch;margin-top:6px">Each owner's hard constraints are checked in code. A proposal that crosses one is rejected, never negotiated away — so "my agent won't betray me" is a provable property, not a hope.</div>
+    <div class="mono" style="font-size:13px;color:var(--color-text-subtle);margin-top:10px">sha256: 9f2c…a71b   ed25519 ✓ verified</div>
+  </div>
+
+  <h2>Buttons</h2>
+  <div class="row"><button class="btn btn-primary">Run consensus</button><button class="btn btn-ghost">Verify transcript ✓</button></div>
+
+  <h2>Delegate cards — one party's stance (red lines + prefs)</h2>
+  <div class="grid cards">
+    <div class="delegate"><div class="who">Ana <span class="badge ok">ok ✓</span></div><ul><li>no mornings before 11:00</li><li class="pref">prefers Tuesday</li></ul></div>
+    <div class="delegate"><div class="who">Bob <span class="badge ok">ok ✓</span></div><ul><li>never Fridays</li><li class="pref">prefers 15:00</li></ul></div>
+    <div class="delegate"><div class="who">Cara <span class="badge masked">masked</span></div><ul><li>kids pickup ≤ 16:00</li><li class="pref">prefers Wednesday</li></ul></div>
+  </div>
+
+  <h2>The money-shot: try to cheat → BLOCKED</h2>
+  <div class="blocked-demo"><span style="font-family:var(--font-mono);font-weight:700">✕</span> Fri 15:00 crosses a red line — rejected in code, not negotiated away.</div>
+
+  <h2>Max-min consensus — lift the least-happy party</h2>
+  <div class="viz">
+    <div class="bar"><span class="lbl">Mon 09:00</span><div class="track"><div class="fill" style="width:32%"></div></div><span class="val">floor .30</span></div>
+    <div class="bar"><span class="lbl">Tue 14:00</span><div class="track"><div class="fill" style="width:50%"></div></div><span class="val">floor .50</span></div>
+    <div class="bar winner"><span class="lbl">Tue 11:00</span><div class="track"><div class="fill" style="width:78%"></div></div><span class="val">floor .70</span></div>
+    <div class="floornote">✓ picked Tue 11:00 — highest floor (the least-happy party is lifted most)</div>
+  </div>
+
+  <h2>The receipt — a signed, replayable transcript</h2>
+  <div class="receipt">
+<span class="k">option</span>   Tue 11:00        <span class="k">status</span> agreed<br>
+<span class="k">ana</span>  acceptable=true  score=1.00  <span class="k">sig</span> 3af9…<br>
+<span class="k">bob</span>  acceptable=true  score=0.50  <span class="k">sig</span> b1c7…<br>
+<span class="k">cara</span> acceptable=true  score=0.50  <span class="k">sig</span> 77e0…<br>
+<span class="k">sha256</span> 9f2c1d4b…a71b   <span class="verified">ed25519 ✓ verified — tamper-evident</span>
+  </div>
+</div>
+</body>
+</html>

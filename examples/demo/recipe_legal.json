@@ -1,0 +1,25 @@
+{
+  "title": "Settle a multi-party dispute",
+  "options": [
+    {"id": "settle-low",  "label": "Settle — low",  "payout": 3,  "admission": false, "within_cap": true},
+    {"id": "settle-mid",  "label": "Settle — mid",  "payout": 6,  "admission": false, "within_cap": true},
+    {"id": "settle-high", "label": "Settle — high (with admission)", "payout": 12, "admission": true, "within_cap": false}
+  ],
+  "parties": [
+    {
+      "owner": "Plaintiff",
+      "hard": [{"attr": "payout", "op": ">=", "value": 2}],
+      "utility": [{"attr": "payout", "weight": 1.0, "direction": "higher", "lo": 0, "hi": 12}]
+    },
+    {
+      "owner": "Defendant",
+      "hard": [{"attr": "admission", "op": "==", "value": false}],
+      "utility": [{"attr": "payout", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 12}]
+    },
+    {
+      "owner": "Insurer",
+      "hard": [{"attr": "within_cap", "op": "==", "value": true}],
+      "utility": [{"attr": "payout", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 12}]
+    }
+  ]
+}

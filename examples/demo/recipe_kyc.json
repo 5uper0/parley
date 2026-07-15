@@ -1,0 +1,45 @@
+{
+  "title": "Onboard a new counterparty",
+  "options": [
+    {"id": "reject",        "label": "Reject",              "revenue": 0,  "risk": 0, "sanctions_ok": true,  "edd_done": true},
+    {"id": "approve-basic", "label": "Approve — basic tier","revenue": 3,  "risk": 3, "sanctions_ok": true,  "edd_done": true},
+    {"id": "approve-full",  "label": "Approve — full tier", "revenue": 8,  "risk": 6, "sanctions_ok": true,  "edd_done": true},
+    {"id": "approve-fast",  "label": "Approve — fast-track", "revenue": 10, "risk": 9, "sanctions_ok": false, "edd_done": false}
+  ],
+  "parties": [
+    {
+      "owner": "Compliance",
+      "hard": [
+        {"attr": "sanctions_ok", "op": "==", "value": true},
+        {"attr": "edd_done", "op": "==", "value": true}
+      ],
+      "utility": [{"attr": "risk", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 9}]
+    },
+    {
+      "owner": "Risk",
+      "hard": [{"attr": "risk", "op": "<=", "value": 7}],
+      "utility": [{"attr": "risk", "weight": 1.0, "direction": "lower", "lo": 0, "hi": 7}]
+    },
+    {
+      "owner": "Business",
+      "hard": [],
+      "utility": [{"attr": "revenue", "weight": 1.0, "direction": "higher", "lo": 0, "hi": 10}]
+    }
+  ],
+  "presentation": {
+    "situation": "A new business wants to sign up. Three teams have to agree whether — and how — to let them in, without ignoring the checks.",
+    "parties": {
+      "Compliance": {"blurb": "won't approve anyone who isn't screened and checked", "redlines": ["sanctions screening done", "enhanced due-diligence done"]},
+      "Risk":       {"blurb": "won't take on too much risk", "redlines": ["risk score no higher than 7"]},
+      "Business":   {"blurb": "wants the revenue", "redlines": []}
+    },
+    "options": {
+      "reject":        {"plain": "Turn them down"},
+      "approve-basic": {"plain": "Approve — basic tier"},
+      "approve-full":  {"plain": "Approve — full tier"},
+      "approve-fast":  {"plain": "Fast-track — skip the checks", "tempting": true}
+    },
+    "attrs": [{"key": "revenue", "label": "revenue"}, {"key": "risk", "label": "risk"}],
+    "outcome": "The tier every team can accept is picked; the fast-track that skips sanctions and due-diligence was blocked by a red line. The revenue team never sees the others' private limits — and there's an audit-ready receipt."
+  }
+}
