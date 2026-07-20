@@ -14,7 +14,7 @@ masked verdicts, and a verifiable non-betrayal transcript.
 ![core](https://img.shields.io/badge/core-zero--dependency-informational.svg)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+**[Try it live](https://parleyprotocol.com)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 <br>
 
@@ -103,10 +103,9 @@ landlord side is inferred, not ratified). The screenshot-native proof card is `e
 docker build -t parley . && docker run --rm -p 8080:8080 parley   # open http://127.0.0.1:8080
 ```
 
-**Hosted demo deployment:** the repo ships a `render.yaml` Blueprint so the same Docker demo
-can be deployed to [Render](https://render.com) with one click via
-[Deploy to Render](https://render.com/deploy?repo=https://github.com/5uper0/parley) once the repo is
-public; no live demo URL exists yet.
+**Try it live: [parleyprotocol.com](https://parleyprotocol.com)** runs the real engine behind one web
+page, no install and nothing to sign up for. Prefer to self-host? The repo ships a `Dockerfile` (and a
+`render.yaml` Blueprint) so you can run the same demo anywhere in one command.
 
 ## Built by an agent fleet
 
