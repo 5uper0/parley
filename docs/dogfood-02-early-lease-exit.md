@@ -1,4 +1,4 @@
-# Dogfood #02 — early lease exit (anonymized retrospective replay)
+# Dogfood #02, early lease exit (anonymized retrospective replay)
 
 > **Evidence level:** a real, fully anonymized rental dispute; the tenant side was ratified
 > retrospectively, the landlord side is inferred from the record. This is stronger than a synthetic
@@ -18,7 +18,7 @@ and nothing here identifies any real party. No claim is made that the replacemen
 
 ## Positions encoded
 
-### Tenant — ratified
+### Tenant, ratified
 
 Hard red lines:
 
@@ -32,7 +32,7 @@ a transparent final settlement. Private information included available cash and 
 pay. The fallback was to stay for two months and consume the deposit, not because that was preferred,
 but because no deposit-return exit was offered.
 
-### Landlord — inferred, not ratified
+### Landlord, inferred, not ratified
 
 Hard red lines inferred from the correspondence: at least one month of rent coverage and payment of
 documented property costs. Soft preferences: more continuous rent coverage and a ready replacement.
