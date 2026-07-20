@@ -15,14 +15,14 @@ Things we especially want to hear about:
 - A way for an untrusted coordinator to **forge or replay** a signed verdict past
   `verify_transcript()`.
 - A way to **extract a private preference sheet** through the net layer (the extraction attack the
-  red-team tests are meant to close — see `tests/test_redteam.py`).
+  red-team tests are meant to close, see `tests/test_redteam.py`).
 - Any way to make `verify_non_betrayal` return a false ✓.
 
 ## Scope & maturity
 
 This is a **v0**. The net layer is hardened against the demonstrated attacks (Ed25519-signed
 verdicts, bearer auth, rate limiting, input validation). Known limits we already disclose (so a
-report on one of these is a confirmation, not a surprise — but a *working exploit or a sharper
+report on one of these is a confirmation, not a surprise, but a *working exploit or a sharper
 framing* is still welcome):
 
 - **Signatures are tamper-evidence, not authenticity.** `verify_transcript` checks each signature
@@ -40,7 +40,7 @@ framing* is still welcome):
 
 Do not deploy v0 against genuinely adversarial principals in production. Reports that deepen the
 collusion-resistance story, or that break a guarantee we *didn't* list above, are the ones we most
-want — the first four items are on the v0.2 roadmap.
+want, the first four items are on the v0.2 roadmap.
 
 ## Supported versions
 
