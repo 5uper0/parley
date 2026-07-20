@@ -16,7 +16,7 @@ python3 -m venv .venv
 ## Ground rules
 
 - **Tests first.** Every behavior change ships with a test. The whole point of Parley is
-  that its guarantees are *checkable* — a change without a test can't demonstrate its guarantee.
+  that its guarantees are *checkable*, a change without a test can't demonstrate its guarantee.
 - **Keep the core zero-dependency.** `parley/` (preferences, agent, consensus, transcript)
   must import only the stdlib. Anything needing a library (crypto, HTTP clients, LLMs) goes
   behind an optional extra and lives in a submodule (see `parley/net/`).
