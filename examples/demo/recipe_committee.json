@@ -1,0 +1,30 @@
+{
+  "title": "Fund a grant proposal (committee vote)",
+  "options": [
+    {"id": "fund-literacy", "label": "Fund the literacy program",  "impact": 6, "cost": 30, "novelty": 2, "reviewed": true},
+    {"id": "fund-climate",  "label": "Fund the climate initiative", "impact": 9, "cost": 90, "novelty": 5, "reviewed": true},
+    {"id": "fund-biotech",  "label": "Fund the diagnostics pilot",  "impact": 5, "cost": 20, "novelty": 9, "reviewed": true},
+    {"id": "rubber-stamp",  "label": "Approve without review",      "impact": 9, "cost": 5,  "novelty": 8, "reviewed": false}
+  ],
+  "parties": [
+    {"owner": "Impact",  "hard": [], "utility": [{"attr": "impact", "direction": "higher", "lo": 0, "hi": 9}]},
+    {"owner": "Budget",  "hard": [{"attr": "reviewed", "op": "==", "value": true}], "utility": [{"attr": "cost", "direction": "lower", "lo": 0, "hi": 90}]},
+    {"owner": "Novelty", "hard": [], "utility": [{"attr": "novelty", "direction": "higher", "lo": 0, "hi": 9}]}
+  ],
+  "presentation": {
+    "situation": "A grant committee has a shortlist of proposals and one pot of money. Three reviewers care about different things, and nobody wants to just wave through the flashiest pitch.",
+    "parties": {
+      "Impact":  {"blurb": "wants the proposal that helps the most people", "redlines": []},
+      "Budget":  {"blurb": "won't approve spending that hasn't been reviewed", "redlines": ["every proposal must go through review before funding"]},
+      "Novelty": {"blurb": "wants to fund something genuinely new", "redlines": []}
+    },
+    "options": {
+      "fund-literacy": {"plain": "Fund the community literacy program"},
+      "fund-climate":  {"plain": "Fund the large climate initiative"},
+      "fund-biotech":  {"plain": "Fund the diagnostics pilot"},
+      "rubber-stamp":  {"plain": "Skip the review, approve the pitch that looks best on paper", "tempting": true}
+    },
+    "attrs": [{"key": "impact", "label": "impact"}, {"key": "cost", "label": "cost ($K)"}, {"key": "novelty", "label": "novelty"}],
+    "outcome": "The proposal that no reviewer strongly objects to is funded; the unreviewed rubber-stamp — the best-looking numbers on paper — was blocked by a red line before anyone could vote on it. Each reviewer's real ceiling stays private, and there's a receipt for the file."
+  }
+}
