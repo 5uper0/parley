@@ -5,7 +5,11 @@ agents reach a decision that respects everyone's red lines, and each owner then
 proves locally that their agent never betrayed them — without exposing the sheet.
 
     python examples/meeting.py
+    python examples/meeting.py --json
 """
+import argparse
+import json
+
 from parley.preferences import PreferenceSheet, HardConstraint
 from parley.agent import Agent
 from parley.consensus import run_consensus
@@ -65,17 +69,37 @@ def show(result):
         print(f'    {a.owner:>5}: red lines held? {"yes ✓" if ok else "NO ✗"}')
 
 
-if __name__ == "__main__":
-    print("=" * 60)
-    print("  PARLEY — consensus among agents with conflicting private interests")
-    print("=" * 60)
-    show(run_consensus(AGENTS, OPTIONS))
+def to_dict(result):
+    return {
+        "status": result.status,
+        "decision": result.decision,
+        "transcript_sha256": result.transcript.hash(),
+        "entries": result.transcript.entries,
+    }
 
-    print("\n" + "-" * 60)
-    print("  Now add Dan, whose red line is 'Fridays only' (conflicts with Bob):")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--json", action="store_true",
+                         help="emit both scenarios as JSON instead of the human-readable report")
+    args = parser.parse_args()
+
     dan = Agent("Dan", PreferenceSheet(
         "Dan",
         hard=[HardConstraint("fridays-only", lambda o: o["day"] == "fri")],
         utility=lambda o: 1.0,
     ))
-    show(run_consensus(AGENTS + [dan], OPTIONS))
+    base = run_consensus(AGENTS, OPTIONS)
+    with_dan = run_consensus(AGENTS + [dan], OPTIONS)
+
+    if args.json:
+        print(json.dumps([to_dict(base), to_dict(with_dan)], indent=2))
+    else:
+        print("=" * 60)
+        print("  PARLEY — consensus among agents with conflicting private interests")
+        print("=" * 60)
+        show(base)
+
+        print("\n" + "-" * 60)
+        print("  Now add Dan, whose red line is 'Fridays only' (conflicts with Bob):")
+        show(with_dan)
