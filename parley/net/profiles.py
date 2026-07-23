@@ -3,9 +3,11 @@
 Each profile lives inside its own bot process; the sheet is never sent on the wire.
 The agenda (OPTIONS) is public — it's the thing everyone is trying to agree on.
 """
+from typing import Any, Callable, Dict, List
+
 from parley.preferences import PreferenceSheet, HardConstraint
 
-OPTIONS = [
+OPTIONS: List[Dict[str, Any]] = [
     {"day": "mon", "hour": 9},
     {"day": "mon", "hour": 15},
     {"day": "tue", "hour": 11},
@@ -16,7 +18,7 @@ OPTIONS = [
     {"day": "tue", "hour": 17},
 ]
 
-PROFILES = {
+PROFILES: Dict[str, Callable[[], PreferenceSheet]] = {
     "ana": lambda: PreferenceSheet(
         "Ana",
         hard=[HardConstraint("no-mornings", lambda o: o["hour"] >= 11)],
