@@ -187,6 +187,13 @@ h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;
 .vok .seal{text-shadow:0 0 14px rgba(31,185,138,.5)}
 .vbtn:hover .seal{text-shadow:0 0 12px rgba(31,185,138,.55)}
 
+.site-footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--hair);
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+.foot-links{display:flex;flex-wrap:wrap;gap:18px}
+.foot-links a{color:var(--muted);font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s var(--ease)}
+.foot-links a:hover{color:var(--indigo)}
+.foot-links svg{width:15px;height:15px;flex:none}
+.foot-meta{color:var(--dim);font-size:12.5px}
 @media (max-width:560px){.hero h1{max-width:20ch}.hero-actions{gap:10px}}
 @media (prefers-reduced-motion:reduce){
   .eyebrow .dot{animation:none}
@@ -249,6 +256,25 @@ h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;
     <button class="vbtn" onclick="doVerify()">Verify transcript <span class="seal">✓</span></button>
     <span class="vok" id="vok"><span class="seal">✓ verified</span> — every party replayed its own limits against the decision; none crossed. Tamper-evident (SHA-256).</span>
   </div>
+
+  <footer class="site-footer">
+    <div class="foot-links">
+      <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.53-1.11-1.53-.91-.64.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.36 1.12 2.93.85.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.81 0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+        GitHub
+      </a>
+      <a href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Contact / Discussions
+      </a>
+      <a href="https://www.linkedin.com/company/parleyprotocol" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/5uper0/parley/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0</a>
+    </div>
+    <div class="foot-meta">Open source · self-hosted · zero-dependency Python core</div>
+  </footer>
 </div>
 
 <script>
