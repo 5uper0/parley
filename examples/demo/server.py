@@ -24,10 +24,12 @@ INDEX = os.path.join(HERE, "index.html")
 # SECURITY boundary: the ?recipe= key is looked up here, never joined into a path, so no traversal is
 # possible. `p2p` is the default — the flagship everyday scenario.
 RECIPES = {
-    "p2p":      "recipe_p2p_dispute.json",
-    "estate":   "recipe_estate.json",
-    "contract": "recipe_contract_terms.json",
-    "kyc":      "recipe_kyc.json",
+    "p2p":         "recipe_p2p_dispute.json",
+    "estate":      "recipe_estate.json",
+    "contract":    "recipe_contract_terms.json",
+    "kyc":         "recipe_kyc.json",
+    "partnership": "recipe_partnership_buyout.json",
+    "dao":         "recipe_dao_treasury.json",
 }
 DEFAULT_RECIPE = "p2p"
 # Back-compat: proofcard.py + docs import RECIPE as the default recipe path.
@@ -76,6 +78,8 @@ def run_recipe(path: str) -> dict:
         "non_betrayal": non_betrayal,
         # optional plain-language layer (data only; ignored by the core spec)
         "presentation": raw.get("presentation"),
+        # optional provenance: the real dispute this scenario is grounded in (data only)
+        "source": raw.get("source"),
     }
 
 

@@ -1,0 +1,35 @@
+{
+  "title": "Break a 3-partner squeeze-out (real case)",
+  "source": {
+    "case": "r/smallbusiness: 'Getting kicked out of my company' (3 equal partners, 2-vs-1 squeeze-out)",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/19543js/getting_kicked_out_of_my_company/",
+    "note": "Encoded from a real thread: three friends own 1/3 each ($12k each in), the two active partners want to push out the third (remote) despite a partnership agreement that says they all equally own the company. Positions, the equal-share red line, and the options are taken from the poster's own account; no party ratified the outcome (this is a real-case run, not a signed engagement)."
+  },
+  "options": [
+    {"id": "keep-equal",  "label": "Status quo: everyone keeps 1/3", "op_outcome": 100, "fair": true,  "partners_control": false},
+    {"id": "fair-buyout", "label": "Buy the third out at a fair 1/3 valuation", "op_outcome": 90, "fair": true, "partners_control": true},
+    {"id": "dissolve",    "label": "Dissolve, liquidate, split proceeds", "op_outcome": 60, "fair": true, "partners_control": false},
+    {"id": "squeeze",     "label": "Dilute / force the third out cheap", "op_outcome": 15, "fair": false, "partners_control": true}
+  ],
+  "parties": [
+    {"owner": "Ousted partner", "hard": [{"attr": "op_outcome", "op": ">=", "value": 50}], "utility": [{"attr": "op_outcome", "direction": "higher", "lo": 0, "hi": 100}]},
+    {"owner": "Two active partners", "hard": [], "utility": [{"attr": "partners_control", "prefer": true}]},
+    {"owner": "Partnership agreement", "hard": [{"attr": "fair", "op": "==", "value": true}], "utility": []}
+  ],
+  "presentation": {
+    "situation": "Three friends started a company, 1/3 each, and each put in $12k. The two who now work in it day-to-day want to push out the third (remote, less recent effort). The signed partnership agreement says all three own it equally. What outcome does everyone accept?",
+    "parties": {
+      "Ousted partner":       {"blurb": "wants his equal, contractually-guaranteed stake honored (or bought out at its true value)", "redlines": ["won't accept less than his equal one-third share"]},
+      "Two active partners":  {"blurb": "want to run the company without a passive co-owner", "redlines": []},
+      "Partnership agreement":{"blurb": "the equal-ownership terms both sides signed; won't ratify a coerced dilution", "redlines": ["no outcome that violates the equal-ownership agreement"]}
+    },
+    "options": {
+      "keep-equal":  {"plain": "Everyone keeps an equal third"},
+      "fair-buyout": {"plain": "Buy the third partner out at a fair one-third valuation"},
+      "dissolve":    {"plain": "Dissolve and split the proceeds"},
+      "squeeze":     {"plain": "Dilute or force the third partner out on the cheap", "tempting": true}
+    },
+    "attrs": [{"key": "op_outcome", "label": "third partner's realized value"}],
+    "outcome": "The shortcut that squeezes the third partner out below his equal share is blocked by the fairness red line. Among the outcomes everyone can accept, the fair buyout lifts the least-happy party highest: the third partner gets true value for his one-third, the two active partners get the control they want, and nobody is forced into a value-destroying dissolution. Everyone gets a receipt: no one was cheated."
+  }
+}
