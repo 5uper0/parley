@@ -1,0 +1,35 @@
+{
+  "title": "Settle a DAO treasury fight without an insider rig (real case)",
+  "source": {
+    "case": "Gnosis DAO GIP-151 treasury-redemption tension (holders want direct pro-rata access; leadership wants to retain deployment control)",
+    "url": "https://www.cryptopolitan.com/gnosis-dao-treasury-governance-tensions-aave/",
+    "note": "Encoded from a real, reported governance fight: token holders push for direct pro-rata redemption + accountability while leadership wants to keep control of capital deployment, and critics reject insider control of a contested vote. Positions and the legitimacy red line are from the reported dispute; no party ratified this outcome (real-case run, not a signed engagement). See also ENS/Aave insider-rush cases in docs/demand-evidence-forums.md."
+  },
+  "options": [
+    {"id": "full",       "label": "Full pro-rata redemption to holders", "holder_access": 100, "legit": true},
+    {"id": "partial",    "label": "Partial redemption + a deployment mandate", "holder_access": 50, "legit": true},
+    {"id": "status-quo", "label": "Leadership keeps deployment control", "holder_access": 0, "legit": true},
+    {"id": "insider",    "label": "Leadership blocks the vote with its own dominant stake", "holder_access": 0, "legit": false}
+  ],
+  "parties": [
+    {"owner": "Token holders", "hard": [{"attr": "legit", "op": "==", "value": true}], "utility": [{"attr": "holder_access", "direction": "higher", "lo": 0, "hi": 100}]},
+    {"owner": "DAO leadership", "hard": [], "utility": [{"attr": "holder_access", "direction": "lower", "lo": 0, "hi": 100}]},
+    {"owner": "On-chain governance", "hard": [{"attr": "legit", "op": "==", "value": true}], "utility": []}
+  ],
+  "presentation": {
+    "situation": "A DAO's token holders want direct pro-rata access to a treasury they feel is underperforming; the leadership wants to keep control of how the capital is deployed. Critics warn that leadership can simply block the vote with its own dominant stake. What outcome is legitimate and everyone can accept?",
+    "parties": {
+      "Token holders":     {"blurb": "want direct pro-rata redemption and accountability", "redlines": ["won't accept an outcome forced by insider control of the vote"]},
+      "DAO leadership":    {"blurb": "want to retain control of capital deployment", "redlines": []},
+      "On-chain governance":{"blurb": "the legitimacy of the process itself; won't ratify a vote decided by insider power, not quorum", "redlines": ["no outcome that rests on insider-rigging the vote"]}
+    },
+    "options": {
+      "full":       {"plain": "Full pro-rata redemption to holders"},
+      "partial":    {"plain": "Partial redemption plus a deployment mandate"},
+      "status-quo": {"plain": "Leadership keeps deployment control"},
+      "insider":    {"plain": "Leadership blocks the vote with its own dominant stake", "tempting": true}
+    },
+    "attrs": [{"key": "holder_access", "label": "direct holder access to the treasury"}],
+    "outcome": "The insider move (blocking the vote with a dominant stake) is blocked by the legitimacy red line: it can't be the outcome, full stop. Among the legitimate options everyone can accept, max-min lifts the least-happy party highest and lands on partial redemption plus a deployment mandate: holders get real direct access, leadership keeps a mandate to deploy, and the result is on-chain verifiable. Everyone gets a receipt: no one rigged it."
+  }
+}
