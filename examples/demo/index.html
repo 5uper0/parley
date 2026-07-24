@@ -154,6 +154,9 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 .cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
 .cta:active{transform:translateY(0) scale(.98)}
 .trustrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.icp-hook{color:var(--dim);font-size:12.5px;margin-top:14px}
+.icp-hook a{color:var(--muted);text-decoration:underline;text-decoration-color:var(--hair2);text-underline-offset:2px}
+.icp-hook a:hover{color:var(--indigo)}
 .pill{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted);background:var(--sunken);
   border:1px solid var(--hair);border-radius:var(--r-full);padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
 .pill svg{width:12px;height:12px;flex:none}
@@ -229,6 +232,7 @@ h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;
       <span class="pill v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>you verify locally</span>
       <span class="pill r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>red lines enforced in code</span>
     </div>
+    <p class="icp-hook">Also used for KYC/AML sign-off, DORA-style multi-party approvals, and enterprise contract negotiation — <a href="#" onclick="document.querySelector('#picker b[data-key=\'kyc\']')?.click();document.getElementById('picker').scrollIntoView({behavior:'smooth',block:'center'});return false">try the Onboarding scenario</a>.</p>
   </section>
 
   <hr class="redrule">
