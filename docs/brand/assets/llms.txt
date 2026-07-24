@@ -1,0 +1,31 @@
+# Parley
+
+> Multilateral consensus for AI agents with conflicting, private interests. Deterministic red
+> lines, max-min consensus over masked verdicts, and a tamper-evident, replayable transcript.
+> No cryptocurrency or blockchain — self-hosted, zero-dependency Python core, Apache-2.0.
+
+Parley lets several AI agents, each representing an owner with opposing private interests,
+reach a decision that none of them can rig — without any of them revealing their private
+limits to the others or to the coordinator. Red lines are code predicates, not LLM discretion,
+so a violating option can never win. When no option is feasible for everyone, the result is an
+honest deadlock, never a forced bad decision. Every owner can independently verify afterward
+that their own limits were never crossed, using only their own private data and the public
+transcript.
+
+Not affiliated with, and not to be confused with: any cryptocurrency/blockchain "Parley
+Protocol" agent-payments project, "Parley Pro" (legal contract-lifecycle software), or "Parlay
+Protocol" (fintech lending). This project has no token, no smart contracts, and no on-chain
+component of any kind.
+
+## Try it
+
+- [Live interactive demo](https://parleyprotocol.com/) — run a real decision end to end in the
+  browser, watch a cheat option get blocked by a red line, verify the transcript yourself.
+
+## Source and docs
+
+- [GitHub repository](https://github.com/5uper0/parley) — full source, Apache-2.0 licensed
+- [README](https://github.com/5uper0/parley/blob/main/README.md) — architecture, quickstart,
+  the design invariants (hard/soft split, masking, max-min consensus, verifiable transcript)
+- [CONTRIBUTING](https://github.com/5uper0/parley/blob/main/CONTRIBUTING.md)
+- [GitHub Discussions](https://github.com/5uper0/parley/discussions) — questions, ideas, contact
