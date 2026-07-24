@@ -1,0 +1,14 @@
+{
+  "name": "Parley — masked-verdict consensus for AI agents",
+  "short_name": "Parley",
+  "description": "Multilateral consensus for AI agents with conflicting private interests. Deterministic red lines, max-min consensus over masked verdicts, a tamper-evident transcript. No cryptocurrency, self-hosted.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#0A0B0D",
+  "theme_color": "#0A0B0D",
+  "icons": [
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
