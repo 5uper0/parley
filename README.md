@@ -80,7 +80,7 @@ and reuses nothing that's already a commodity.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-.venv/bin/pytest -q                     # 59 tests, all green
+.venv/bin/pytest -q                     # 65 tests, all green
 .venv/bin/python examples/demo/server.py   # the money-shot: open http://127.0.0.1:8080 → Run
 .venv/bin/python examples/meeting.py    # three delegates pick a meeting slot
 .venv/bin/python examples/run_env.py    # bots as separate processes, consensus over HTTP
