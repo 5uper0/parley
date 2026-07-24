@@ -260,9 +260,11 @@ async function fetchRun(key){
 async function initPicker(){
   const recipes = await fetchRecipes();
   document.getElementById('picker').innerHTML = recipes.map(r=>
-    `<b data-key="${r.key}" class="${r.key===RECIPE?'on':''}" title="${(r.title||'').replace(/"/g,'&quot;')}">${shortName(r.key)}</b>`).join('');
+    `<b data-key="${r.key}" class="${r.key===RECIPE?'on':''}" role="button" tabindex="0" aria-pressed="${r.key===RECIPE?'true':'false'}" title="${(r.title||'').replace(/"/g,'&quot;')}">${shortName(r.key)}</b>`).join('');
   document.getElementById('picker').querySelectorAll('b').forEach(el=>{
-    el.onclick=()=>{ RECIPE=el.dataset.key; document.querySelectorAll('#picker b').forEach(x=>x.classList.toggle('on',x.dataset.key===RECIPE)); load(); };
+    const pick=()=>{ RECIPE=el.dataset.key; document.querySelectorAll('#picker b').forEach(x=>{const on=x.dataset.key===RECIPE; x.classList.toggle('on',on); x.setAttribute('aria-pressed',on);}); load(); };
+    el.onclick=pick;
+    el.onkeydown=(e)=>{ if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); pick(); } };
   });
 }
 function shortName(k){ return {p2p:"Marketplace", estate:"Inheritance", contract:"Agency deal", kyc:"Onboarding"}[k] || k; }
