@@ -1,6 +1,6 @@
 <div align="center">
 
-# parley
+# parley.
 
 ### The trust layer for the agent economy
 
