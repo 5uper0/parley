@@ -6,9 +6,18 @@ rule — maximise the least-happy agent's soft score (a Rawlsian / max-min socia
 not a majority vote), tie-broken by total welfare. No feasible option => honest deadlock.
 """
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, List, Optional, Protocol, Sequence, Tuple
 
+from .agent import Verdict
 from .transcript import Transcript
+
+
+class AgentLike(Protocol):
+    """What run_consensus needs from a delegate: local Agent and net.client.RemoteAgent
+    both satisfy this structurally, without either importing the other."""
+    owner: str
+
+    def consider(self, option: Any) -> Verdict: ...
 
 
 @dataclass
@@ -18,9 +27,11 @@ class ConsensusResult:
     transcript: Transcript
 
 
-def run_consensus(agents, options, rule: str = "egalitarian") -> ConsensusResult:
+def run_consensus(
+    agents: Sequence[AgentLike], options: Sequence[Any], rule: str = "egalitarian"
+) -> ConsensusResult:
     transcript = Transcript()
-    feasible = []  # (option, floor_score, total_score)
+    feasible: List[Tuple[Any, float, float]] = []  # (option, floor_score, total_score)
 
     for option in options:
         verdicts = [a.consider(option) for a in agents]
