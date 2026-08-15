@@ -3,7 +3,7 @@
 # then open http://127.0.0.1:8080 and press Run.
 #
 # The parley/ core is zero-dependency stdlib, so this image needs no pip install and no build step.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 WORKDIR /app
 COPY parley/ ./parley/
