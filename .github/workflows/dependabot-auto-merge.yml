@@ -5,6 +5,7 @@ on: pull_request
 permissions:
   contents: write
   pull-requests: write
+  checks: read
 
 jobs:
   dependabot:
@@ -16,9 +17,33 @@ jobs:
         uses: dependabot/fetch-metadata@v2
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Enable auto-merge for patch/minor updates
+
+      - name: Wait for other checks, then merge patch/minor
         if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
-        run: gh pr merge --auto --squash "$PR_URL"
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          # No branch protection available on this plan, so GitHub's native
+          # --auto merge (which requires it) is not usable. Poll sibling
+          # checks ourselves (excluding this workflow's own run) and merge
+          # directly once they're all green. Give up after ~10 minutes.
+          for i in $(seq 1 40); do
+            STATE=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
+              [.statusCheckRollup[]? | select(.workflowName != "Dependabot auto-merge")] as $c
+              | if ($c | length) == 0 then "ready"
+                elif ($c | any(.status? == "IN_PROGRESS" or .status? == "QUEUED" or .status? == "PENDING" or .state? == "PENDING")) then "pending"
+                elif ($c | any(.conclusion? == "FAILURE" or .conclusion? == "TIMED_OUT" or .conclusion? == "CANCELLED" or .state? == "FAILURE" or .state? == "ERROR")) then "failed"
+                else "ready" end
+            ')
+            echo "poll $i: $STATE"
+            if [ "$STATE" = "ready" ]; then
+              gh pr merge --squash "$PR_URL"
+              exit 0
+            elif [ "$STATE" = "failed" ]; then
+              echo "a sibling check failed — leaving for manual review"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "timed out waiting for checks — leaving for manual review"
