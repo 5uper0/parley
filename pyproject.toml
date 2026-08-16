@@ -18,7 +18,7 @@ dev = ["pytest>=8", "pynacl>=1.6.2"]
 # endpoint over urllib, so there is no extra to install.
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
