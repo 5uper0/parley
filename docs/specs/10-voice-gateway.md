@@ -1,5 +1,8 @@
 # voice/gateway.py — Spec
 
+> **Status:** the `voice/` package this spec describes is not in this repository. It exists as a
+> working prototype, developed privately. This repo contains the specification.
+
 ## Purpose
 The gateway is an OpenAI-compatible `POST /v1/chat/completions` (SSE) server that ElevenLabs'
 Custom-LLM mode calls and speaks verbatim — so **Parley itself is registered as the model**. Every

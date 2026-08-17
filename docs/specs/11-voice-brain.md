@@ -1,5 +1,8 @@
 # voice/brain.py — Spec
 
+> **Status:** the `voice/` package this spec describes is not in this repository. It exists as a
+> working prototype, developed privately. This repo contains the specification.
+
 ## Purpose
 The brain lets the phone agent **converse naturally** (Claude via OpenRouter's OpenAI-compatible
 endpoint) while keeping non-betrayal intact: the model **never sees the owner's private sheet**. Its
