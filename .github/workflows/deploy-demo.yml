@@ -1,0 +1,50 @@
+name: deploy-demo
+
+# The hosted demo at parleyprotocol.com is a static pre-render of examples/demo/, so it
+# only changes when a recipe, the page, or the build script changes. Without this the site
+# drifted behind main silently: PR #43 added a seventh scenario that the live API kept
+# serving six of, because the only way to publish was a human running the build locally.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/demo/**"
+      - "scripts/build-static-demo.py"
+      - "docs/brand/assets/**"
+      - ".github/workflows/deploy-demo.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PARLEY_GA4_ID: ${{ vars.PARLEY_GA4_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Build the static demo
+        run: python scripts/build-static-demo.py build/static-demo
+      - name: Check the build is complete
+        run: |
+          test -f build/static-demo/index.html
+          test -f build/static-demo/api/recipes.json
+          # every whitelisted recipe must have a baked response
+          python - <<'PY'
+          import json, pathlib
+          keys = [r["key"] for r in json.loads(pathlib.Path("build/static-demo/api/recipes.json").read_text())]
+          missing = [k for k in keys if not pathlib.Path(f"build/static-demo/api/run/{k}.json").exists()]
+          assert not missing, f"missing baked responses: {missing}"
+          print(f"{len(keys)} scenarios baked")
+          PY
+      - name: Deploy to Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npx --yes wrangler@4 pages deploy build/static-demo --project-name=parley-demo --branch=main
+      - name: Report skipped deploy
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: |
+          echo "::notice::Built successfully but did not deploy — CLOUDFLARE_API_TOKEN is not set."
+          echo "Add the repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to enable deploys."
