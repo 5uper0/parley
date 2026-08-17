@@ -46,6 +46,16 @@ STATIC_COPIES = {
     _ASSETS / "favicon" / "icon-512.png": "icon-512.png",
     _ASSETS / "manifest.json": "manifest.json",
     _ASSETS / "llms.txt": "llms.txt",
+    # Orphan-but-live URLs: nothing on the site links these, but they are served today and
+    # the proof cards were built to be shared, so a deploy that dropped them would 404 links
+    # already in the wild. Cloudflare Pages replaces the whole tree, so absent means deleted.
+    Path(HERE, "proofcard_p2p.html"): "proofcard_p2p.html",
+    Path(HERE, "proofcard_dao.html"): "proofcard_dao.html",
+    Path(HERE, "proofcard_estate_real.html"): "proofcard_estate_real.html",
+    Path(HERE, "proofcard_partnership.html"): "proofcard_partnership.html",
+    _ASSETS / "proofcard.png": "proofcard.png",
+    _ASSETS / "parley-money-shot.gif": "parley-money-shot.gif",
+    _ASSETS.parent / "built-by-a-fleet.html": "built-by-a-fleet.html",
 }
 
 
