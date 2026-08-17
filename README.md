@@ -130,16 +130,17 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
   brute-force enumeration is throttled (429); oversized/malformed bodies are rejected (413/400).
   This closes the preference-extraction hole (an unauthenticated attacker previously reconstructed
   a bot's private red line by probing).
+- **Outcome verification.** `verify_outcome(transcript)` (in `parley.consensus`) recomputes the
+  max-min winner from the recorded verdicts and checks it matches the announced decision, so a
+  coordinator that finalizes a *feasible-but-not-max-min* (or infeasible) option is caught. Anyone
+  can replay it over the public record — no private sheet needed. (`verify_non_betrayal` still only
+  proves your *own* red lines held.)
 
 Not yet (v0.1 honest limits, do not treat as production-secure for adversarial principals):
 - **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster
   (above); the roster-pinned check (verify against the key from each bot's discovery Agent Card) is v0.2.
 - **Replay binding**, verdicts carry no session/nonce, so a signed verdict is replayable into another
   parley that reuses the same option.
-- **Outcome verification**, nothing yet recomputes the max-min winner from the transcript, so a
-  coordinator that announces a *feasible-but-not-max-min* decision isn't caught by `verify_non_betrayal`
-  (which only re-checks that *your own* red lines held). What's provable today is **per-owner
-  non-betrayal**, not that the *selection* itself was computed honestly.
 - **Range-masked scores**, the soft cardinal `score` is public in the transcript, so an untrusted
   coordinator can infer preference *ordering* and each party's feasible region (the *reason* and the
   private sheet stay hidden; MPC/range-masking is future work).
