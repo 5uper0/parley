@@ -11,7 +11,7 @@
     {"owner": "Legal",    "hard": [{"attr": "data_residency_ok", "op": "==", "value": true}], "utility": [{"attr": "auto_renew", "prefer": false}]}
   ],
   "presentation": {
-    "situation": "You and a client are agreeing on contract terms — neither wants to show their real bottom line.",
+    "situation": "You and a client are agreeing on contract terms, and neither wants to show their real bottom line.",
     "parties": {
       "Customer": {"blurb": "needs a real uptime guarantee", "redlines": ["at least 99% uptime (SLA)"]},
       "Vendor":   {"blurb": "wants to cap how much it can be on the hook for", "redlines": []},
@@ -23,6 +23,6 @@
       "vendor-lockin":   {"plain": "Lock-in, weak uptime, data sent offshore", "tempting": true}
     },
     "attrs": [{"key": "sla", "label": "uptime %"}, {"key": "liability_cap", "label": "liability cap"}],
-    "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor — with a receipt."
+    "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor, with a receipt."
   }
 }

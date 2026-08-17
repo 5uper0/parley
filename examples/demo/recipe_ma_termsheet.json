@@ -1,5 +1,10 @@
 {
   "title": "Agree an investment term sheet",
+  "source": {
+    "case": "r/smallbusiness: Getting kicked out of my company",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/19543js/getting_kicked_out_of_my_company/",
+    "note": "Mirrors this real dispute: three equal one-third partners where two try to squeeze out the third minority, though the agreement says all equally own the company."
+  },
   "options": [
     {"id": "founder-friendly", "label": "Founder-friendly", "valuation": 8, "liq_pref": 1, "board_control": false, "pool": 10},
     {"id": "market",           "label": "Market terms",     "valuation": 6, "liq_pref": 1, "board_control": false, "pool": 12},

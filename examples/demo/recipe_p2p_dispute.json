@@ -1,5 +1,10 @@
 {
   "title": "Resolve a P2P trade dispute (escrow)",
+  "source": {
+    "case": "Bitcointalk: public escrow dispute (greendots & Redblue)",
+    "url": "https://bitcointalk.org/index.php?topic=309410.0",
+    "note": "Mirrors this real dispute: a 3-party buyer/seller/arbiter escrow where the red line was that the resolution had to stand on its own, with an evidence-gated release."
+  },
   "options": [
     {"id": "to-seller", "label": "Release to seller (0/100)", "buyer": 0,   "seller": 100, "evidence_ok": true},
     {"id": "split",     "label": "Split the escrow (50/50)",  "buyer": 50,  "seller": 50,  "evidence_ok": true},
@@ -25,6 +30,6 @@
       "instant":   {"plain": "Instant refund, skip the evidence check", "tempting": true}
     },
     "attrs": [{"key": "buyer", "label": "buyer gets"}, {"key": "seller", "label": "seller gets"}],
-    "outcome": "The fairest call everyone accepts is a 50/50 split — nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."
+    "outcome": "The fairest call everyone accepts is a 50/50 split, nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."
   }
 }

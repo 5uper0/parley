@@ -1,5 +1,10 @@
 {
   "title": "Allocate the DAO treasury",
+  "source": {
+    "case": "BonkDAO: $20M governance attack",
+    "url": "https://crypto.news/the-bonk-governance-attack-how-a-dao-lost-20-million-in-one-proposal/",
+    "note": "Mirrors this real dispute: a low-turnout proposal auto-executed a treasury-draining transfer, a case where the system worked as designed, which is the entire problem."
+  },
   "options": [
     {"id": "conservative", "label": "Conservative",           "dev": 3, "runway": 24, "emission": false, "marketing": 1},
     {"id": "balanced",     "label": "Balanced",               "dev": 5, "runway": 18, "emission": false, "marketing": 3},

@@ -22,6 +22,9 @@ a bug in one of them — reconcile, don't drift. Read the spec before touching t
 
 ## Voice (`voice/`)
 
+> **Status:** the `voice/` package these three specs describe is **not in this repository**. It
+> exists as a working prototype, developed privately. What this repo contains is the specification.
+
 - [10-voice-gateway](10-voice-gateway.md) — an OpenAI-compatible `/v1/chat/completions` (SSE) endpoint that registers Parley *as* the model: every spoken commitment first clears `sheet.evaluate` in code.
 - [11-voice-brain](11-voice-brain.md) — the conversational LLM (Claude via OpenRouter) that speaks but never sees the sheet; its only channel to acceptability is a tool returning a masked `{"acceptable": bool}`.
 - [12-voice-policy](12-voice-policy.md) — the speech-side of non-betrayal: the agent may only utter whitelisted, reason-free lines (accept / masked-refuse / fail-closed clarify), chosen by code from an `Evaluation`.

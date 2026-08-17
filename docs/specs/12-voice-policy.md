@@ -1,5 +1,8 @@
 # voice/policy.py — Spec
 
+> **Status:** the `voice/` package this spec describes is not in this repository. It exists as a
+> working prototype, developed privately. This repo contains the specification.
+
 ## Purpose
 This module is the speech-side of non-betrayal: **what the voice agent is ALLOWED to say**. The
 consensus core already masks *why* an option is rejected (`Verdict.reason == "red-line"`, never the

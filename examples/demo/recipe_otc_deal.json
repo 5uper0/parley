@@ -1,5 +1,10 @@
 {
   "title": "Agree terms for a large OTC crypto trade",
+  "source": {
+    "case": "Bitcointalk: fake-escrow impersonation OTC",
+    "url": "https://bitcointalk.org/index.php?topic=5529101.0",
+    "note": "Mirrors this real dispute: a scammer controlled both sides behind a fake neutral escrow (the untrusted-coordinator threat), and the community remedy was a signed wallet message."
+  },
   "options": [
     {"id": "fair",         "label": "Fair terms",              "discount": 5, "sanctions_ok": true,  "escrow": true},
     {"id": "buyer-favored","label": "Buyer-favored",           "discount": 8, "sanctions_ok": true,  "escrow": true},
