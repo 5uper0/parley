@@ -30,6 +30,7 @@ RECIPES = {
     "kyc":         "recipe_kyc.json",
     "partnership": "recipe_partnership_buyout.json",
     "dao":         "recipe_dao_treasury.json",
+    "valuation":   "recipe_estate_valuation.json",
 }
 DEFAULT_RECIPE = "p2p"
 # Back-compat: proofcard.py + docs import RECIPE as the default recipe path.
