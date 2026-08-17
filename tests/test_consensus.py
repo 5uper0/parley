@@ -65,3 +65,34 @@ def test_coordinator_only_sees_verdicts_not_sheets():
     r = run_consensus([ana(), bob()], OPTIONS)
     dump = str(r.transcript.to_dict())
     assert "no-mornings" not in dump and "no-friday" not in dump
+
+
+def test_verify_outcome_accepts_honest_transcript():
+    from parley.consensus import verify_outcome
+    r = run_consensus([ana(), bob()], OPTIONS)
+    assert verify_outcome(r.transcript) is True
+
+
+def test_verify_outcome_rejects_non_maxmin_decision():
+    # A dishonest coordinator swaps the finalized decision to a feasible-but-not-max-min option.
+    from parley.consensus import verify_outcome
+    r = run_consensus([ana(), bob()], OPTIONS)
+    assert r.decision == slot("tue", 12)          # the honest max-min winner
+    r.transcript.finalize(status="agreed", decision=slot("mon", 15))  # tampered
+    assert verify_outcome(r.transcript) is False
+
+
+def test_verify_outcome_rejects_infeasible_decision():
+    from parley.consensus import verify_outcome
+    r = run_consensus([ana(), bob()], OPTIONS)
+    r.transcript.finalize(status="agreed", decision=slot("fri", 16))  # bob red-lines friday
+    assert verify_outcome(r.transcript) is False
+
+
+def test_verify_outcome_accepts_honest_deadlock():
+    from parley.consensus import verify_outcome
+    picky = Agent("picky", PreferenceSheet(
+        owner="picky", hard=[HardConstraint("impossible", lambda o: False)]))
+    r = run_consensus([ana(), picky], OPTIONS)
+    assert r.status == "deadlock"
+    assert verify_outcome(r.transcript) is True

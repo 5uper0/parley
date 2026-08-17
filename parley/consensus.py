@@ -52,3 +52,24 @@ def run_consensus(
     decision = best[0]
     transcript.finalize(status="agreed", decision=decision)
     return ConsensusResult("agreed", decision, transcript)
+
+
+def verify_outcome(transcript: Transcript) -> bool:
+    """Recompute the max-min outcome from the transcript's recorded verdicts and check it matches
+    the announced decision. This is what catches a dishonest coordinator that finalized a
+    *feasible-but-not-max-min* option (or an infeasible one): `verify_non_betrayal` only proves an
+    owner's *own* red lines held, never that the selection itself was computed honestly. Anyone can
+    replay this over the public record — no private sheet needed.
+    """
+    feasible: List[Tuple[Any, float, float]] = []
+    for entry in transcript.entries:
+        verdicts = entry["verdicts"]
+        if verdicts and all(v["acceptable"] for v in verdicts):
+            floor = min(v["score"] for v in verdicts)
+            total = sum(v["score"] for v in verdicts)
+            feasible.append((entry["option"], floor, total))
+    result = transcript.result or {}
+    if not feasible:
+        return result.get("status") == "deadlock" and result.get("decision") is None
+    best = max(feasible, key=lambda x: (x[1], x[2]))
+    return result.get("status") == "agreed" and result.get("decision") == best[0]
