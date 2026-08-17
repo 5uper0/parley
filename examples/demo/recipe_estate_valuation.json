@@ -1,0 +1,35 @@
+{
+  "title": "Split an inherited house without a coerced waiver (real case)",
+  "source": {
+    "case": "r/legaladvice: 'My brothers want to keep our dad's house' (a 1/4 heir vs three siblings living in the home)",
+    "url": "https://www.reddit.com/r/legaladvice/comments/1q5wo7s/my_brothers_want_to_keep_our_dads_house_after_his/",
+    "note": "Encoded from a real thread: the poster is a one-quarter owner by intestacy; three brothers live in the house, want to keep it, and would rather buy the poster out at the lower county-assessor value than a market appraisal. A family member first asked the poster to sign away their probate rights. Positions, the no-waiver red line, and the options are from the poster's own account; no party ratified the outcome (real-case run, not a signed engagement)."
+  },
+  "options": [
+    {"id": "market",   "label": "Buyout at market appraisal", "op_share": 100, "keeps_home": true,  "legit": true},
+    {"id": "assessor", "label": "Buyout at county-assessor value", "op_share": 65, "keeps_home": true, "legit": true},
+    {"id": "partition","label": "Forced partition sale, split proceeds", "op_share": 88, "keeps_home": false, "legit": true},
+    {"id": "waiver",   "label": "Sign away your share (family pressure)", "op_share": 5, "keeps_home": true, "legit": false}
+  ],
+  "parties": [
+    {"owner": "You (1/4 heir)", "hard": [{"attr": "op_share", "op": ">=", "value": 50}], "utility": [{"attr": "op_share", "direction": "higher", "lo": 0, "hi": 100}]},
+    {"owner": "Three brothers", "hard": [], "utility": [{"attr": "keeps_home", "prefer": true}, {"attr": "op_share", "direction": "lower", "lo": 0, "hi": 100}]},
+    {"owner": "Neutral valuation", "hard": [{"attr": "legit", "op": "==", "value": true}], "utility": []}
+  ],
+  "presentation": {
+    "situation": "A parent dies without a will. You inherit a one-quarter share of the house; your three siblings live in it and want to keep it. They would rather buy you out at the low county-assessor value than a real market appraisal, and someone already asked you to just sign away your rights. What does everyone accept?",
+    "parties": {
+      "You (1/4 heir)":    {"blurb": "want a fair value for your quarter, on a neutral valuation", "redlines": ["won't sign away or accept less than half your fair share"]},
+      "Three brothers":    {"blurb": "want to keep the family home and pay as little as possible for your quarter", "redlines": []},
+      "Neutral valuation": {"blurb": "a legally clean process; won't ratify a coerced waiver", "redlines": ["no outcome that rests on a pressured rights-waiver"]}
+    },
+    "options": {
+      "market":    {"plain": "Buy you out at a market appraisal"},
+      "assessor":  {"plain": "Buy you out at the lower county-assessor value"},
+      "partition": {"plain": "Force a court sale and split the proceeds"},
+      "waiver":    {"plain": "Sign away your share under family pressure", "tempting": true}
+    },
+    "attrs": [{"key": "op_share", "label": "your realized value"}],
+    "outcome": "The coerced rights-waiver is blocked by the neutral red line. Among the outcomes everyone can accept, the market-appraisal buyout and the low assessor buyout tie on the floor, so the tie-break by total welfare lands on the market appraisal: the siblings keep the family home, you get your quarter at a real (not lowball) value, and nobody triggers a value-destroying partition suit. Everyone gets a receipt: no one was pressured into signing their share away."
+  }
+}

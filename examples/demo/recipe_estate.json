@@ -1,5 +1,10 @@
 {
   "title": "Split an inherited estate",
+  "source": {
+    "case": "r/legaladvice: My brothers want to keep our dad's house",
+    "url": "https://www.reddit.com/r/legaladvice/comments/1q5wo7s/my_brothers_want_to_keep_our_dads_house_after_his/",
+    "note": "Mirrors this real dispute: 4 heirs fighting over the neutral valuation basis, where the poster refused to sign away their rights."
+  },
   "options": [
     {"id": "equal",    "label": "Equal split (50/50)",   "heir1": 50, "heir2": 50, "legal_ok": true},
     {"id": "weighted", "label": "Weighted (60/40)",       "heir1": 60, "heir2": 40, "legal_ok": true},
@@ -11,7 +16,7 @@
     {"owner": "Executor", "hard": [{"attr": "legal_ok", "op": "==", "value": true}], "utility": [{"attr": "legal_ok", "prefer": true}]}
   ],
   "presentation": {
-    "situation": "Two heirs split an inheritance. Neither wants to reveal how badly they want each piece — and it has to be legally clean.",
+    "situation": "Two heirs split an inheritance. Neither wants to reveal how badly they want each piece, and it has to be legally clean.",
     "parties": {
       "Heir 1":   {"blurb": "wants the larger share", "redlines": []},
       "Heir 2":   {"blurb": "won't accept less than a fair third", "redlines": ["at least a third of the estate"]},
@@ -20,9 +25,9 @@
     "options": {
       "equal":    {"plain": "Split it equally (50/50)"},
       "weighted": {"plain": "Weighted split (60/40)"},
-      "grab":     {"plain": "One heir grabs 90/10 — title left unclear", "tempting": true}
+      "grab":     {"plain": "One heir grabs 90/10, title left unclear", "tempting": true}
     },
     "attrs": [{"key": "heir1", "label": "heir 1 gets"}, {"key": "heir2", "label": "heir 2 gets"}],
-    "outcome": "The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. No family fight — and a record everyone can check."
+    "outcome": "The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. No family fight, and a record everyone can check."
   }
 }
