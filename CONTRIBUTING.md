@@ -28,9 +28,12 @@ python3 -m venv .venv
 
 ## Good first issues
 
-- Adversarial tests against the consensus protocol (strategic misreporting, (N−1)-vs-1 collusion).
-- An A2A-native transport adapter alongside the current HTTP one.
-- Natural-language → `PreferenceSheet` elicitation (behind an LLM extra).
+Scoped, single-file tasks are tracked under the [`good first issue`](https://github.com/5uper0/parley/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+label — typing passes, edge-case tests, new decision recipes. Comment on one to claim it.
+
+Larger tracks (adversarial tests against the consensus protocol, an A2A-native transport
+adapter, natural-language → `PreferenceSheet` elicitation) are on the roadmap rather than
+ready to pick up — open an issue to discuss before starting one.
 
 ## Scope
 
