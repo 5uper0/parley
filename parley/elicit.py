@@ -10,7 +10,9 @@ red line they never stated. This module makes that impossible by construction:
 - Ambiguity fails to an owner-visible question (`needs_clarification`); malformed extractor
   output lands in `rejected`. Neither ever becomes an inferred red line.
 - Nothing becomes binding until the participant confirms every hard constraint by id plus the
-  exact sheet version; only the participant can confirm or revise their own sheet.
+  exact sheet version; only the participant can confirm or revise their own sheet, proven by an
+  unguessable capability token minted at interview start — a guessable participant id alone is
+  never enough.
 - A drafting pass only ever sees that one participant's own answers — there is no cross-
   participant data flow here, so injection text in an answer is inert data to everyone else.
 
@@ -19,6 +21,8 @@ the existing DecisionSpec/consensus engine unchanged.
 """
 import hashlib
 import json
+import math
+import secrets
 from dataclasses import dataclass, field
 from itertools import count
 from typing import Any, Callable, Optional, Union
@@ -51,12 +55,25 @@ class ElicitError(ValueError):
 
 
 def _plain_data(value: Any) -> bool:
-    """JSON-serializable check: blocks callables/objects an extractor might try to smuggle in."""
-    try:
-        json.dumps(value)
+    """Strict plain-data check: blocks callables/objects an extractor might try to smuggle in.
+
+    Exact types only (`type(v) is dict`, not `isinstance`): a hostile dict/list *subclass* with
+    an overridden `__contains__`/`__eq__` would otherwise execute inside `Constraint.check` on
+    an `in`/`==` op. json.loads only ever produces exact types, so nothing legitimate is lost.
+    """
+    if value is None or type(value) in (str, int, float, bool):
         return True
-    except (TypeError, ValueError):
-        return False
+    if type(value) in (list, tuple):
+        return all(_plain_data(v) for v in value)
+    if type(value) is dict:
+        return all(type(k) is str and _plain_data(v) for k, v in value.items())
+    return False
+
+
+def _finite_number(value: Any) -> bool:
+    # bool is an int subclass in Python, so exclude it before the numeric check
+    return isinstance(value, (int, float)) and not isinstance(value, bool) \
+        and math.isfinite(value)
 
 
 @dataclass
@@ -65,6 +82,7 @@ class Interview:
     case_id: str
     participant_id: str
     answers: dict = field(default_factory=dict)  # prompt_id -> text
+    token: str = ""  # capability token: proof of being the participant, not just knowing the id
 
     @property
     def prompts(self) -> tuple:
@@ -120,6 +138,7 @@ class SheetDraft:
     needs_clarification: list = field(default_factory=list)  # list[Clarification]
     rejected: list = field(default_factory=list)             # list[RejectedItem]
     version: str = ""
+    token: str = ""
 
     def review(self) -> str:
         lines = [f"Sheet draft {self.draft_id} for {self.participant_id} "
@@ -145,6 +164,7 @@ class ConfirmedSheet:
     shared_claims: tuple
     hard: tuple                                  # tuple[Constraint]
     utility: tuple                               # tuple[UtilityTerm]
+    token: str = ""
 
     def to_party_spec(self) -> PartySpec:
         return PartySpec(owner=self.participant_id, hard=list(self.hard),
@@ -175,9 +195,25 @@ def _validate_hard(raw: Any) -> tuple:
     if "value" not in raw or raw["value"] is None:
         # well-formed but meaning is incomplete: ask the owner, never guess a red line
         return None, f"Red line on '{attr}' ({op}) had no usable value — what is the limit?", None
-    if not _plain_data(raw["value"]):
+    value = raw["value"]
+    if not _plain_data(value):
         return None, None, "hard item value is not plain data"
-    return Constraint.from_dict({"attr": attr, "op": op, "value": raw["value"]}), None, None
+    # Operator/value type compatibility. Without this, Constraint.check misbehaves silently:
+    # `"in"` on a string does Python *substring* matching ("u" in "tuesday" → True), admitting
+    # options the owner meant to reject, and an ordering op on a non-number crashes with
+    # TypeError at evaluation time instead of failing closed. The meaning is recoverable by
+    # asking the owner, so a mismatch is a clarification, never a ratified red line.
+    if op in ("<", "<=", ">", ">="):
+        if not _finite_number(value):
+            return None, (f"Red line '{attr} {op} {value!r}' needs a finite number to compare"
+                          " against — what is the numeric limit?"), None
+    elif op in ("in", "not_in"):
+        # A str would pass a naive container check and then substring-match in Constraint.check
+        # — require a real list/tuple and never loosen this to accept strings.
+        if isinstance(value, str) or not isinstance(value, (list, tuple)):
+            return None, (f"Red line '{attr} {op} {value!r}' needs a list of values — which"
+                          " values did you mean?"), None
+    return Constraint.from_dict({"attr": attr, "op": op, "value": value}), None, None
 
 
 def _validate_soft(raw: Any) -> tuple:
@@ -191,8 +227,10 @@ def _validate_soft(raw: Any) -> tuple:
     if not isinstance(attr, str) or not attr:
         return None, "utility item missing a string 'attr'"
     weight = raw.get("weight", 1.0)
-    if not isinstance(weight, (int, float)) or weight <= 0:
-        return None, "utility weight must be a positive number"
+    # _finite_number also rejects bool (an int subclass) and NaN/Infinity — stdlib json.loads
+    # happily produces the latter from bare `Infinity`/`NaN` in extractor output.
+    if not _finite_number(weight) or weight <= 0:
+        return None, "utility weight must be a positive finite number"
     prefer, direction = raw.get("prefer"), raw.get("direction")
     if prefer is not None:
         if direction is not None:
@@ -203,8 +241,10 @@ def _validate_soft(raw: Any) -> tuple:
         if direction not in ("higher", "lower"):
             return None, f"unknown direction {direction!r}"
         lo, hi = raw.get("lo"), raw.get("hi")
-        if not isinstance(lo, (int, float)) or not isinstance(hi, (int, float)):
-            return None, "directional utility needs numeric 'lo' and 'hi'"
+        if not _finite_number(lo) or not _finite_number(hi):
+            return None, "directional utility needs finite numeric 'lo' and 'hi'"
+        if hi < lo:
+            return None, "directional utility range is inverted ('hi' below 'lo')"
     else:
         return None, "utility item needs 'prefer' or 'direction' (would score nothing)"
     return UtilityTerm.from_dict({k: v for k, v in raw.items() if k != "source_prompt_id"}), None
@@ -228,7 +268,8 @@ class Elicitation:
         return f"{prefix}-{next(self._seq)}"
 
     def start_interview(self, case_id: str, participant_id: str) -> Interview:
-        iv = Interview(self._id("iv"), case_id, participant_id)
+        iv = Interview(self._id("iv"), case_id, participant_id,
+                       token=secrets.token_urlsafe(24))
         self._interviews[iv.interview_id] = iv
         return iv
 
@@ -289,7 +330,7 @@ class Elicitation:
         draft = SheetDraft(self._id("draft"), interview_id, iv.case_id, iv.participant_id,
                            shared_claims=claims, hard=hard, utility=soft,
                            needs_clarification=unclear, rejected=rejected,
-                           version=_sheet_version(claims, hard, soft))
+                           version=_sheet_version(claims, hard, soft), token=iv.token)
         self._drafts[draft.draft_id] = draft
         return draft
 
@@ -301,6 +342,9 @@ class Elicitation:
             raise ElicitError("confirmations must be a dict")
         if confirmations.get("participant_id") != draft.participant_id:
             raise ElicitError("only the participant can confirm their own sheet")
+        if not draft.token or confirmations.get("token") != draft.token:
+            raise ElicitError("capability token does not match — confirmation requires the"
+                              " token issued at interview start, not just the participant id")
         if draft.needs_clarification:
             open_ids = [q.item_id for q in draft.needs_clarification]
             raise ElicitError(f"unresolved clarifications {open_ids} — revise the sheet first")
@@ -318,7 +362,7 @@ class Elicitation:
             participant_id=draft.participant_id, version=draft.version,
             rendered=draft.review(), shared_claims=tuple(draft.shared_claims),
             hard=tuple(i.data for i in draft.hard),
-            utility=tuple(i.data for i in draft.utility))
+            utility=tuple(i.data for i in draft.utility), token=draft.token)
         self._sheets[sheet.sheet_id] = sheet
         return sheet
 
@@ -332,11 +376,15 @@ class Elicitation:
                 sheet_id, None, confirmed.case_id, confirmed.participant_id,
                 shared_claims=list(confirmed.shared_claims),
                 hard=[DraftItem(self._id("h"), "hard", c) for c in confirmed.hard],
-                utility=[DraftItem(self._id("s"), "soft", t) for t in confirmed.utility])
+                utility=[DraftItem(self._id("s"), "soft", t) for t in confirmed.utility],
+                token=confirmed.token)
         if not isinstance(changes, dict):
             raise ElicitError("changes must be a dict")
         if changes.get("participant_id") != base.participant_id:
             raise ElicitError("only the participant can revise their own sheet")
+        if not base.token or changes.get("token") != base.token:
+            raise ElicitError("capability token does not match — revision requires the token"
+                              " issued at interview start, not just the participant id")
 
         hard = list(base.hard)
         soft = list(base.utility)
@@ -348,7 +396,7 @@ class Elicitation:
         draft = SheetDraft(self._id("draft"), base.interview_id, base.case_id,
                            base.participant_id, shared_claims=claims, hard=hard, utility=soft,
                            needs_clarification=unclear, rejected=[],
-                           version=_sheet_version(claims, hard, soft))
+                           version=_sheet_version(claims, hard, soft), token=base.token)
         self._drafts[draft.draft_id] = draft
         return draft
 
@@ -411,23 +459,19 @@ class Elicitation:
                                  item.source_prompt_id)
             return hard, soft + [replaced], unclear, claims
         if kind == "reclassify":
+            # No auto-conversion in either direction: minting the target from the source would
+            # be the module silently deciding what the owner meant. The owner states it.
             if item.kind == "hard":
-                if "term" in op:
-                    term = self._new_soft(op["term"])
-                elif item.data.op == "==":
-                    term = UtilityTerm(attr=item.data.attr, weight=1.0, prefer=item.data.value)
-                else:
+                if "term" not in op:
                     raise ElicitError(
                         f"reclassifying '{item.data.describe()}' to soft needs an explicit 'term'")
+                term = self._new_soft(op["term"])
                 return hard, soft + [DraftItem(item.item_id, "soft", term, item.source_prompt_id)], unclear, claims
-            if "constraint" in op:
-                constraint = self._new_hard(op["constraint"])
-            elif item.data.prefer is not None:
-                constraint = Constraint(attr=item.data.attr, op="==", value=item.data.prefer)
-            else:
+            if "constraint" not in op:
                 raise ElicitError(
                     f"reclassifying the '{item.data.attr}' preference to hard needs an explicit"
                     " 'constraint'")
+            constraint = self._new_hard(op["constraint"])
             return hard + [DraftItem(item.item_id, "hard", constraint, item.source_prompt_id)], soft, unclear, claims
         raise ElicitError(f"unknown change op {kind!r}")
 
@@ -447,10 +491,11 @@ _EXTRACTION_SYSTEM = (
 
 
 def http_elicitor(api_key: Optional[str] = None, model: str = "anthropic/claude-sonnet-4-6",
-                  transport: Optional[Callable[[dict], dict]] = None) -> Elicitor:
-    """Production `Elicitor` over OpenRouter's OpenAI-compatible endpoint, stdlib urllib only
-    (same pattern as voice/brain.py). Tests inject `transport`; the output still goes through
-    the exact same validation as any other elicitor — this wiring earns no extra trust.
+                  transport: Optional[Callable[[dict], dict]] = None,
+                  endpoint: str = ENDPOINT) -> Elicitor:
+    """Production `Elicitor` over an OpenAI-compatible chat endpoint (OpenRouter by default),
+    stdlib urllib only. Tests inject `transport`; the output still goes through the exact same
+    validation as any other elicitor — this wiring earns no extra trust.
     """
     def _call(answers: dict) -> dict:
         payload = {
@@ -463,7 +508,7 @@ def http_elicitor(api_key: Optional[str] = None, model: str = "anthropic/claude-
         else:
             import urllib.request
             req = urllib.request.Request(
-                ENDPOINT, data=json.dumps(payload).encode(),
+                endpoint, data=json.dumps(payload).encode(),
                 headers={"Authorization": f"Bearer {api_key}",
                          "Content-Type": "application/json", "X-Title": "Parley elicitation"})
             with urllib.request.urlopen(req, timeout=60) as r:
