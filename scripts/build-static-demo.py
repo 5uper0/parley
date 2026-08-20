@@ -40,6 +40,7 @@ _ASSETS = Path(HERE).parent.parent / "docs" / "brand" / "assets"
 STATIC_COPIES = {
     Path(HERE, "robots.txt"): "robots.txt",
     Path(HERE, "sitemap.xml"): "sitemap.xml",
+    Path(HERE, "privacy.html"): "privacy.html",
     _ASSETS / "og-card.png": "og-card.png",
     # index.html <head> links these; manifest.json additionally needs icon-192/512.
     _ASSETS / "favicon" / "favicon.svg": "favicon.svg",
