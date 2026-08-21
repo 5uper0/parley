@@ -15,10 +15,12 @@ omitted.
 - `--json` flag on `examples/run_env.py` for machine-readable consensus output (#31).
 - Live demo: estate-valuation recipe made runnable, plus proof cards, recipe provenance, and
   SEO files (#42, #43).
+- Live demo promoted to six scenarios with the Partnership and DAO treasury recipes (#18).
 - Tests covering transcript tamper-evidence edge cases — first external contribution (#21).
 
 ### Fixed
 - Static demo build now carries the proof cards and brand assets (#45).
+- SHA-256 receipt hash wraps instead of overflowing its box (#19).
 
 ### CI
 - Hosted demo builds and deploys on merge (#44); Python 3.14 added to the test matrix (#33);
@@ -38,13 +40,12 @@ First tagged release. Repo went public 2026-07-18.
   the consensus core transport-agnostic (`net/client.py`).
 - Runnable examples: `meeting.py` (in-process, with `--json`) and `run_env.py` (consensus over
   HTTP) (#5).
-- Live demo at [parleyprotocol.com](https://parleyprotocol.com) with six scenarios, including
-  committee grant vote, partnership, and DAO treasury recipes (#7, #18).
+- Live demo at [parleyprotocol.com](https://parleyprotocol.com) with the committee grant vote
+  recipe (#7).
 - Site polish: footer, favicon, PWA manifest, `llms.txt` (#11, #12).
 
 ### Fixed
 - Demo scenario tabs are keyboard-reachable with focus and key activation (#10).
-- SHA-256 receipt hash wraps instead of overflowing its box (#19).
 
 [Unreleased]: https://github.com/5uper0/parley/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/5uper0/parley/releases/tag/v0.1.0
