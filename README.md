@@ -146,6 +146,10 @@ Not yet (v0.1 honest limits, do not treat as production-secure for adversarial p
   private sheet stay hidden; MPC/range-masking is future work).
 - **TLS/mTLS**, and game-theoretic **collusion / strategic-misreport resistance** (the research track).
 
+The hosted demo at [parleyprotocol.com](https://parleyprotocol.com) uses GA4 for basic traffic
+analytics — see [what's collected](https://parleyprotocol.com/privacy). The protocol and the
+self-hosted `docker run` path collect nothing.
+
 ## Where's the money (open-core thesis)
 
 The consensus mechanism itself is a commodity (voting/consensus is free, Snapshot, polls). Value,
