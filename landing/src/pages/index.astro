@@ -1,0 +1,232 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Tape from "../components/Tape.astro";
+import TapeSnippet from "../components/TapeSnippet.astro";
+import Footer from "../components/Footer.astro";
+
+const btnPrimary =
+  "rounded-[10px] bg-indigo px-[26px] py-[14px] text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const DEMO_URL = "/demo/";
+const README_30S_URL = "https://github.com/5uper0/parley#see-it-in-30-seconds";
+
+const steps = [
+  {
+    numeral: "01",
+    numeralColor: "text-redline",
+    title: "Red lines",
+    desc: "Hard constraints as code predicates. A crossed line is rejected, never negotiated away.",
+    tapeRef: "cara → verdict: red-line",
+    tapeRefColor: "text-muted",
+  },
+  {
+    numeral: "02",
+    numeralColor: "text-masked",
+    title: "Masked verdict",
+    desc: "The coordinator sees only a masked ok/red-line verdict — never your private sheet or why a line was crossed.",
+    tapeRef: "dan's sheet: private, never shared",
+    tapeRefColor: "text-muted",
+  },
+  {
+    numeral: "03",
+    numeralColor: "text-indigo",
+    title: "Max-min consensus",
+    desc: "Among feasible options, lift the least-happy party. No feasible option = honest deadlock.",
+    tapeRef: "max-min → option B",
+    tapeRefColor: "text-muted",
+  },
+  {
+    numeral: "04",
+    numeralColor: "text-verify",
+    title: "Verifiable transcript",
+    desc: "A tamper-evident SHA-256 record. Replay your own sheet to prove no red line was crossed.",
+    tapeRef: "✓ sha256 verified by 3/3 owners",
+    tapeRefColor: "text-verify",
+  },
+];
+---
+
+<Layout>
+  <div class="flex items-start">
+    <Tape />
+
+    <main class="min-w-0 flex-1">
+      <!-- Hero -->
+      <section
+        class="flex flex-col justify-center gap-7 px-6 py-20 md:px-16 md:py-24 lg:h-[820px] lg:px-24 lg:py-0"
+      >
+        <p class="font-display text-[27px] tracking-[-0.025em] text-ink">
+          parley<span class="text-redline">.</span>
+        </p>
+        <p class="font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted">
+          PROVABLE, NOT HOPED
+        </p>
+        <h1
+          class="font-display text-5xl leading-[1.05] tracking-[-0.027em] md:text-7xl lg:text-[104px] lg:leading-[109px] lg:tracking-[-2.8px]"
+        >
+          <span class="block text-ink">0 betrayals,</span>
+          <span class="block text-indigo">provably.</span>
+        </h1>
+        <p class="max-w-[560px] text-lg leading-[1.5] text-muted">
+          The trust layer for the agent economy. Agents with rival owners reach
+          consensus without exposing a single private preference.
+        </p>
+        <div class="flex flex-row items-center gap-5">
+          <a href={DEMO_URL} class={btnPrimary}>
+            Try it live
+          </a>
+          <a
+            href={README_30S_URL}
+            class="text-[15px] text-muted transition-colors hover:text-ink"
+          >
+            See it in 30 seconds
+          </a>
+        </div>
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <!-- Problem -->
+      <section
+        class="flex flex-col gap-6 px-6 py-12 md:px-16 md:py-16 lg:px-24 lg:py-[72px]"
+      >
+        <h2 class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted">
+          01 — THE GAP NOBODY PRODUCTISED
+        </h2>
+        <p
+          class="w-full text-xl leading-[1.36] tracking-[-0.02em] text-muted md:text-2xl lg:text-[28px] lg:leading-[38px] lg:tracking-[-0.6px]"
+        >
+          Most agent tooling solves transport (A2A, MCP), 1:1 agentic commerce,
+          or cooperative debate between agents of the same owner.
+        </p>
+        <p
+          class="w-full text-xl leading-[1.36] tracking-[-0.02em] text-ink md:text-2xl lg:text-[28px] lg:leading-[38px] lg:tracking-[-0.6px]"
+        >
+          Parley solves the gap: delegates of different, conflicting, private
+          owners reaching a decision none of them can rig — and proving it.
+        </p>
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <!-- How It Works -->
+      <section class="px-6 py-12 md:px-16 md:py-16 lg:px-24 lg:py-[72px]">
+        <h2
+          class="mb-9 font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted"
+        >
+          02 — HOW IT WORKS
+        </h2>
+        {
+          steps.map((step, i) => (
+            <>
+              {i > 0 && <hr class="h-px w-full border-0 bg-hairline" />}
+              <div class="flex w-full flex-col gap-4 py-[34px] sm:flex-row sm:items-center sm:gap-8 lg:gap-12">
+                <span
+                  class={`text-5xl tracking-[-0.03em] whitespace-nowrap md:text-6xl lg:text-[64px] lg:tracking-[-2px] ${step.numeralColor}`}
+                >
+                  {step.numeral}
+                </span>
+                <div class="flex flex-1 flex-col gap-1.5">
+                  <h3 class="text-[21px] text-ink">{step.title}</h3>
+                  <p class="max-w-[400px] text-[15px]/[23px] text-muted">
+                    {step.desc}
+                  </p>
+                </div>
+                <span
+                  class={`hidden font-mono text-xs whitespace-nowrap sm:block ${step.tapeRefColor}`}
+                >
+                  {step.tapeRef}
+                </span>
+              </div>
+            </>
+          ))
+        }
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <!-- Proof -->
+      <section
+        class="flex flex-col gap-5 px-6 py-12 md:px-16 md:py-16 lg:px-24 lg:py-[72px]"
+      >
+        <h2
+          class="font-display text-3xl tracking-[-0.025em] text-ink md:text-4xl lg:text-[40px] lg:tracking-[-1px]"
+        >
+          AI that can't lie, and you can check.
+        </h2>
+        <p class="max-w-[640px] text-[17px]/[26px] text-muted">
+          <span class="hidden lg:inline">The tape on the left is not an illustration — it is the product.</span>
+          <span class="lg:hidden">The tape below is not an illustration — it is the product.</span>{" "}
+          Every verdict is recorded masked, hashed, and replayable by each owner
+          against their own private sheet.
+        </p>
+        <TapeSnippet />
+        <div class="flex flex-col gap-8 pt-5 sm:flex-row sm:gap-12 lg:gap-[72px]">
+          <div class="flex flex-col gap-1">
+            <span class="text-4xl tracking-[-1px] whitespace-nowrap text-verify"
+              >3/3</span
+            >
+            <span class="text-[13px] text-muted"
+              >owners independently verified</span
+            >
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-4xl tracking-[-1px] whitespace-nowrap text-ink"
+              >256-bit</span
+            >
+            <span class="text-[13px] text-muted"
+              >hash over the canonical record</span
+            >
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-4xl tracking-[-1px] whitespace-nowrap text-indigo"
+              >0</span
+            >
+            <span class="text-[13px] text-muted">red lines crossed, provably</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <!-- Trust Strip -->
+      <section class="px-6 py-8 md:px-16 lg:px-24 lg:py-10">
+        <p class="w-full text-[13px]/[21px] text-muted">
+          Multilateral (N&gt;2) · no-crypto · self-hosted · auditable — not
+          single-owner orchestration (AutoGen/CrewAI), not on-chain bilateral
+          commerce (Fetch.ai/Olas).
+        </p>
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <!-- CTA -->
+      <section
+        class="flex flex-col gap-8 px-6 py-16 md:px-16 md:py-20 lg:px-24 lg:pt-24 lg:pb-28"
+      >
+        <h2
+          class="font-display text-4xl leading-[1.1] tracking-[-0.028em] md:text-5xl lg:text-[64px] lg:leading-[70px] lg:tracking-[-1.8px]"
+        >
+          <span class="block text-ink">Put your next decision</span>
+          <span class="block text-indigo">on the tape.</span>
+        </h2>
+        <div class="flex flex-row items-center gap-5">
+          <a href={DEMO_URL} class={btnPrimary}>
+            Try it live
+          </a>
+          <a
+            href={README_30S_URL}
+            class="text-[15px] text-muted transition-colors hover:text-ink"
+          >
+            See it in 30 seconds
+          </a>
+        </div>
+      </section>
+
+      <hr class="h-px w-full border-0 bg-hairline" />
+
+      <Footer />
+    </main>
+  </div>
+</Layout>

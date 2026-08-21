@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+/* Semantic tokens sourced from docs/brand/tokens.css (dark theme values +
+   primitives). The landing commits to the dark look — light stays a demo-side
+   concern. */
+@theme {
+  --color-bg: #0a0b0d;
+  --color-surface: #121316;
+  --color-ink: #f4f6f7;
+  --color-muted: #99a1b3;
+  --color-subtle: #6b7383;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-indigo: #6675d3;
+  --color-verify: #14a473;
+  --color-redline: #d93a3a;
+  --color-masked: #d9971c;
+  /* redline-300 primitive (docs/brand/tokens.css) — for small (<18px) text on
+     dark bg only. #d93a3a is 4.33:1 there, below WCAG AA's 4.5:1 for normal
+     text; this lift clears 8:1. Large text (the numerals) stays #d93a3a —
+     it only needs 3:1, which it already clears. */
+  --color-redline-text: #ec8a8a;
+  /* indigo-300 primitive — same reason, for indigo used as small text
+     (6675d3 is 4.47:1 on the tape surface, a hair under 4.5:1). */
+  --color-indigo-text: #8e9be1;
+
+  --font-sans:
+    "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "SFMono-Regular", "Cascadia Code",
+    monospace;
+
+  /* Refined display weight — premium, not loud (brand calibration-linear.md) */
+  --font-weight-display: 560;
+}
+
+/* Keyboard focus — on-brand (--color-focus-ring in docs/brand/tokens.css),
+   not the browser default. There was no focus treatment at all before this. */
+a:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

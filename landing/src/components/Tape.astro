@@ -1,0 +1,21 @@
+---
+import { tapeLines, tapeColorClass } from "../data/tape";
+---
+
+<aside
+  aria-label="Live parley transcript"
+  class="sticky top-0 hidden h-screen w-[400px] shrink-0 flex-col gap-[9px] overflow-y-auto border-r border-hairline bg-surface px-8 py-9 lg:flex xl:w-[440px]"
+>
+  <p class="font-mono text-xs whitespace-nowrap text-muted">
+    parley transcript — live
+  </p>
+  {
+    tapeLines.map((line) => (
+      <p
+        class={`font-mono text-[13px]/[22px] whitespace-nowrap ${tapeColorClass[line.color]}`}
+      >
+        {line.text}
+      </p>
+    ))
+  }
+</aside>
