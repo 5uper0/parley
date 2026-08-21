@@ -12,6 +12,12 @@ const url = "https://parleyprotocol.com/";
 <!doctype html>
 <html lang="en" data-theme="dark">
   <head>
+    <script is:inline>
+      try {
+        var t = localStorage.getItem("parley-theme");
+        if (t === "light") document.documentElement.dataset.theme = "light";
+      } catch (e) {}
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

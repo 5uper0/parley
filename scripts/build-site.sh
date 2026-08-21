@@ -27,6 +27,7 @@ text = text.replace("fetch('/api/run/'", "fetch('/demo/api/run/'")
 text = text.replace('href="https://parleyprotocol.com/"', 'href="https://parleyprotocol.com/demo/"')
 text = text.replace('content="https://parleyprotocol.com/"', 'content="https://parleyprotocol.com/demo/"')
 text = text.replace('"url":"https://parleyprotocol.com/"', '"url":"https://parleyprotocol.com/demo/"')
+text = text.replace('content="https://parleyprotocol.com/og-card-demo.png"', 'content="https://parleyprotocol.com/demo/og-card-demo.png"')
 open(path, "w", encoding="utf-8").write(text)
 PY
 

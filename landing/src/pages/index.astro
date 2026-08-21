@@ -55,9 +55,18 @@ const steps = [
       <section
         class="flex flex-col justify-center gap-7 px-6 py-20 md:px-16 md:py-24 lg:h-[820px] lg:px-24 lg:py-0"
       >
-        <p class="font-display text-[27px] tracking-[-0.025em] text-ink">
-          parley<span class="text-redline">.</span>
-        </p>
+        <div class="flex items-center justify-between gap-4">
+          <p class="font-display text-[27px] tracking-[-0.025em] text-ink">
+            parley<span class="text-redline">.</span>
+          </p>
+          <button
+            type="button"
+            onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
+            class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+          >
+            ◑ theme
+          </button>
+        </div>
         <p class="font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted">
           PROVABLE, NOT HOPED
         </p>
@@ -155,10 +164,12 @@ const steps = [
           AI that can't lie, and you can check.
         </h2>
         <p class="max-w-[640px] text-[17px]/[26px] text-muted">
-          <span class="hidden lg:inline">The tape on the left is not an illustration — it is the product.</span>
-          <span class="lg:hidden">The tape below is not an illustration — it is the product.</span>{" "}
-          Every verdict is recorded masked, hashed, and replayable by each owner
-          against their own private sheet.
+          <span class="hidden lg:inline">The tape on the left isn't decoration — it's the real transcript format the engine produces,</span>
+          <span class="lg:hidden">The tape below isn't decoration — it's the real transcript format the engine produces,</span>{" "}
+          replayed from a sample run.{" "}
+          <a href={DEMO_URL} class="text-indigo underline decoration-hairline underline-offset-2 hover:decoration-indigo">Run your own</a>{" "}
+          and every verdict is recorded masked, hashed, and replayable by each
+          owner against their own private sheet.
         </p>
         <TapeSnippet />
         <div class="flex flex-col gap-8 pt-5 sm:flex-row sm:gap-12 lg:gap-[72px]">

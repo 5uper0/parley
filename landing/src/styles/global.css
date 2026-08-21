@@ -1,27 +1,22 @@
 @import "tailwindcss";
 
-/* Semantic tokens sourced from docs/brand/tokens.css (dark theme values +
-   primitives). The landing commits to the dark look — light stays a demo-side
-   concern. */
+/* Semantic tokens sourced from docs/brand/tokens.css. Values live on :root as
+   plain custom properties (below) so a `data-theme` swap on <html> can
+   override them at runtime — @theme just points Tailwind's utilities at
+   those variables instead of baking in fixed colors. */
 @theme {
-  --color-bg: #0a0b0d;
-  --color-surface: #121316;
-  --color-ink: #f4f6f7;
-  --color-muted: #99a1b3;
-  --color-subtle: #6b7383;
-  --color-hairline: rgba(255, 255, 255, 0.08);
-  --color-indigo: #6675d3;
-  --color-verify: #14a473;
-  --color-redline: #d93a3a;
-  --color-masked: #d9971c;
-  /* redline-300 primitive (docs/brand/tokens.css) — for small (<18px) text on
-     dark bg only. #d93a3a is 4.33:1 there, below WCAG AA's 4.5:1 for normal
-     text; this lift clears 8:1. Large text (the numerals) stays #d93a3a —
-     it only needs 3:1, which it already clears. */
-  --color-redline-text: #ec8a8a;
-  /* indigo-300 primitive — same reason, for indigo used as small text
-     (6675d3 is 4.47:1 on the tape surface, a hair under 4.5:1). */
-  --color-indigo-text: #8e9be1;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-hairline: var(--hairline);
+  --color-indigo: var(--indigo);
+  --color-verify: var(--verify);
+  --color-redline: var(--redline);
+  --color-masked: var(--masked);
+  --color-redline-text: var(--redline-text);
+  --color-indigo-text: var(--indigo-text);
 
   --font-sans:
     "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -32,6 +27,52 @@
 
   /* Refined display weight — premium, not loud (brand calibration-linear.md) */
   --font-weight-display: 560;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0b0d;
+  --surface: #121316;
+  --ink: #f4f6f7;
+  --muted: #99a1b3;
+  --subtle: #6b7383;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --indigo: #6675d3;
+  --verify: #14a473;
+  --redline: #d93a3a;
+  --masked: #d9971c;
+  /* redline-300 primitive (docs/brand/tokens.css) — for small (<18px) text on
+     dark bg only. #d93a3a is 4.33:1 there, below WCAG AA's 4.5:1 for normal
+     text; this lift clears 8:1. Large text (the numerals) stays #d93a3a —
+     it only needs 3:1, which it already clears. */
+  --redline-text: #ec8a8a;
+  /* indigo-300 primitive — same reason, for indigo used as small text
+     (6675d3 is 4.47:1 on the tape surface, a hair under 4.5:1). */
+  --indigo-text: #8e9be1;
+}
+
+/* Light theme — same palette the demo already ships (docs/brand/tokens.css),
+   re-verified for WCAG AA at 4.5:1 against this page's #F6F7FB/#FFFFFF
+   surfaces (relative-luminance check, not eyeballed): verify/masked/subtle
+   needed darkening from the demo's raw values (0E8F63/B87C15/8A909C were
+   3.83/3.31/2.99:1 on #F6F7FB — all below the bar for small text). redline
+   and indigo already clear 5.47:1 / 7.38:1, so redline-text/indigo-text
+   collapse to the same value as their base tone here (unlike dark theme,
+   where small text needed a *lighter* variant). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --ink: #12151c;
+  --muted: #535a68;
+  --subtle: #6c727f;
+  --hairline: #e3e6ef;
+  --indigo: #3a45b0;
+  --verify: #0d825a;
+  --redline: #c42121;
+  --masked: #996711;
+  --redline-text: #c42121;
+  --indigo-text: #3a45b0;
 }
 
 /* Keyboard focus — on-brand (--color-focus-ring in docs/brand/tokens.css),
