@@ -42,6 +42,7 @@ STATIC_COPIES = {
     Path(HERE, "sitemap.xml"): "sitemap.xml",
     Path(HERE, "privacy.html"): "privacy.html",
     _ASSETS / "og-card.png": "og-card.png",
+    _ASSETS / "og-card-demo.png": "og-card-demo.png",
     # index.html <head> links these; manifest.json additionally needs icon-192/512.
     _ASSETS / "favicon" / "favicon.svg": "favicon.svg",
     _ASSETS / "favicon" / "favicon-16.png": "favicon-16.png",
