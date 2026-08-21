@@ -3,10 +3,20 @@ import "@fontsource-variable/inter";
 import "@fontsource/jetbrains-mono/400.css";
 import "../styles/global.css";
 
-const title = "Parley — the trust layer for the agent economy";
-const description =
-  "Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open-source. Red lines enforced in code.";
-const url = "https://parleyprotocol.com/";
+interface Props {
+  title?: string;
+  description?: string;
+  path?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = "Parley — the trust layer for the agent economy",
+  description = "Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open-source. Red lines enforced in code.",
+  path = "/",
+  noindex = false,
+} = Astro.props;
+const url = `https://parleyprotocol.com${path}`;
 ---
 
 <!doctype html>
@@ -28,16 +38,17 @@ const url = "https://parleyprotocol.com/";
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={url} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:type" content="website" />
     <meta property="og:url" content={url} />
     <meta property="og:site_name" content="Parley" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={`${url}og-card.png`} />
+    <meta property="og:image" content="https://parleyprotocol.com/og-card.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={`${url}og-card.png`} />
+    <meta name="twitter:image" content="https://parleyprotocol.com/og-card.png" />
   </head>
   <body class="bg-bg font-sans text-ink antialiased">
     <slot />

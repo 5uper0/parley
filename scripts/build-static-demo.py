@@ -38,9 +38,12 @@ GA4_SNIPPET = """<script async src="https://www.googletagmanager.com/gtag/js?id=
 # Static files copied verbatim into the deploy root alongside index.html.
 _ASSETS = Path(HERE).parent.parent / "docs" / "brand" / "assets"
 STATIC_COPIES = {
-    Path(HERE, "robots.txt"): "robots.txt",
-    Path(HERE, "sitemap.xml"): "sitemap.xml",
-    Path(HERE, "privacy.html"): "privacy.html",
+    # robots.txt/sitemap.xml/privacy.html are deliberately NOT copied here — all three are
+    # root-only (privacy.html was a demo-local drifted duplicate of the canonical
+    # landing/src/pages/privacy.astro; the merged site is the only real deploy target, and its
+    # root copies of robots.txt/sitemap.xml already cover /demo/ — a second copy under
+    # /demo/sitemap.xml only rotted, e.g. proofcard URLs listed without the /demo/ prefix they
+    # actually live at).
     _ASSETS / "og-card.png": "og-card.png",
     _ASSETS / "og-card-demo.png": "og-card-demo.png",
     # index.html <head> links these; manifest.json additionally needs icon-192/512.
@@ -51,7 +54,9 @@ STATIC_COPIES = {
     _ASSETS / "favicon" / "icon-192.png": "icon-192.png",
     _ASSETS / "favicon" / "icon-512.png": "icon-512.png",
     _ASSETS / "manifest.json": "manifest.json",
-    _ASSETS / "llms.txt": "llms.txt",
+    # llms.txt is deliberately NOT copied here: it's a root-only discovery convention (like
+    # robots.txt/sitemap.xml), added directly at the merged site's root by build-site.sh — a
+    # copy under /demo/llms.txt would be dead weight nothing looks for.
     # Orphan-but-live URLs: nothing on the site links these, but they are served today and
     # the proof cards were built to be shared, so a deploy that dropped them would 404 links
     # already in the wild. Cloudflare Pages replaces the whole tree, so absent means deleted.

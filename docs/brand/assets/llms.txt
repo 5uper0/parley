@@ -19,8 +19,10 @@ component of any kind.
 
 ## Try it
 
-- [Live interactive demo](https://parleyprotocol.com/) — run a real decision end to end in the
-  browser, watch a cheat option get blocked by a red line, verify the transcript yourself.
+- [Landing page](https://parleyprotocol.com/) — the protocol explained: red lines, masked
+  verdicts, max-min consensus, verifiable transcript.
+- [Live interactive demo](https://parleyprotocol.com/demo/) — run a real decision end to end in
+  the browser, watch a cheat option get blocked by a red line, verify the transcript yourself.
 
 ## Source and docs
 

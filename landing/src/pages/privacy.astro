@@ -1,0 +1,124 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="Privacy — Parley"
+  description="What the hosted Parley demo collects and why: standard GA4 page-view and click-event analytics, no ads, no data resale, no tracking in the self-hosted core."
+  path="/privacy"
+>
+  <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
+    <header class="flex items-center justify-between gap-4 py-9">
+      <a
+        href="/"
+        class="font-display text-[21px] tracking-[-0.025em] text-ink"
+      >
+        parley<span class="text-redline">.</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-[13px] text-muted transition-colors hover:text-ink"
+          >← back to Parley</a
+        >
+        <button
+          type="button"
+          onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
+          class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+        >
+          ◑ theme
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 pb-16">
+      <h1 class="font-display text-3xl tracking-[-0.02em] text-ink">Privacy</h1>
+      <p class="mt-1.5 text-[12.5px] text-subtle">Last updated 2026-08-21</p>
+
+      <p class="mt-8 text-[15px]/[24px] text-muted">
+        Parley itself — the protocol and the code in{" "}
+        <a
+          href="https://github.com/5uper0/parley"
+          target="_blank"
+          rel="noopener"
+          class="text-indigo underline decoration-hairline underline-offset-2 hover:decoration-indigo"
+          >github.com/5uper0/parley</a
+        > — collects nothing. It is a zero-dependency Python library and a self-hosted
+        demo; if you <code
+          class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+          >docker run</code
+        > it locally or on your own infrastructure, no data leaves your machine and there
+        is no telemetry, ever.
+      </p>
+
+      <div class="my-6 rounded-[14px] border border-hairline bg-surface px-5 py-[18px]">
+        <p class="text-[15px]/[24px] text-muted">
+          <strong class="text-ink">The hosted demo at parleyprotocol.com is different</strong>{" "}
+          — it uses Google Analytics (GA4) so we can tell whether the demo is reaching
+          anyone worth talking to.
+        </p>
+      </div>
+
+      <h2 class="mt-8 mb-3 font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase">
+        What's collected
+      </h2>
+      <ul class="list-disc space-y-1.5 pl-5">
+        <li class="text-[14.5px] text-muted">
+          Standard GA4 page views and browser/device metadata (the same as most
+          websites).
+        </li>
+        <li class="text-[14.5px] text-muted">
+          A handful of click events scoped to this page: running a scenario, clicking
+          verify, clicking the Arena "join the beta" link, or clicking through to
+          GitHub, Discussions, or LinkedIn. No content you type into the demo (party
+          names, preferences) is sent — the events log that a button was clicked, not
+          what the decision was.
+        </li>
+      </ul>
+
+      <h2 class="mt-8 mb-3 font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase">
+        What's not collected
+      </h2>
+      <ul class="list-disc space-y-1.5 pl-5">
+        <li class="text-[14.5px] text-muted">No account, no email, no login — the demo doesn't ask for either.</li>
+        <li class="text-[14.5px] text-muted">No advertising identifiers, no ad network, no retargeting pixels.</li>
+        <li class="text-[14.5px] text-muted">No data is sold, shared, or used for anything beyond understanding demo traffic.</li>
+      </ul>
+
+      <h2 class="mt-8 mb-3 font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase">
+        Your options
+      </h2>
+      <p class="text-[14.5px]/[24px] text-muted">
+        Any ad-blocker or tracking-protection extension that blocks Google Analytics
+        will block this too — the demo works identically either way, nothing is gated
+        on analytics. For zero analytics of any kind, run the demo yourself: <code
+          class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+          >docker run -p 8080:8080 parley</code
+        >{" "}
+        (see the{" "}
+        <a
+          href="https://github.com/5uper0/parley#see-it-in-30-seconds"
+          target="_blank"
+          rel="noopener"
+          class="text-indigo underline decoration-hairline underline-offset-2 hover:decoration-indigo"
+          >README</a
+        >).
+      </p>
+
+      <h2 class="mt-8 mb-3 font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase">
+        Contact
+      </h2>
+      <p class="text-[14.5px]/[24px] text-muted">
+        Questions —{" "}
+        <a
+          href="https://github.com/5uper0/parley/discussions"
+          target="_blank"
+          rel="noopener"
+          class="text-indigo underline decoration-hairline underline-offset-2 hover:decoration-indigo"
+          >open a GitHub Discussion</a
+        >.
+      </p>
+    </main>
+  </div>
+
+  <Footer />
+</Layout>
