@@ -42,7 +42,8 @@ rm -rf "$DEMO_RAW"
 
 test -f "$OUT/index.html" || { echo "missing $OUT/index.html" >&2; exit 1; }
 test -f "$OUT/demo/index.html" || { echo "missing $OUT/demo/index.html" >&2; exit 1; }
-test -f "$OUT/privacy.html" || { echo "missing $OUT/privacy.html" >&2; exit 1; }
+test -f "$OUT/privacy/index.html" || { echo "missing $OUT/privacy/index.html" >&2; exit 1; }
+test -f "$OUT/404.html" || { echo "missing $OUT/404.html" >&2; exit 1; }
 grep -q "/demo/api/recipes.json" "$OUT/demo/index.html" || { echo "demo API paths were not rewritten" >&2; exit 1; }
 
 echo "✓ built $OUT (landing at /, demo at /demo/)"

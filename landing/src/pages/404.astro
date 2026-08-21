@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout
+  title="404 — Parley"
+  description="Page not found."
+  path="/404"
+  noindex
+>
+  <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
+    <header class="flex items-center justify-between gap-4 py-9">
+      <a
+        href="/"
+        class="font-display text-[21px] tracking-[-0.025em] text-ink"
+      >
+        parley<span class="text-redline">.</span>
+      </a>
+      <button
+        type="button"
+        onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
+        class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+      >
+        ◑ theme
+      </button>
+    </header>
+
+    <main class="flex flex-1 flex-col justify-center gap-4 pb-24">
+      <p class="font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted">
+        404 — OPTION INFEASIBLE
+      </p>
+      <h1 class="font-display text-5xl tracking-[-0.027em] text-ink">
+        No feasible route<span class="text-redline">.</span>
+      </h1>
+      <p class="max-w-[440px] text-[15px]/[24px] text-muted">
+        That page doesn't exist, no honest deadlock about it — head back and try again.
+      </p>
+      <div>
+        <a
+          href="/"
+          class="mt-2 inline-block rounded-[10px] bg-indigo px-[26px] py-[14px] text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]"
+        >
+          Back to Parley
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <Footer />
+</Layout>
