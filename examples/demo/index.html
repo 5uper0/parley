@@ -57,7 +57,8 @@ button,.toggle,.btn,.vbtn,.seg b{-webkit-tap-highlight-color:transparent;touch-a
 :focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:var(--r)}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;transition:background .25s var(--ease),color .25s var(--ease)}
+  -webkit-font-smoothing:antialiased;transition:background .25s var(--ease),color .25s var(--ease);
+  overflow-x:hidden}
 .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:40px 22px 90px}
 header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .brand{display:flex;flex-direction:column;gap:3px}
@@ -164,6 +165,19 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 .pill.v{color:var(--verify);border-color:var(--verify-hair);background:var(--verify-bg)}
 .pill.r{color:var(--red);border-color:var(--red-hair);background:var(--red-bg)}
 
+/* arena fake-door — interest signal for a future hosted Arena (no backend yet) */
+.arena-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px;
+  margin:24px 0 4px;padding:14px 18px;background:var(--surface);border:1px dashed var(--hair2);
+  border-radius:var(--r-lg)}
+.arena-copy{display:flex;flex-direction:column;gap:2px;max-width:56ch}
+.arena-copy b{font-size:14px;font-weight:560;color:var(--ink)}
+.arena-copy span{font-size:12.5px;color:var(--muted);line-height:1.5}
+.arena-btn{flex:none;font-size:13px;font-weight:540;color:var(--indigo);text-decoration:none;
+  background:rgba(110,121,224,.10);border:1px solid rgba(110,121,224,.28);border-radius:var(--r-full);
+  padding:8px 15px;transition:.2s var(--ease)}
+.arena-btn:hover{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.arena-btn:active{transform:scale(.97)}
+
 /* numbered section badges (how-it-works cadence) */
 .wrap{counter-reset:sec}
 h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;height:22px;border-radius:6px;
@@ -210,33 +224,98 @@ h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;
   .party,.opt,.bar,.vok,.opt.winner,.opt.blocked{animation:none}
   *{scroll-behavior:auto}
 }
+
+/* ─── hero band: full-bleed, ambient wash, decorative live proof-in-motion ─────── */
+.hero-band{position:relative;overflow:hidden;border-bottom:1px solid var(--hair)}
+.hero-band::before{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 780px 420px at 82% -8%, rgba(110,121,224,.16), transparent 60%),
+    radial-gradient(ellipse 520px 320px at 8% 108%, rgba(31,185,138,.07), transparent 65%),
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 52px),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 52px);
+  pointer-events:none}
+.hero-inner{position:relative;max-width:1180px;margin:0 auto;padding:40px 22px 46px;
+  display:grid;grid-template-columns:1fr;gap:8px}
+.hero-inner header{max-width:none}
+.hero-cols{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center;margin-top:8px}
+.hero-cols>*{min-width:0}
+@media (max-width:920px){.hero-cols{grid-template-columns:1fr}}
+.hero-copy .hero{margin:22px 0 0}
+.hero-copy .hero h1{max-width:none}
+
+/* decorative visualization — a silent, looping "3 verdicts → the fair pick" moment */
+.proofviz{background:var(--surface-top);border:1px solid var(--hair);border-radius:var(--r-lg);
+  padding:22px 22px 20px;box-shadow:var(--ambient);position:relative}
+.proofviz .pv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.proofviz .pv-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.proofviz .pv-live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--verify)}
+.proofviz .pv-live i{width:5px;height:5px;border-radius:50%;background:var(--verify);animation:pvBlink 1.8s var(--ease) infinite}
+@keyframes pvBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.pv-row{display:grid;grid-template-columns:74px 1fr 34px;align-items:center;gap:11px;margin:9px 0}
+.pv-row .pv-who{font-size:12px;color:var(--muted);font-weight:540}
+.pv-row .pv-track{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-full);height:10px;overflow:hidden}
+.pv-row .pv-fill{height:100%;border-radius:var(--r-full);background:var(--indigo-dim);width:0;
+  animation:pvGrow 2.4s var(--ease) infinite}
+.pv-row.win .pv-fill{background:var(--indigo)}
+.pv-row .pv-pct{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
+.pv-row:nth-child(1) .pv-fill{--to:38%;animation-delay:0s}
+.pv-row:nth-child(2) .pv-fill{--to:71%;animation-delay:.12s}
+.pv-row:nth-child(3) .pv-fill{--to:71%;animation-delay:.24s}
+@keyframes pvGrow{0%{width:0}18%{width:var(--to)}82%{width:var(--to)}100%{width:0}}
+.pv-foot{display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+.pv-foot .seal{font-family:var(--mono);font-weight:700;color:var(--verify);font-size:12.5px}
+.pv-foot span.t{font-size:11.5px;color:var(--dim)}
+@media (prefers-reduced-motion:reduce){.pv-row .pv-fill{animation:none;width:var(--to)}.pv-live i{animation:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="hero-band"><div class="hero-inner">
   <header>
     <div class="brand"><div class="logo">parley<span class="d">.</span></div>
       <div class="tag">a group decision your agents can't lie about — and you can check</div></div>
     <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
   </header>
 
-  <section class="hero">
-    <span class="eyebrow"><span class="dot"></span>Live · provable AI consensus</span>
-    <h1>Your AI speaks for you. <span class="g">Prove it never sold you out.</span></h1>
-    <!-- ROI swap staged: docs/growth/hero-roi-swap-ready.md — fire once a real design partner ratifies, don't swap on synthetic demos -->
-    <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>none of them can rig</b> — and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>, live.</p>
-    <div class="hero-actions">
-      <button class="cta" onclick="run()">Run a live decision ↓</button>
-      <span class="muted" style="font-size:13px">pick a real-world scenario below, then hit Run</span>
+  <div class="hero-cols">
+    <div class="hero-copy">
+    <section class="hero">
+      <span class="eyebrow"><span class="dot"></span>Live · provable AI consensus</span>
+      <h1>Your AI speaks for you. <span class="g">Prove it never sold you out.</span></h1>
+      <!-- ROI swap staged: docs/growth/hero-roi-swap-ready.md — fire once a real design partner ratifies, don't swap on synthetic demos -->
+      <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>none of them can rig</b> — and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>, live.</p>
+      <div class="hero-actions">
+        <button class="cta" onclick="run()">Run a live decision ↓</button>
+        <span class="muted" style="font-size:13px">pick a real-world scenario below, then hit Run</span>
+      </div>
+      <div class="trustrow">
+        <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg>no crypto · self-hosted</span>
+        <span class="pill v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>you verify locally</span>
+        <span class="pill r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>red lines enforced in code</span>
+      </div>
+      <p class="icp-hook">Also used for KYC/AML sign-off, DORA-style multi-party approvals, and enterprise contract negotiation — <a href="#" onclick="document.querySelector('#picker b[data-key=\'kyc\']')?.click();document.getElementById('picker').scrollIntoView({behavior:'smooth',block:'center'});return false">try the Onboarding scenario</a>.</p>
+    </section>
     </div>
-    <div class="trustrow">
-      <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg>no crypto · self-hosted</span>
-      <span class="pill v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>you verify locally</span>
-      <span class="pill r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>red lines enforced in code</span>
+    <div class="hero-viz" aria-hidden="true">
+      <div class="proofviz">
+        <div class="pv-head"><span class="pv-label">Max-min consensus</span><span class="pv-live"><i></i>live</span></div>
+        <div class="pv-row"><span class="pv-who">Buyer</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">38</span></div>
+        <div class="pv-row win"><span class="pv-who">Seller</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">71</span></div>
+        <div class="pv-row win"><span class="pv-who">Platform</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">71</span></div>
+        <div class="pv-foot"><span class="seal">✓</span><span class="t">least-happy party lifted, no sheet exposed</span></div>
+      </div>
     </div>
-    <p class="icp-hook">Also used for KYC/AML sign-off, DORA-style multi-party approvals, and enterprise contract negotiation — <a href="#" onclick="document.querySelector('#picker b[data-key=\'kyc\']')?.click();document.getElementById('picker').scrollIntoView({behavior:'smooth',block:'center'});return false">try the Onboarding scenario</a>.</p>
-  </section>
+  </div>
 
+  <aside class="arena-cta">
+    <div class="arena-copy">
+      <b>Want to bring your own agent to a live Parley?</b>
+      <span>A hosted Arena is on the drawing board — state your position, watch real agents negotiate it in real time. Interest decides whether it gets built.</span>
+    </div>
+    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">I'm interested — say so in Discussions →</a>
+  </aside>
+</div></div>
+
+<div class="wrap">
   <hr class="redrule">
 
   <div class="controls">
@@ -284,6 +363,7 @@ h2.step::before{counter-increment:sec;content:counter(sec);flex:none;width:22px;
         LinkedIn
       </a>
       <a href="https://github.com/5uper0/parley/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0</a>
+      <a href="/privacy">Privacy</a>
     </div>
     <div class="foot-meta">Open source · self-hosted · zero-dependency Python core</div>
   </footer>
