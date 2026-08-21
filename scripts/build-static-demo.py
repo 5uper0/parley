@@ -38,9 +38,12 @@ GA4_SNIPPET = """<script async src="https://www.googletagmanager.com/gtag/js?id=
 # Static files copied verbatim into the deploy root alongside index.html.
 _ASSETS = Path(HERE).parent.parent / "docs" / "brand" / "assets"
 STATIC_COPIES = {
-    Path(HERE, "robots.txt"): "robots.txt",
-    Path(HERE, "sitemap.xml"): "sitemap.xml",
-    Path(HERE, "privacy.html"): "privacy.html",
+    # robots.txt/sitemap.xml/privacy.html are deliberately NOT copied here — all three are
+    # root-only (privacy.html was a demo-local drifted duplicate of the canonical
+    # landing/src/pages/privacy.astro; the merged site is the only real deploy target, and its
+    # root copies of robots.txt/sitemap.xml already cover /demo/ — a second copy under
+    # /demo/sitemap.xml only rotted, e.g. proofcard URLs listed without the /demo/ prefix they
+    # actually live at).
     _ASSETS / "og-card.png": "og-card.png",
     _ASSETS / "og-card-demo.png": "og-card-demo.png",
     # index.html <head> links these; manifest.json additionally needs icon-192/512.

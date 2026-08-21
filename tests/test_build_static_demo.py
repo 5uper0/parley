@@ -15,13 +15,6 @@ def _load_build_module():
     return module
 
 
-def test_privacy_page_is_wired_into_the_static_copy_list():
-    build = _load_build_module()
-    assert "privacy.html" in build.STATIC_COPIES.values()
-    src = next(k for k, v in build.STATIC_COPIES.items() if v == "privacy.html")
-    assert src.exists()
-
-
 def test_footer_links_to_the_privacy_page():
     index = os.path.join(_ROOT, "examples", "demo", "index.html")
     with open(index, encoding="utf-8") as fh:
@@ -29,11 +22,31 @@ def test_footer_links_to_the_privacy_page():
     assert 'href="/privacy"' in html
 
 
-def test_static_build_emits_privacy_html(tmp_path):
+def test_root_only_files_are_not_duplicated_under_the_demo_build():
+    """privacy.html/sitemap.xml/robots.txt/llms.txt are root-only in the merged deploy tree
+    (landing/src/pages/privacy.astro + landing/public/*) — scripts/build-site.sh copies them
+    in exactly once. A demo-local copy of any of these previously drifted silently (stale
+    design tokens, a sitemap missing /demo/ prefixes) since nothing kept two copies in sync;
+    guard against it coming back."""
+    build = _load_build_module()
+    for name in ("privacy.html", "sitemap.xml", "robots.txt", "llms.txt"):
+        assert name not in build.STATIC_COPIES.values(), (
+            f"{name} should not be emitted by the demo build — it belongs at the merged "
+            "site's root only (see scripts/build-site.sh)"
+        )
+
+
+def test_static_build_emits_manifest_with_root_absolute_paths(tmp_path):
+    """The demo build itself is intentionally NOT /demo/-aware (it doesn't know it'll be
+    merged under a subpath) — scripts/build-site.sh rewrites these to /demo/-prefixed paths
+    afterward. This test pins the PRE-rewrite shape so that rewrite has something correct to
+    rewrite from."""
     build = _load_build_module()
     out = tmp_path / "static-demo"
     build.OUT = out
     build.main()
-    assert (out / "privacy.html").is_file()
-    assert (out / "sitemap.xml").is_file()
-    assert "parleyprotocol.com/privacy" in (out / "sitemap.xml").read_text(encoding="utf-8")
+    manifest = (out / "manifest.json").read_text(encoding="utf-8")
+    assert '"start_url": "/"' in manifest
+    assert '"/icon-192.png"' in manifest
+    index = (out / "index.html").read_text(encoding="utf-8")
+    assert 'href="/manifest.json"' in index
