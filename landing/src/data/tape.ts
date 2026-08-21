@@ -117,7 +117,7 @@ export const tapeSnippet: TapeLine[] = [
   { text: "bob → verdict: ok", color: "muted" },
   { text: "max-min → option B", color: "indigo" },
   { text: `sha256 ${H[0]}`, color: "dim" },
-  { text: "✓ verified by 5/5 owners", color: "verify" },
+  { text: "✓ verified by 3/3 owners", color: "verify" },
   { text: "round 3 · option C proposed", color: "dim" },
   { text: "awaiting bob, cara…", color: "masked" },
 ];
