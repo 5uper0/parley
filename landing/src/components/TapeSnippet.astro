@@ -1,0 +1,21 @@
+---
+import { tapeSnippet, tapeColorClass } from "../data/tape";
+---
+
+<div
+  aria-label="Excerpt of a parley transcript"
+  class="w-full max-w-[420px] overflow-x-auto rounded-lg border border-hairline bg-surface px-5 py-4 lg:hidden"
+>
+  <p class="mb-2 font-mono text-xs whitespace-nowrap text-muted">
+    parley transcript — excerpt
+  </p>
+  {
+    tapeSnippet.map((line) => (
+      <p
+        class={`font-mono text-[13px]/[22px] whitespace-nowrap ${tapeColorClass[line.color]}`}
+      >
+        {line.text}
+      </p>
+    ))
+  }
+</div>
