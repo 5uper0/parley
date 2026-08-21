@@ -14,7 +14,7 @@ masked verdicts, and a verifiable non-betrayal transcript.
 ![core](https://img.shields.io/badge/core-zero--dependency-informational.svg)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[Try it live](https://parleyprotocol.com)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+**[Try it live](https://parleyprotocol.com)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 <br>
 
@@ -145,6 +145,10 @@ Not yet (v0.1 honest limits, do not treat as production-secure for adversarial p
   coordinator can infer preference *ordering* and each party's feasible region (the *reason* and the
   private sheet stay hidden; MPC/range-masking is future work).
 - **TLS/mTLS**, and game-theoretic **collusion / strategic-misreport resistance** (the research track).
+
+The hosted demo at [parleyprotocol.com](https://parleyprotocol.com) uses GA4 for basic traffic
+analytics — see [what's collected](https://parleyprotocol.com/privacy). The protocol and the
+self-hosted `docker run` path collect nothing.
 
 ## Where's the money (open-core thesis)
 

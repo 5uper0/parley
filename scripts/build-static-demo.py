@@ -29,13 +29,18 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build/static-demo")
 GA4_ID = os.environ.get("PARLEY_GA4_ID", "")
 GA4_SNIPPET = """<script async src="https://www.googletagmanager.com/gtag/js?id={id}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());gtag('config','{id}');</script>
-<script>document.addEventListener('click',function(e){{var el=e.target.closest&&e.target.closest('.cta,.btn,.vbtn,a[href]');if(!el)return;if(el.matches('.vbtn')){{gtag('event','demo_verify_click',{{transport_type:'beacon'}});}}else if(el.matches('.cta,.btn')){{gtag('event','demo_run_click',{{transport_type:'beacon',cta_location:el.matches('.cta')?'hero':'panel'}});}}else{{var h=el.getAttribute('href')||'';if(/github\\.com\\/5uper0\\/parley\\/discussions/.test(h)){{gtag('event','discussions_click',{{transport_type:'beacon'}});}}else if(/github\\.com\\/5uper0\\/parley/.test(h)){{gtag('event','github_click',{{transport_type:'beacon'}});}}else if(/linkedin\\.com/.test(h)){{gtag('event','linkedin_click',{{transport_type:'beacon'}});}}}}}});</script>"""
+<script>document.addEventListener('click',function(e){{var el=e.target.closest&&e.target.closest('.cta,.btn,.vbtn,a[href]');if(!el)return;if(el.matches('.vbtn')){{gtag('event','demo_verify_click',{{transport_type:'beacon'}});}}else if(el.matches('.cta,.btn')){{gtag('event','demo_run_click',{{transport_type:'beacon',cta_location:el.matches('.cta')?'hero':'panel'}});}}else{{var h=el.getAttribute('href')||'';if(el.matches('.arena-btn')){{gtag('event','arena_interest_click',{{transport_type:'beacon'}});}}else if(/github\\.com\\/5uper0\\/parley\\/discussions/.test(h)){{gtag('event','discussions_click',{{transport_type:'beacon'}});}}else if(/github\\.com\\/5uper0\\/parley/.test(h)){{gtag('event','github_click',{{transport_type:'beacon'}});}}else if(/linkedin\\.com/.test(h)){{gtag('event','linkedin_click',{{transport_type:'beacon'}});}}}}}});</script>"""
+# The `.arena-btn` check runs BEFORE the discussions-href regex on purpose: the Arena fake-door
+# CTA links into /discussions too, and arena_interest_click must fire INSTEAD OF the generic
+# discussions_click so the interest signal is attributable to that CTA alone (a footer
+# Discussions click still logs discussions_click as before).
 
 # Static files copied verbatim into the deploy root alongside index.html.
 _ASSETS = Path(HERE).parent.parent / "docs" / "brand" / "assets"
 STATIC_COPIES = {
     Path(HERE, "robots.txt"): "robots.txt",
     Path(HERE, "sitemap.xml"): "sitemap.xml",
+    Path(HERE, "privacy.html"): "privacy.html",
     _ASSETS / "og-card.png": "og-card.png",
     # index.html <head> links these; manifest.json additionally needs icon-192/512.
     _ASSETS / "favicon" / "favicon.svg": "favicon.svg",
