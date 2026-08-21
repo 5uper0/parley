@@ -54,9 +54,11 @@ cp -r landing/dist/. "$OUT/"
 mkdir -p "$OUT/demo"
 cp -r "$DEMO_RAW/." "$OUT/demo/"
 rm -rf "$DEMO_RAW"
+cp docs/brand/assets/llms.txt "$OUT/llms.txt"
 
 test -f "$OUT/index.html" || { echo "missing $OUT/index.html" >&2; exit 1; }
 test -f "$OUT/demo/index.html" || { echo "missing $OUT/demo/index.html" >&2; exit 1; }
+test -f "$OUT/llms.txt" || { echo "missing $OUT/llms.txt" >&2; exit 1; }
 test -f "$OUT/privacy/index.html" || { echo "missing $OUT/privacy/index.html" >&2; exit 1; }
 test -f "$OUT/404.html" || { echo "missing $OUT/404.html" >&2; exit 1; }
 grep -q "/demo/api/recipes.json" "$OUT/demo/index.html" || { echo "demo API paths were not rewritten" >&2; exit 1; }
