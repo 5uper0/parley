@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 ---
 
@@ -9,26 +10,7 @@ import Footer from "../components/Footer.astro";
   path="/privacy"
 >
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
-    <header class="flex items-center justify-between gap-4 py-9">
-      <a
-        href="/"
-        class="font-display text-[21px] tracking-[-0.025em] text-ink"
-      >
-        parley<span class="text-redline">.</span>
-      </a>
-      <div class="flex items-center gap-4">
-        <a href="/" class="text-[13px] text-muted transition-colors hover:text-ink"
-          >← back to Parley</a
-        >
-        <button
-          type="button"
-          onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
-          class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
-        >
-          ◑ theme
-        </button>
-      </div>
-    </header>
+    <Header />
 
     <main class="flex-1 pb-16">
       <h1 class="font-display text-3xl tracking-[-0.02em] text-ink">Privacy</h1>

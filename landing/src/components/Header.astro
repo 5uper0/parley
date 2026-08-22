@@ -1,0 +1,44 @@
+---
+interface Props {
+  large?: boolean;
+  padded?: boolean;
+}
+const { large = false, padded = true } = Astro.props;
+---
+
+<header
+  class:list={["flex items-center justify-between gap-4", padded && "py-9"]}
+>
+  <a
+    href="/"
+    class:list={[
+      "font-display tracking-[-0.025em] text-ink",
+      large ? "text-[27px]" : "text-[21px]",
+    ]}
+  >
+    parley<span class="text-redline">.</span>
+  </a>
+  <nav class="flex items-center gap-5">
+    <a
+      href="/demo/"
+      class="text-[13px] text-muted transition-colors hover:text-ink"
+    >
+      Demo
+    </a>
+    <a
+      href="https://github.com/5uper0/parley"
+      target="_blank"
+      rel="noopener"
+      class="text-[13px] text-muted transition-colors hover:text-ink"
+    >
+      GitHub
+    </a>
+    <button
+      type="button"
+      onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
+      class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+    >
+      ◑ theme
+    </button>
+  </nav>
+</header>

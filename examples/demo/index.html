@@ -71,6 +71,9 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;fl
 .toggle{border:1px solid var(--hair2);background:var(--surface);color:var(--muted);border-radius:var(--r-full);
   padding:7px 15px;font:inherit;font-size:12.5px;cursor:pointer;transition:.2s var(--ease)}
 .toggle:hover{color:var(--ink);border-color:var(--indigo)}
+.hdr-nav{display:flex;align-items:center;gap:20px}
+.hdr-nav a{color:var(--muted);font-size:13px;text-decoration:none;transition:.2s var(--ease)}
+.hdr-nav a:hover{color:var(--ink)}
 .toggle:active{transform:scale(.97)}
 .redrule{border:none;border-top:2px solid var(--red);margin:20px 0 24px;opacity:.9}
 /* controls */
@@ -287,7 +290,11 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
   <header>
     <div class="brand"><a href="/" class="logo">parley<span class="d">.</span></a>
       <div class="tag">a group decision your agents can't lie about — and you can check</div></div>
-    <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
+    <div class="hdr-nav">
+      <a href="/">← parley.com</a>
+      <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">GitHub</a>
+      <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
+    </div>
   </header>
 
   <div class="hero-cols">
