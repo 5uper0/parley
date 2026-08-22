@@ -12,16 +12,16 @@ const { large = false, padded = true } = Astro.props;
   <a
     href="/"
     class:list={[
-      "font-display tracking-[-0.025em] text-ink",
+      "-my-2 inline-flex items-center py-2 font-display tracking-[-0.025em] text-ink",
       large ? "text-[27px]" : "text-[21px]",
     ]}
   >
     parley<span class="text-redline">.</span>
   </a>
-  <nav class="flex items-center gap-5">
+  <nav class="flex items-center gap-1">
     <a
       href="/demo/"
-      class="text-[13px] text-muted transition-colors hover:text-ink"
+      class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
       Demo
     </a>
@@ -29,14 +29,14 @@ const { large = false, padded = true } = Astro.props;
       href="https://github.com/5uper0/parley"
       target="_blank"
       rel="noopener"
-      class="text-[13px] text-muted transition-colors hover:text-ink"
+      class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
       GitHub
     </a>
     <button
       type="button"
       onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
-      class="rounded-full border border-hairline bg-surface px-[15px] py-[7px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+      class="ml-2 rounded-full border border-hairline bg-surface px-[15px] py-[13px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
     >
       ◑ theme
     </button>
