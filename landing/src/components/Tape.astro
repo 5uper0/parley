@@ -4,18 +4,76 @@ import { tapeLines, tapeColorClass } from "../data/tape";
 
 <aside
   aria-label="Live parley transcript"
-  class="sticky top-0 hidden h-screen w-[400px] shrink-0 flex-col gap-[9px] overflow-y-auto border-r border-hairline bg-surface px-8 py-9 lg:flex xl:w-[440px]"
+  class="tape-aside sticky top-0 hidden h-screen w-[400px] shrink-0 flex-col gap-[9px] border-r border-hairline bg-surface px-8 py-9 lg:flex xl:w-[440px]"
 >
-  <p class="font-mono text-xs whitespace-nowrap text-muted">
+  <p class="flex shrink-0 items-center gap-[7px] font-mono text-xs whitespace-nowrap text-muted">
+    <span class="tape-dot h-[5px] w-[5px] rounded-full bg-verify"></span>
     parley transcript — live
   </p>
-  {
-    tapeLines.map((line) => (
-      <p
-        class={`font-mono text-[13px]/[22px] whitespace-nowrap ${tapeColorClass[line.color]}`}
-      >
-        {line.text}
-      </p>
-    ))
-  }
+  <div class="tape-viewport min-h-0 flex-1 overflow-hidden">
+    <div class="tape-track flex shrink-0 flex-col gap-[9px]">
+      {
+        tapeLines.map((line) => (
+          <p
+            class={`font-mono text-[13px]/[22px] whitespace-nowrap ${tapeColorClass[line.color]}`}
+          >
+            {line.text}
+          </p>
+        ))
+      }
+    </div>
+    <div class="tape-track flex shrink-0 flex-col gap-[9px]" aria-hidden="true">
+      {
+        tapeLines.map((line) => (
+          <p
+            class={`font-mono text-[13px]/[22px] whitespace-nowrap ${tapeColorClass[line.color]}`}
+          >
+            {line.text}
+          </p>
+        ))
+      }
+    </div>
+  </div>
 </aside>
+
+<style>
+  .tape-viewport {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 24px,
+      black calc(100% - 24px),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 24px,
+      black calc(100% - 24px),
+      transparent
+    );
+  }
+  .tape-track {
+    animation: tape-scroll 150s linear infinite;
+  }
+  .tape-aside:hover .tape-track {
+    animation-play-state: paused;
+  }
+  @keyframes tape-scroll {
+    to {
+      transform: translateY(-100%);
+    }
+  }
+  .tape-dot {
+    animation: tape-blink 1.8s ease infinite;
+  }
+  @keyframes tape-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+</style>
