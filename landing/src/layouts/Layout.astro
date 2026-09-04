@@ -17,6 +17,7 @@ const {
   noindex = false,
 } = Astro.props;
 const url = `https://parleyprotocol.com${path}`;
+const ga4 = process.env.PARLEY_GA4_ID || "";
 ---
 
 <!doctype html>
@@ -49,6 +50,10 @@ const url = `https://parleyprotocol.com${path}`;
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://parleyprotocol.com/og-card.png" />
+    {ga4 && (<>
+      <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${ga4}`}></script>
+      <script is:inline set:html={`if(location.hostname==="parleyprotocol.com"){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","${ga4}");}`}></script>
+    </>)}
   </head>
   <body class="bg-bg font-sans text-ink antialiased">
     <slot />
