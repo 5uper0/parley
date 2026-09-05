@@ -8,6 +8,14 @@ omitted.
 ## [Unreleased]
 
 ### Added
+- `parley/ratify.py`: an owner's explicit accept of a finished parley, bound to the decision and
+  the transcript hash. `ratify()` refuses an accept that the submitted sheet rejects; `agreement()`
+  is unanimous over one exact record and fails closed on a stale hash, a swapped decision, a
+  rejection, a stranger or a missing owner. Unsigned acceptances are tamper-evidence only.
+- `examples/real_decision.py`: the end-to-end flow for running a decision with real people at one
+  keyboard. Public option set, private positions taken one person at a time, natural-language entry
+  through `elicit` (or a manual mode with no model involved), then per-owner local ratification.
+  The receipt reports unanimous acceptance and honest max-min separately.
 - `parley/elicit.py`: natural-language → `PreferenceSheet` extraction behind a pluggable
   `Elicitor` interface — the LLM boundary stays outside the zero-dependency core (#46).
 - `verify_outcome()` in `parley/consensus.py`: recompute the max-min result from the public

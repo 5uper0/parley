@@ -12,7 +12,7 @@ a bug in one of them — reconcile, don't drift. Read the spec before touching t
 - [03-consensus](03-consensus.md) — max-min group decision over options feasible for *everyone*: lift the least-happy participant, tie-broken by total welfare; no feasible option ⇒ honest deadlock.
 - [04-transcript](04-transcript.md) — a tamper-evident SHA-256 record of public masked verdicts; each owner replays their own private sheet locally to prove non-betrayal without revealing it.
 - [05-spec](05-spec.md) — declarative `DecisionSpec` recipes (constraints as shareable JSON data, never executable code) compiled into the unchanged engine.
-- [06-net-identity](06-net-identity.md) — optional Ed25519 layer: a signature binds a bot's key to the exact `(option, verdict)` pair, making the transcript audit-grade — no forgery, no replay.
+- [06-net-identity](06-net-identity.md) — optional Ed25519 layer: a signature binds a bot's key to the exact `(option, verdict)` pair, so a signed verdict cannot be altered or moved to another option; the key is self-attested until the v0.2 roster pin (see SECURITY.md).
 
 ## Networking (`parley/net/`)
 
