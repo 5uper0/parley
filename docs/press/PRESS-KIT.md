@@ -171,8 +171,18 @@ No, and deliberately so. Verification is a local replay of a hash-chained record
 private data. There is no chain, no token and no network to join.
 
 **What stops the coordinator from cheating?**
-It never sees enough to cheat usefully, and with signing enabled it cannot forge or replay a verdict
-either, because an Ed25519 signature binds a bot's key to the exact option and verdict pair.
+Structurally, it never learns enough to cheat usefully: it sees a masked verdict, never the reason
+and never the sheet. On top of that, `verify_outcome` lets anyone replay the public record and
+confirm the announced decision really is the max-min one, so a coordinator cannot quietly finalise
+some other feasible option.
+
+What signing does **not** yet do, and we would rather say so than be caught saying otherwise: an
+Ed25519 signature binds a key to an exact option and verdict pair, which stops a signed verdict
+being altered or moved to another option, but it does not prove *who* signed. There is no trusted
+owner-to-key roster yet, so a coordinator holding any key could sign a fabricated verdict under its
+own key, and a genuine signed verdict carries no nonce, so it can be replayed into another parley
+that reuses the same option. Today the guarantee is tamper-evidence, not authenticity. The roster
+pin and replay binding are the v0.2 work, and both limits are listed in `SECURITY.md`.
 
 **What happens when there is no acceptable option?**
 Parley returns a deadlock and says so. Forcing an agreement that crosses somebody's red line is the
