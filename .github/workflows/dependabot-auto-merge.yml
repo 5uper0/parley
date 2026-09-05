@@ -6,6 +6,12 @@ permissions:
   contents: write
   pull-requests: write
   checks: read
+  # The poll step below filters statusCheckRollup on .workflowName, which resolves
+  # checkSuite.workflowRun in the GraphQL schema. A Dependabot-triggered run gets a
+  # scope-capped token, so without actions: read that field is not readable and the
+  # query fails. Never observed here, because every Dependabot PR so far has been a
+  # major bump and the step skipped, but it would bite the first patch/minor one.
+  actions: read
 
 jobs:
   dependabot:
