@@ -1,0 +1,567 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const boilerplates = [
+  {
+    id: "bp-line",
+    label: "One line",
+    meta: "under 100 characters",
+    text: "Parley is the neutral referee for AI agents that represent people with conflicting interests.",
+  },
+  {
+    id: "bp-short",
+    label: "Short",
+    meta: "50 words",
+    text: "Parley is an open-source consensus layer for AI agents that act on behalf of different owners. Each owner's red lines are enforced as code, not as a model's good intentions. Agents exchange masked verdicts, a max-min rule picks the option that lifts the least-happy party, and every decision leaves a transcript each owner can verify alone.",
+  },
+  {
+    id: "bp-medium",
+    label: "Medium",
+    meta: "100 words",
+    text: "When two organisations both put an AI agent in the room, someone has to referee. Parley is the open-source layer that does it. Owners write private preference sheets whose hard constraints are executable predicates, so a violating option cannot win regardless of what any model argues. Agents reveal only a masked verdict: acceptable or not, a soft score, and a reason reduced to “ok” or “red-line”. Consensus is max-min, so the least satisfied participant is lifted rather than outvoted. Every run produces a hash-chained transcript with optional Ed25519 signatures that each owner replays against their own private sheet. Multilateral, non-crypto, self-hosted.",
+  },
+];
+
+const facts = [
+  ["Category", "Infrastructure for multi-agent systems; agent governance and coordination"],
+  ["Founded", "2026"],
+  ["Headquarters", "Valencia, Spain"],
+  ["Founder", "Oleh Veheria, solo founder"],
+  ["Stage", "Pre-seed, bootstrapped"],
+  ["Licence", "Apache-2.0 (core)"],
+  ["Repository", "github.com/5uper0/parley, public since 2026-07-18"],
+  ["Live demo", "parleyprotocol.com/demo/, runs in the browser, no signup"],
+  ["Runtime", "Python 3.11 through 3.14"],
+  ["Dependencies", "None in the core. Cryptography and LLM elicitation ship as optional extras"],
+  ["Tests", "107 passing, including a red-team suite for preference-extraction attacks"],
+  ["External contributors", "1 merged pull request from outside the project"],
+  ["Self-hosting", "docker run one-liner; nothing calls home"],
+  ["Business model", "Open core. The consensus engine is Apache-2.0; the hosted broker is commercial"],
+];
+
+const failureModes = [
+  {
+    n: "01",
+    head: "A model can be talked out of a constraint.",
+    body: "Parley makes hard constraints executable predicates that reject an option. Persuasion has no surface to work on.",
+  },
+  {
+    n: "02",
+    head: "A coordinator sees everyone's cards.",
+    body: "Parley's agents emit a masked verdict only. The coordinator learns whether an option is acceptable, never why, and never the sheet.",
+  },
+  {
+    n: "03",
+    head: "Nobody can audit the outcome.",
+    body: "Parley emits a hash-chained transcript of the masked verdicts. Each owner replays it against their own private sheet and confirms no red line of theirs was crossed, without revealing the sheet to anyone.",
+  },
+];
+
+const compareCols = [
+  "Parley",
+  "Single-owner orchestration (AutoGen, CrewAI)",
+  "On-chain agent commerce (Fetch.ai, Olas)",
+];
+
+const compareRows = [
+  ["Whose interests", "Several rival owners", "One principal, many workers", "Two counterparties"],
+  ["Parties per decision", "N, multilateral", "N workers, one goal", "Typically bilateral"],
+  ["Trust anchor", "Code predicates and a local replay", "The orchestrator", "A chain and a token"],
+  ["Crypto required", "No", "No", "Yes"],
+  ["Deployment", "Self-hosted, no external calls", "Self-hosted or SaaS", "Public network"],
+];
+
+const quotes = [
+  "Every agent framework assumes the agents are on the same side. Parley is what you need for the hour when they are not.",
+  "A red line that a model can be argued out of is not a red line. It is a suggestion with good manners.",
+  "The coordinator should not need to be trusted. In Parley it does not learn enough to be worth corrupting.",
+  "The point is not that the decision is good. The point is that afterwards you can check it yourself, without showing anyone your cards.",
+];
+
+const assets = [
+  {
+    file: "/press/og-card.png",
+    name: "Open Graph card",
+    use: "Article header, link preview",
+    kind: "PNG",
+  },
+  {
+    file: "/press/og-card-demo.png",
+    name: "Demo Open Graph card",
+    use: "When linking the live demo",
+    kind: "PNG",
+  },
+  {
+    file: "/press/proofcard.png",
+    name: "Proof card",
+    use: "Illustrating the verifiable transcript",
+    kind: "PNG",
+  },
+  {
+    file: "/press/parley-money-shot.gif",
+    name: "Motion clip",
+    use: "A decision resolving end to end",
+    kind: "GIF",
+  },
+  {
+    file: "/press/built-by-a-fleet.png",
+    name: "Built by a fleet",
+    use: "The autonomous engineering story",
+    kind: "PNG",
+  },
+];
+
+const palette = [
+  { hex: "#3A45B0", name: "Parley indigo", meaning: "the engine" },
+  { hex: "#0E8F63", name: "Verify green", meaning: "a proven verdict" },
+  { hex: "#C42121", name: "Red-line red", meaning: "a deterministic block, never decorative" },
+  { hex: "#B87C15", name: "Masked amber", meaning: "a hidden verdict" },
+];
+
+const faqs = [
+  {
+    q: "Is this a blockchain project?",
+    a: "No, and deliberately so. Verification is a local replay of a hash-chained record against your own private data. There is no chain, no token and no network to join.",
+  },
+  {
+    q: "What stops the coordinator from cheating?",
+    a: "It never sees enough to cheat usefully, and with signing enabled it cannot forge or replay a verdict either, because an Ed25519 signature binds a bot's key to the exact option and verdict pair.",
+  },
+  {
+    q: "What happens when there is no acceptable option?",
+    a: "Parley returns a deadlock and says so. Forcing an agreement that crosses somebody's red line is the outcome the whole design exists to prevent.",
+  },
+  {
+    q: "Who is it for today?",
+    a: "Teams putting agents in front of a counterparty where the wrong answer is expensive and someone will later ask how the decision was reached. Compliance-adjacent operations were the first cluster we looked at.",
+  },
+  {
+    q: "How much of it is real?",
+    a: "The consensus engine, the masking, the signed transcript and the networked mode where each bot is its own process are all in the repository with tests. The commercial broker is not built yet.",
+  },
+  {
+    q: "Is it usable without writing Python?",
+    a: "The demo runs in a browser with no signup. Integration today is a Python API or an HTTP endpoint per agent.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Parley",
+  url: "https://parleyprotocol.com/",
+  description:
+    "Open-source consensus layer for AI agents that act on behalf of owners with conflicting private interests.",
+  foundingDate: "2026",
+  foundingLocation: { "@type": "Place", name: "Valencia, Spain" },
+  founder: { "@type": "Person", name: "Oleh Veheria" },
+  sameAs: [
+    "https://github.com/5uper0/parley",
+    "https://www.linkedin.com/company/parleyprotocol",
+  ],
+});
+---
+
+<Layout
+  title="Press kit — Parley"
+  description="Boilerplate, fact sheet, founder bio, cleared quotes, logos and imagery for anyone writing about Parley, the open-source consensus layer for AI agents with conflicting owners."
+  path="/press"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Press kit
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Everything you need to<br class="hidden sm:block" /> write about Parley.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Parley is the neutral referee for AI agents that represent people with
+          conflicting interests. Every number on this page is checked against the
+          repository rather than the pitch. Take any of it without asking.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Last verified 2026-09-05 ·{" "}
+          <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener" class={link}>
+            source repository
+          </a>{" "}·{" "}
+          <a href="/demo/" class={link}>live demo</a>
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Boilerplate -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Boilerplate</h2>
+        <p class="mt-3 max-w-[58ch] text-[15px]/[24px] text-muted">
+          Cleared for publication as written, at four lengths. Copy takes the text
+          without the label.
+        </p>
+        <div class="mt-6 flex flex-col gap-4">
+          {
+            boilerplates.map((b) => (
+              <figure class={`${card} px-5 py-[18px]`}>
+                <figcaption class="mb-3 flex items-center justify-between gap-4">
+                  <span class="font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">
+                    {b.label} <span class="text-hairline">/</span> {b.meta}
+                  </span>
+                  <button
+                    type="button"
+                    data-copy={b.id}
+                    class="flex-none rounded-full border border-hairline bg-bg px-3.5 py-2 font-mono text-[11.5px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
+                  >
+                    Copy
+                  </button>
+                </figcaption>
+                <p id={b.id} class="text-[15px]/[25px] text-ink">
+                  {b.text}
+                </p>
+              </figure>
+            ))
+          }
+          <details class={`${card} px-5 py-[18px]`}>
+            <summary class="cursor-pointer font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase marker:text-hairline">
+              Long <span class="text-hairline">/</span> 150 words
+            </summary>
+            <div class="mt-4 flex flex-col gap-3 text-[15px]/[25px] text-ink">
+              <p id="bp-long-a">
+                The agent ecosystem standardised how agents talk to each other. It left
+                open what happens when two agents want opposite things on behalf of rival
+                owners. Parley fills that gap.
+              </p>
+              <p>
+                An owner writes a preference sheet with two kinds of entries: soft
+                preferences that carry a score, and hard red lines that are code
+                predicates. A red line rejects an option outright, so non-betrayal is a
+                property of the program rather than a hope about model behaviour. The only
+                thing that leaves an agent is a masked verdict, which never names which
+                constraint was crossed and never exposes the sheet, so the coordinator is
+                untrusted by construction. Among options feasible for everyone, Parley
+                lifts the least-happy participant and breaks ties on total welfare. When no
+                option is feasible for all, it returns an honest deadlock instead of a
+                forced bad decision. Every run emits a tamper-evident transcript that each
+                owner verifies locally against their own sheet, revealing nothing.
+              </p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Fact sheet -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Fact sheet</h2>
+        <dl class={`${card} mt-5 divide-y divide-hairline`}>
+          {
+            facts.map(([k, v]) => (
+              <div class="grid gap-1 px-5 py-3.5 sm:grid-cols-[190px_1fr] sm:gap-6">
+                <dt class="font-mono text-[12px] tracking-[0.04em] text-subtle uppercase">
+                  {k}
+                </dt>
+                <dd class="text-[14.5px]/[23px] text-ink">{v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </section>
+
+      <!-- Problem -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The problem, in the words we actually use</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Standards such as MCP and A2A settled the transport question: agents can now
+          discover each other and exchange messages. They deliberately did not settle the
+          adversarial question. If your agent and my agent are negotiating a delivery
+          window, a contract clause or a shared budget, both of us are trusting a language
+          model to hold a line it was merely told to hold. There is no artifact afterwards
+          that proves it did.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three failure modes follow, and Parley closes each one in code.
+        </p>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            failureModes.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="mt-6 rounded-[14px] border border-hairline bg-surface px-5 py-[18px]">
+          <p class="text-[14.5px]/[23px] text-muted">
+            <strong class="text-ink">What we deliberately do not claim.</strong>{" "}
+            Non-betrayal is provable with respect to the red lines an owner actually
+            encoded. Parley does not read minds, does not judge whether a sheet captures
+            what someone meant, and does not make a language model honest. It makes the
+            boundary the owner wrote enforceable and the result checkable.
+          </p>
+        </div>
+      </section>
+
+      <!-- Why now -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Why now</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three things landed within roughly a year of each other: agents that can take
+          real actions on someone's behalf, a standard transport for agent-to-agent
+          contact, and organisations willing to put those agents in front of
+          counterparties. The referee layer is the piece that did not arrive with them.
+          The comparable moment is payments before settlement rails, where the messaging
+          worked long before anyone could prove what had been agreed.
+        </p>
+      </section>
+
+      <!-- Comparison -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What makes it different</h2>
+        <div class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface">
+          <table class="w-full min-w-[680px] border-collapse text-left">
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase"></th>
+                {
+                  compareCols.map((c, i) => (
+                    <th
+                      scope="col"
+                      class:list={[
+                        "px-5 py-3.5 text-[13px] font-semibold",
+                        i === 0 ? "text-indigo-text" : "text-muted",
+                      ]}
+                    >
+                      {c}
+                    </th>
+                  ))
+                }
+              </tr>
+            </thead>
+            <tbody>
+              {
+                compareRows.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th
+                      scope="row"
+                      class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase"
+                    >
+                      {r[0]}
+                    </th>
+                    {r.slice(1).map((cell, i) => (
+                      <td
+                        class:list={[
+                          "px-5 py-3.5 text-[14px]/[22px]",
+                          i === 0 ? "text-ink" : "text-muted",
+                        ]}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Founder -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Founder</h2>
+        <div class={`${card} mt-5 px-5 py-[22px]`}>
+          <p class="font-display text-[22px] tracking-[-0.02em] text-ink">Oleh Veheria</p>
+          <p class="mt-1 text-[13px] text-subtle">Founder · Valencia, Spain · Ukrainian</p>
+          <p class="mt-4 max-w-[58ch] text-[15px]/[25px] text-muted">
+            A decade building systems where the interesting failures were about conflicting
+            incentives rather than uptime. Parley started from a practical annoyance: every
+            agent framework assumed the agents were on the same side, and the moment they
+            were not, the design had nothing to say.
+          </p>
+          <p class="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[13.5px]">
+            <a href="mailto:hello@parleyprotocol.com" class={link}>hello@parleyprotocol.com</a>
+            <a href="https://www.linkedin.com/in/oleh-veheria" target="_blank" rel="noopener" class={link}>LinkedIn</a>
+            <a href="https://github.com/5uper0" target="_blank" rel="noopener" class={link}>GitHub</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- Quotes -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Quotes, cleared for use</h2>
+        <p class="mt-3 text-[13px] text-subtle">Attribute to Oleh Veheria, founder of Parley.</p>
+        <div class="mt-5 flex flex-col gap-3">
+          {
+            quotes.map((q, i) => (
+              <figure class={`${card} flex items-start gap-4 px-5 py-[18px]`}>
+                <blockquote id={`q-${i}`} class="flex-1 text-[15px]/[25px] text-ink">
+                  {q}
+                </blockquote>
+                <button
+                  type="button"
+                  data-copy={`q-${i}`}
+                  class="mt-0.5 flex-none rounded-full border border-hairline bg-bg px-3.5 py-2 font-mono text-[11.5px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
+                >
+                  Copy
+                </button>
+              </figure>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Assets -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Assets</h2>
+        <p class="mt-3 max-w-[58ch] text-[15px]/[24px] text-muted">
+          Cleared for editorial use. Right click to save, or open the file directly.
+        </p>
+        <div class="mt-5 grid gap-4 sm:grid-cols-2">
+          {
+            assets.map((a) => (
+              <a
+                href={a.file}
+                target="_blank"
+                rel="noopener"
+                class={`${card} group block overflow-hidden transition-colors hover:border-indigo`}
+              >
+                <img
+                  src={a.file}
+                  alt={a.name}
+                  loading="lazy"
+                  class="block h-[168px] w-full bg-bg object-contain p-3"
+                />
+                <div class="border-t border-hairline px-4 py-3">
+                  <p class="text-[14px] font-semibold text-ink">
+                    {a.name}{" "}
+                    <span class="font-mono text-[11px] font-normal text-subtle">{a.kind}</span>
+                  </p>
+                  <p class="mt-0.5 text-[13px]/[20px] text-muted">{a.use}</p>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+
+        <h3 class="mt-10 text-[15px] font-semibold text-ink">Colour</h3>
+        <p class="mt-2 max-w-[58ch] text-[14.5px]/[23px] text-muted">
+          Colour carries product meaning rather than decoration. If you are laying out a
+          page, these four are the whole vocabulary.
+        </p>
+        <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+          {
+            palette.map((p) => (
+              <li class={`${card} flex items-center gap-3.5 px-4 py-3`}>
+                <span
+                  class="h-8 w-8 flex-none rounded-[7px] border border-hairline"
+                  style={`background:${p.hex}`}
+                  aria-hidden="true"
+                />
+                <span class="text-[14px] text-ink">
+                  {p.name}{" "}
+                  <span class="font-mono text-[12px] text-subtle">{p.hex}</span>
+                  <span class="block text-[13px] text-muted">{p.meaning}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+
+        <h3 class="mt-10 text-[15px] font-semibold text-ink">Typography</h3>
+        <p class="mt-2 max-w-[58ch] text-[14.5px]/[23px] text-muted">
+          Inter for text. JetBrains Mono for anything that represents a receipt, a hash or
+          a signature. Both are open source.
+        </p>
+
+        <h3 class="mt-10 text-[15px] font-semibold text-ink">Naming</h3>
+        <p class="mt-2 max-w-[58ch] text-[14.5px]/[23px] text-muted">
+          Write <strong class="text-ink">Parley</strong> in prose. The wordmark is
+          lowercase. It is not "Parley Protocol", not "ParleyAI", and there is no spaced or
+          hyphenated variant. The domain is parleyprotocol.com because parley.com was
+          taken, which is the whole story behind it.
+        </p>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions we get, answered</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Press and partnerships
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          Write to{" "}
+          <a href="mailto:hello@parleyprotocol.com" class={link}>hello@parleyprotocol.com</a>.
+          Replies come the same day, European hours. Interviews, demos and technical
+          walkthroughs are all fine to ask for.
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+
+  <script is:inline>
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-copy]");
+      if (!btn) return;
+      var el = document.getElementById(btn.getAttribute("data-copy"));
+      if (!el) return;
+      var text = el.textContent.trim().replace(/\s+/g, " ");
+      var done = function () {
+        var prev = btn.textContent;
+        btn.textContent = "Copied";
+        setTimeout(function () {
+          btn.textContent = prev;
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      }
+    });
+  </script>
+</Layout>
