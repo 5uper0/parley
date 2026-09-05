@@ -148,7 +148,6 @@ All assets live in the repository under `docs/brand/assets/` and are cleared for
 | Asset | File | Use |
 |---|---|---|
 | Open Graph card | `og-card.png` | Article header, link preview |
-| Demo Open Graph card | `og-card-demo.png` | When linking the live demo |
 | Proof card | `proofcard.png` | Illustrating the verifiable transcript |
 | Motion clip | `parley-money-shot.gif` | A decision resolving end to end |
 | Favicon set | `favicon/` | Small placements |
