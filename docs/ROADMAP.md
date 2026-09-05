@@ -61,11 +61,18 @@ Every Exp has a kill/continue gate. Small balanced bets, feedback each cycle.
 
 ## Concrete next engineering steps (Exp 1)
 
-- `parley/elicit.py` (new), NL → PreferenceSheet, behind an LLM (hard/soft constraints).
-- Multi-round counter-proposals in `parley/consensus.py` (not only scoring fixed options).
-- `examples/real_decision.py` (new), an end-to-end "run a decision with real people" flow,
-  NL position entry, a human-ratification step.
-- Tests: `tests/test_elicit.py`.
+- [x] `parley/elicit.py`, NL → PreferenceSheet, behind an LLM (hard/soft constraints). Merged
+  2026-08-18 (#46).
+- [x] `parley/ratify.py` + `examples/real_decision.py`, the end-to-end "run a decision with real
+  people" flow with NL position entry and a human-ratification step. Merged 2026-09-05. **The
+  engineering side of the Exp 1 gate is now complete: what remains is an operator action, not a
+  build.** Run it with two or three real people who actually disagree about something, and the
+  gate turns on one sentence from them.
+- [ ] Multi-round counter-proposals in `parley/consensus.py` (not only scoring fixed options).
+  **Deliberately not built yet** — nothing in the Exp 1 gate needs it, and building it before a
+  real run tells us what to change is exactly the build-ahead-of-the-experiment failure mode this
+  roadmap exists to prevent.
+- [x] Tests: `tests/test_elicit.py`, `tests/test_ratify.py`, `tests/test_real_decision.py`.
 
 ## Verification gates
 

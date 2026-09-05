@@ -1,9 +1,10 @@
-"""Ed25519 identity for bots: signed Agent Cards + signed verdicts.
+"""Ed25519 identity for bots: signed Agent Cards, signed verdicts, signed acceptances.
 
-Optional layer (needs the `crypto` extra / pynacl). A signed verdict binds the bot's
-key to the exact (option, verdict) pair, so the coordinator that assembles the transcript
-can neither fabricate a verdict nor replay a real one against a different option — the
-transcript becomes an authentic, audit-grade record, not just a tamper-evident one.
+Optional layer (needs the `crypto` extra / pynacl). A signed verdict binds a key to the exact
+(option, verdict) pair, so the coordinator that assembles the transcript cannot alter a
+signed verdict or move it to a different option. Signatures verify against the pubkey carried
+in the same record: with no trusted owner -> key roster yet (v0.2), that is tamper-evidence,
+not proof of who signed. See SECURITY.md.
 """
 import json
 from dataclasses import dataclass
@@ -12,11 +13,15 @@ from nacl.encoding import HexEncoder
 from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
+from ..ratify import acceptance_payload
+
 
 def verdict_payload(option, owner, acceptable, score, reason) -> bytes:
-    """Canonical bytes a bot signs for one verdict — binds owner+option+content."""
+    """Canonical bytes a bot signs for one verdict — binds owner+option+content.
+
+    `type` separates this domain from acceptance signatures (`ratify.acceptance_payload`)."""
     return json.dumps(
-        {"owner": owner, "option": option, "acceptable": acceptable,
+        {"type": "verdict/0.1", "owner": owner, "option": option, "acceptable": acceptable,
          "score": score, "reason": reason},
         sort_keys=True, ensure_ascii=False, default=str,
     ).encode("utf-8")
@@ -64,6 +69,26 @@ class Identity:
         return self.sign(verdict_payload(
             option, verdict.owner, verdict.acceptable, verdict.score, verdict.reason))
 
+    def sign_acceptance(self, payload: bytes) -> tuple:
+        """`ratify.Signer`: sign the canonical acceptance bytes, return (sig_hex, pubkey_hex)."""
+        return self.sign(payload), self.card().pubkey_hex
+
+
+def verify_acceptance(acceptance) -> bool:
+    """A signed `ratify.Acceptance` must validate against its own pubkey over its own content.
+
+    Unsigned acceptances fail: ratification is the one step where a missing signature is never
+    an acceptable downgrade. This proves the record was not altered after signing; it does not
+    prove the `owner` named in it holds the key — the pubkey is self-attested by the record
+    under test, and the owner -> key roster pin lands in v0.2 (SECURITY.md).
+    """
+    if not acceptance.sig or not acceptance.pubkey_hex:
+        return False
+    card = AgentCard(owner=acceptance.owner, pubkey_hex=acceptance.pubkey_hex)
+    payload = acceptance_payload(acceptance.owner, acceptance.decision,
+                                 acceptance.transcript_hash, acceptance.accepted)
+    return card.verify(payload, acceptance.sig)
+
 
 def verify_transcript(transcript, require_signed: bool = False) -> bool:
     """Every SIGNED verdict must validate against its own pubkey for its own option.
@@ -75,7 +100,7 @@ def verify_transcript(transcript, require_signed: bool = False) -> bool:
     Unsigned (local) verdicts are skipped by default, so a mixed local/remote transcript
     still verifies. That default is fail-OPEN against a *downgrade* attack: a coordinator
     that strips signatures makes the check pass silently. When every participant is
-    expected to sign (the audit-grade case), pass ``require_signed=True`` — then a verdict
+    expected to sign (the all-remote case), pass ``require_signed=True`` — then a verdict
     missing its ``sig``/``pubkey_hex`` fails closed.
     """
     for entry in transcript.entries:

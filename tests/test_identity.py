@@ -1,8 +1,9 @@
 """Cryptographic identity: signed Agent Cards + signed verdicts (Ed25519).
 
-This is what makes the transcript trustworthy: a verdict is signed by the bot's key
-over the SPECIFIC option, so a malicious coordinator can neither forge a verdict nor
-move a real one to a different option. Requires the `crypto` extra (pynacl).
+A verdict is signed by the bot's key over the SPECIFIC option, so a malicious coordinator
+can neither alter a signed verdict nor move a real one to a different option. It verifies
+against the pubkey carried in the same record, so this is tamper-evidence, not proof of who
+signed (roster pin is v0.2, SECURITY.md). Requires the `crypto` extra (pynacl).
 """
 import pytest
 

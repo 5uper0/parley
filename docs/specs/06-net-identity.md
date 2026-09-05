@@ -1,13 +1,13 @@
 # parley/net/identity.py — Spec
 
 ## Purpose
-This module adds **Ed25519 cryptographic identity** to bots: signed Agent Cards and, more
-importantly, signed verdicts. A signature binds a bot's key to the *exact* `(option, verdict)`
-pair, so a coordinator that assembles the transcript can neither **forge** a verdict nor
-**replay** a real one against a different option. That upgrades the transcript from merely
-tamper-evident (any edit changes the hash) to **audit-grade / authentic** (each signed
-verdict provably came from its owner for its option). It is an **optional** layer — the
-zero-dependency core never imports it.
+This module adds **Ed25519 cryptographic identity** to bots: signed Agent Cards, signed
+verdicts and signed acceptances. A signed verdict binds a key to the *exact* `(option, verdict)`
+pair, so the coordinator that assembles the transcript cannot alter a signed verdict or move it
+to a different option. Signatures verify against the pubkey carried *in the same record*: with
+no trusted `owner → key` roster yet (v0.2), that is **tamper-evidence, not proof of who signed**
+— a holder of any keypair can sign under another owner's name and pass `verify_transcript`.
+See `SECURITY.md`. It is an **optional** layer — the zero-dependency core never imports it.
 
 ## The zero-dependency boundary (explicit)
 
@@ -28,7 +28,8 @@ zero-dependency core never imports it.
 
 - `verdict_payload(option, owner, acceptable, score, reason) -> bytes`
   — the canonical bytes a bot signs for one verdict:
-  `json.dumps({"owner","option","acceptable","score","reason"}, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")`.
+  `json.dumps({"type":"verdict/0.1","owner","option","acceptable","score","reason"}, sort_keys=True, ensure_ascii=False, default=str).encode("utf-8")`.
+  `type` is domain separation from `ratify.acceptance_payload` (`"acceptance/0.1"`).
   Binds owner + option + full verdict content.
 - `@dataclass(frozen=True) AgentCard(owner: str, pubkey_hex: str, protocol: str = "parley/0.1")`
   — public discovery identity (no private key, no sheet).
@@ -65,9 +66,10 @@ zero-dependency core never imports it.
   silently break every signature check.
 - **The private key never leaves the bot.** `Identity._sk` is not in any `to_dict`/card;
   only the verify key (as `pubkey_hex`) is ever published. (`test_card_exposes_owner_and_pubkey_only`.)
-- **One key cannot forge for another owner.** Verification is against the card's own
-  `pubkey_hex`, so a signature from key A fails on key B's card.
-  (`test_a_key_cannot_forge_for_another`.)
+- **A signature is bound to one key.** A signature from key A fails against key B's card
+  (`test_a_key_cannot_forge_for_another`). But `verify_transcript` constructs the card from the
+  record under test (`AgentCard(v["owner"], v["pubkey_hex"])`), so this is not owner
+  authentication until the v0.2 roster pin — see `SECURITY.md`.
 - **Verification fails closed.** `AgentCard.verify` returns `False` (never raises) on a bad
   signature or malformed hex, so a single tampered verdict makes `verify_transcript` return
   `False` rather than crashing.

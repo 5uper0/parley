@@ -29,6 +29,10 @@ framing* is still welcome):
   against the pubkey carried *in the same record*; there is no trusted `owner → key` roster yet, so a
   coordinator that assembles the transcript could sign a fabricated verdict with its own key. The
   roster-pinned check (pin each owner's key from its `/card`) lands in v0.2.
+- **Signed acceptances have the same gap.** `verify_acceptance` checks the signature against the
+  pubkey carried *in the same acceptance*, so anyone with a key can sign an acceptance under another
+  owner's name. Unsigned acceptances authenticate nothing: `agreement()` without a `verifier` is
+  tamper-evidence only. Closed by the same v0.2 roster pin.
 - **No replay binding.** Verdict payloads carry no session id or nonce, so a genuine signed verdict
   is replayable into another parley that reuses the same option.
 - **Scores are unmasked.** The soft cardinal `score` is public, leaking preference ordering / feasible
