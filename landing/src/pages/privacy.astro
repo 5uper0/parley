@@ -7,7 +7,7 @@ import Footer from "../components/Footer.astro";
 <Layout
   title="Privacy — Parley"
   description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics, no ads, no data resale, no tracking in the self-hosted core."
-  path="/privacy"
+  path="/privacy/"
 >
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
     <Header />
@@ -74,7 +74,7 @@ import Footer from "../components/Footer.astro";
         will block this too — the demo works identically either way, nothing is gated
         on analytics. For zero analytics of any kind, run the demo yourself: <code
           class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
-          >docker run -p 8080:8080 parley</code
+          >docker build -t parley . && docker run --rm -p 8080:8080 parley</code
         >{" "}
         (see the{" "}
         <a

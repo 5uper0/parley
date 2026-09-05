@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Parley ship gate — run before every commit (the six hard-stops the conductor/autopilot enforce).
-# Bundles: tests green · zero-dependency core intact · examples smoke.
+# Bundles: tests green · zero-dependency core intact · examples smoke · published claims true.
 # The redteam extraction + net hardening are covered inside the test suite (tests/test_redteam.py,
 # tests/test_net.py), so a green pytest already exercises them.
 #
@@ -14,10 +14,10 @@ PY="${PARLEY_PY:-.venv/bin/python}"
 
 fail() { echo "✗ ship-gate FAILED: $1" >&2; exit 1; }
 
-echo "▸ 1/3 tests"
+echo "▸ 1/5 tests"
 "$PY" -m pytest -q || fail "pytest not green"
 
-echo "▸ 2/3 zero-dependency core"
+echo "▸ 2/5 zero-dependency core"
 # The core (parley/, minus the optional signed layer net/identity.py) must import only stdlib
 # or local parley modules. Correct check via sys.stdlib_module_names — not an ad-hoc grep.
 "$PY" - <<'PYCHECK' || fail "core imports a third-party package (keep it zero-dependency)"
@@ -48,7 +48,19 @@ if bad:
 print("  core is stdlib-only (nacl confined to net/identity.py)")
 PYCHECK
 
-echo "▸ 3/3 examples smoke"
+echo "▸ 3/5 examples smoke"
 "$PY" examples/meeting.py >/dev/null || fail "examples/meeting.py errored"
 
-echo "✓ ship-gate passed — tests green · zero-dep core · examples run"
+# Gates 4 and 5 exist because the site twice shipped a number or a hash that the code did not
+# back. Both failures were caught by a human reading the page, not by anything mechanical.
+echo "▸ 4/5 homepage tape matches a real engine run"
+"$PY" landing/scripts/gen-tape.py --check >/dev/null \
+  || fail "landing/src/data/tape.ts is stale — regenerate with: $PY landing/scripts/gen-tape.py"
+echo "  tape hashes come from a live run"
+
+echo "▸ 5/5 published test-count claims are current"
+bash scripts/claim-freshness-check.sh >/dev/null \
+  || fail "a live doc states a stale test count — run scripts/claim-freshness-check.sh"
+echo "  every live doc agrees with pytest"
+
+echo "✓ ship-gate passed — tests green · zero-dep core · examples run · claims true"

@@ -47,7 +47,20 @@ find a segment that pays.
   produces one proof of value.*
 - **Exp 1, Value (~1–2 wk).** NL-preference demo + run 1–2 **real** group decisions with
   real people (dogfood: family/team). Signal: do people feel the value of "private +
-  auditable + I wasn't betrayed" vs Doodle/Slack? **Gate: ≥1 "this is better because …".**
+  auditable + I wasn't betrayed" vs Doodle/Slack?
+  **Gate (one bar, both halves required):** real people ran a live decision through the tool,
+  *each* of them ratified it against their own sheet, non-betrayal verified — **and** at least
+  one of them said "this is better because …" in their own words.
+
+  > **Corrected 2026-09-05.** This line used to state the gate as the quote alone, while the
+  > Verification gates section below stated it as "real people ran a decision end-to-end, each
+  > ratified". Two bars for one experiment. The weaker one was met by `dogfood-02` on 2026-07-22
+  > and Exp 1 was recorded as closed, so the stronger one stopped being tracked and the software
+  > that would have satisfied it went unwritten for seven weeks. `dogfood-02` is a **retrospective,
+  > one-sided replay** — its own header says "not bilateral dogfood: the landlord has not reviewed
+  > or ratified", so it cannot satisfy "real people, each ratified" and never could. It remains
+  > genuine evidence of value and it closed HANDOFF gate #1, which is worded as the quote alone.
+  > It does not close this one.
 - **Exp 2, Segment/WTP (parallel, ~2 wk).** 8–12 problem interviews across candidates
   (procurement, agencies/SOW, committees/panels, DAOs). Signal: where do multi-party
   private negotiations cost real time/money today, and will they pay? **Gate: ≥1 segment
@@ -79,7 +92,10 @@ Every Exp has a kill/continue gate. Small balanced bets, feedback each cycle.
 - **Exp 0:** `pytest -q` green; re-run `examples/redteam_probe_baseline.py` against a
   hardened bot, extraction blocked (401/429/signature); coordinator can't forge the
   transcript (verdict-signature check).
-- **Exp 1:** real people ran a decision end-to-end, each ratified, non-betrayal verified.
+- **Exp 1:** real people ran a decision end-to-end, each ratified, non-betrayal verified, plus
+  one "this is better because …" in a participant's own words. Identical to the gate stated on the
+  Exp 1 line above — if these two ever diverge again, the divergence is the bug. Runnable since
+  2026-09-05 via `examples/real_decision.py`; the receipt it writes is the artifact.
 
 ## Critical files
 
