@@ -7,10 +7,16 @@ same shape — but *true*: agents of rival owners reached a max-min decision, on
 BLOCKED by a red line, and the receipt is verifiable. Zero-dependency (stdlib only). Also the README
 demo asset. `card_html()`/`STYLE` are reused by the niche gallery.
 """
+import html
 import os
 import sys
 
 from server import RECIPE, run_recipe  # same dir
+
+# The cards deploy under /demo/ of the merged site (scripts/build-static-demo.py copies them
+# verbatim; scripts/build-site.sh only rewrites index.html), so absolute URLs are final here.
+SITE = "https://parleyprotocol.com"
+OG_IMAGE = f"{SITE}/demo/og-card-demo.png"
 
 STYLE = """
 :root{--indigo-600:#3A45B0;--verify-600:#0E8F63;--verify-sub:#E7F6EF;--redline-600:#C42121;
@@ -78,8 +84,47 @@ def card_html(data: dict) -> str:
 </div>"""
 
 
-def build_card(data: dict) -> str:
-    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8">{_FONTS}'
+def _head_meta(data: dict, path) -> str:
+    """Title/description/canonical/OG/Twitter, derived from the scenario data (same tag shape as
+    landing/src/layouts/Layout.astro). Nothing here touches the card body."""
+    _, decision = _blocked_and_decision(data)
+    dec_label = decision.get("label", decision.get("id")) if decision else "HONEST DEADLOCK"
+    parties = " · ".join(p["owner"] for p in data["parties"])
+    title = f'{data["title"]} · Parley proof card'
+    situation = (data.get("presentation") or {}).get("situation")
+    description = situation or (
+        f'{len(data["parties"])} rival parties ({parties}) reached "{dec_label}" by max-min '
+        f'consensus. Every private red line held; the receipt is verifiable.')
+    t, d = html.escape(title, quote=True), html.escape(description, quote=True)
+    url = f"{SITE}{path}" if path else None
+    tags = [
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        f'<title>{t}</title>',
+        f'<meta name="description" content="{d}">',
+    ]
+    if url:
+        tags.append(f'<link rel="canonical" href="{url}">')
+    tags.append('<meta property="og:type" content="website">')
+    if url:
+        tags.append(f'<meta property="og:url" content="{url}">')
+    tags += [
+        '<meta property="og:site_name" content="Parley">',
+        f'<meta property="og:title" content="{t}">',
+        f'<meta property="og:description" content="{d}">',
+        f'<meta property="og:image" content="{OG_IMAGE}">',
+        '<meta name="twitter:card" content="summary_large_image">',
+        f'<meta name="twitter:title" content="{t}">',
+        f'<meta name="twitter:description" content="{d}">',
+        f'<meta name="twitter:image" content="{OG_IMAGE}">',
+    ]
+    return "\n".join(tags)
+
+
+def build_card(data: dict, path: str = None) -> str:
+    """Full page. `path` is the site-relative URL the card is served at (e.g. /demo/proofcard_p2p);
+    it drives the canonical + og:url tags and is omitted from the head when unknown."""
+    return (f'<!doctype html><html lang="en"><head>\n{_head_meta(data, path)}\n{_FONTS}'
             f'<style>{STYLE}\nbody{{background:#e7e9f0;padding:28px;display:flex;justify-content:center}}</style>'
             f'</head><body>{card_html(data)}</body></html>')
 
@@ -90,8 +135,10 @@ def main():
     rest = [a for a in args if not a.endswith(".json")]
     out = rest[0] if rest else os.path.join(os.path.dirname(__file__), "proofcard.html")
     data = run_recipe(recipe)
+    # Cards are served extensionless under /demo/ (see scripts/build-static-demo.py).
+    slug = os.path.splitext(os.path.basename(out))[0]
     with open(out, "w", encoding="utf-8") as fh:
-        fh.write(build_card(data))
+        fh.write(build_card(data, path=f"/demo/{slug}"))
     print(f"wrote proof-card: {out}  (decision={data['decision']['id']}, verified={all(data['non_betrayal'].values())})")
 
 

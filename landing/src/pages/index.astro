@@ -94,7 +94,7 @@ const jsonLd = JSON.stringify({
             <div
               class="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3 font-mono text-xs text-muted"
             >
-              <span>parley &middot; replay meeting-042</span>
+              <span>parley &middot; replay af170229&hellip;</span>
               <span>transcript</span>
             </div>
             <div class="px-6 pt-6 pb-1.5">
@@ -158,7 +158,8 @@ const jsonLd = JSON.stringify({
               </svg>
             </div>
             <p class="px-6 pt-3 pb-4 text-[12.5px] leading-[1.5] text-muted">
-              Five delegates, five private sheets. One shared decision,
+              Five delegates, five private sheets. Option A below, three of the five
+              verdicts shown. One shared decision,
               <b class="font-semibold text-ink">verified</b>, none of the
               sheets revealed.
             </p>
@@ -166,19 +167,9 @@ const jsonLd = JSON.stringify({
               class="flex flex-col gap-3.5 border-t border-hairline p-5 font-mono text-[13px] leading-[1.5]"
             >
               <div class="flex items-center justify-between gap-2.5">
-                <span class="flex-none font-medium text-ink">ana</span>
-                <span class="flex-none text-xs whitespace-nowrap text-muted"
-                  >score 0.82</span
-                >
-                <span
-                  class="inline-flex items-center rounded-full border border-verify/30 bg-verify/10 px-3.5 py-1.5 text-[11.5px] font-medium text-verify"
-                  >acceptable</span
-                >
-              </div>
-              <div class="flex items-center justify-between gap-2.5">
                 <span class="flex-none font-medium text-ink">bob</span>
                 <span class="flex-none text-xs whitespace-nowrap text-muted"
-                  >score 0.71</span
+                  >score 0.30</span
                 >
                 <span
                   class="inline-flex items-center rounded-full border border-verify/30 bg-verify/10 px-3.5 py-1.5 text-[11.5px] font-medium text-verify"
@@ -187,6 +178,16 @@ const jsonLd = JSON.stringify({
               </div>
               <div class="flex items-center justify-between gap-2.5">
                 <span class="flex-none font-medium text-ink">cara</span>
+                <span class="flex-none text-xs whitespace-nowrap text-muted"
+                  >score 0.70</span
+                >
+                <span
+                  class="inline-flex items-center rounded-full border border-verify/30 bg-verify/10 px-3.5 py-1.5 text-[11.5px] font-medium text-verify"
+                  >acceptable</span
+                >
+              </div>
+              <div class="flex items-center justify-between gap-2.5">
+                <span class="flex-none font-medium text-ink">ana</span>
                 <span
                   class="inline-flex flex-none items-center gap-1 text-xs whitespace-nowrap text-masked"
                 >
@@ -222,11 +223,11 @@ const jsonLd = JSON.stringify({
               <hr class="my-2.5 border-0 border-t border-dashed border-hairline" />
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <span class="font-semibold text-indigo-text"
-                  >max-min &rarr; option B</span
+                  >max-min &rarr; option P</span
                 >
                 <span
                   class="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-verify"
-                  >&#10003; sha256 verified 3/3</span
+                  >&#10003; sha256 verified 5/5</span
                 >
               </div>
             </div>
@@ -389,21 +390,24 @@ const jsonLd = JSON.stringify({
             AI that can't lie, and you can check.
           </h2>
           <p class="max-w-[62ch] text-base leading-[1.6] text-muted">
-            The tape below is the real transcript format the engine produces,
-            replayed from a sample run. Every verdict is recorded masked,
-            hashed, and independently replayable by each owner against their
-            own private sheet.
+            The tape below is a real run. Five agents with conflicting private
+            sheets, sixteen options, scored by the engine in this repository. Every
+            verdict is recorded masked, hashed, and independently replayable by each
+            owner against their own private sheet. The transcript hashes to
+            <code class="font-mono text-[0.9em] text-verify">af1702294878&hellip;b7a84127</code>,
+            and <code class="font-mono text-[0.9em]">landing/scripts/gen-tape.py</code>
+            reproduces it byte for byte.
           </p>
         </div>
         <p class="mb-3 flex items-center gap-2 font-mono text-xs text-muted">
-          sample transcript &middot; replayed from meeting-042 &middot; hover to
+          real transcript &middot; sha256 af170229&hellip;b7a84127 &middot; hover to
           pause
         </p>
         <div
           class="group overflow-hidden rounded-xl border border-hairline bg-bg [mask-image:linear-gradient(to_right,transparent_0,black_6%,black_94%,transparent_100%)] motion-reduce:overflow-x-auto motion-reduce:[mask-image:none]"
           tabindex="0"
           role="img"
-          aria-label="Scrolling excerpt of a sample parley transcript: option A rejected by a red line, option B chosen by max-min consensus and verified by all three owners"
+          aria-label="Scrolling excerpt of a real parley transcript: option A rejected by a red line, option P chosen by max-min consensus, red lines verified for all five owners"
         >
           <div
             class="flex w-max group-focus-within:[animation-play-state:paused] group-hover:[animation-play-state:paused] motion-safe:animate-[tick_46s_linear_infinite]"
@@ -453,7 +457,7 @@ const jsonLd = JSON.stringify({
               <div
                 class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-verify"
               >
-                3/3
+                5/5
               </div>
               <div class="mt-1 max-w-[18ch] text-[12.5px] text-muted">
                 owners independently verified

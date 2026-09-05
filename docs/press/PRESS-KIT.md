@@ -58,8 +58,8 @@ Public page: <https://parleyprotocol.com/press/> · Repository: <https://github.
 | Repository | github.com/5uper0/parley, public since 2026-07-18 |
 | Live demo | parleyprotocol.com/demo/, runs in the browser, no signup |
 | Runtime | Python 3.11 through 3.14 |
-| Dependencies | None in the core. Cryptography and LLM elicitation ship as optional extras |
-| Tests | 107 passing, including a red-team suite for preference-extraction attacks |
+| Dependencies | None in the core, standard library only. Ed25519 signing is the one optional extra |
+| Tests | 148 passing, including a red-team suite for preference-extraction attacks |
 | External contributors | 1 merged pull request from outside the project |
 | Self-hosting | `docker run` one-liner; nothing calls home |
 | Business model | Open core. The consensus engine is Apache-2.0; the hosted broker is commercial |
