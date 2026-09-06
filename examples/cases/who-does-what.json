@@ -1,0 +1,10 @@
+{
+  "title": "Who takes which part of the work?",
+  "options": [
+    {"id": "as-is",          "hours_a": 18, "hours_b": 6,  "hours_c": 12, "anyone_on_call": "a", "swaps_allowed": false},
+    {"id": "even-split",     "hours_a": 12, "hours_b": 12, "hours_c": 12, "anyone_on_call": "rotating", "swaps_allowed": true},
+    {"id": "by-skill",       "hours_a": 15, "hours_b": 9,  "hours_c": 12, "anyone_on_call": "b", "swaps_allowed": true},
+    {"id": "b-steps-up",     "hours_a": 12, "hours_b": 14, "hours_c": 10, "anyone_on_call": "rotating", "swaps_allowed": true},
+    {"id": "hire-out-the-worst", "hours_a": 10, "hours_b": 8, "hours_c": 10, "anyone_on_call": "none", "swaps_allowed": true, "extra_cost_each": 90}
+  ]
+}

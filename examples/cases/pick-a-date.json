@@ -1,0 +1,10 @@
+{
+  "title": "Which weekend do we actually go?",
+  "options": [
+    {"id": "oct-third",  "weeks_away": 3,  "cost_each": 210, "days_off_needed": 1, "weather_risk": "low",    "someone_misses": "none"},
+    {"id": "oct-fourth", "weeks_away": 4,  "cost_each": 180, "days_off_needed": 1, "weather_risk": "low",    "someone_misses": "c"},
+    {"id": "nov-second", "weeks_away": 7,  "cost_each": 140, "days_off_needed": 0, "weather_risk": "medium", "someone_misses": "none"},
+    {"id": "dec-first",  "weeks_away": 12, "cost_each": 260, "days_off_needed": 2, "weather_risk": "high",   "someone_misses": "none"},
+    {"id": "next-week",  "weeks_away": 1,  "cost_each": 320, "days_off_needed": 2, "weather_risk": "low",    "someone_misses": "b"}
+  ]
+}

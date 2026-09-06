@@ -1,0 +1,9 @@
+{
+  "title": "How do we split a shared cost when people used it unevenly?",
+  "options": [
+    {"id": "equal",        "share_heavy_user": 33, "share_light_user": 33, "share_middle_user": 34, "admin_effort": "none",  "needs_receipts": false},
+    {"id": "by-usage",     "share_heavy_user": 55, "share_light_user": 15, "share_middle_user": 30, "admin_effort": "high",  "needs_receipts": true},
+    {"id": "usage-capped", "share_heavy_user": 45, "share_light_user": 22, "share_middle_user": 33, "admin_effort": "medium","needs_receipts": true},
+    {"id": "equal-minus",  "share_heavy_user": 40, "share_light_user": 26, "share_middle_user": 34, "admin_effort": "low",   "needs_receipts": false}
+  ]
+}
