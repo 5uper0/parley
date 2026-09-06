@@ -5,8 +5,10 @@ accept an outcome their own sheet rejects, a deadlock is reported honestly inste
 the receipt distinguishes unanimous acceptance from an honestly computed outcome, and one
 participant's position never reaches another participant's screen.
 """
+import glob
 import json
 import os
+import re
 import sys
 
 import pytest
@@ -385,3 +387,34 @@ def test_sign_flag_signs_and_the_receipt_still_verifies(tmp_path, monkeypatch):
     report = mod.verify(json.loads(out_path.read_text()))
     assert report["ok"] is True
     assert {a["signature"] for a in report["acceptances"]} == {"verified"}
+
+
+# examples/cases/ is addressed to someone who is not on the project yet: a newcomer who reads the
+# README and runs the command in it. Nobody here executes those instructions, so nothing discovers
+# when they rot. These two tests are that discovery.
+
+def test_every_shipped_case_loads_with_the_documented_command():
+    """A case file that does not load makes the README's one command fail on first contact."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    cases = sorted(glob.glob(os.path.join(here, "..", "examples", "cases", "*.json")))
+    assert cases, "examples/cases/ has no case files; the README promises four"
+    for path in cases:
+        title, options = rd.load_options(path)
+        assert title and title != "Untitled decision", f"{os.path.basename(path)} has no title"
+        assert len(options) >= 3, f"{os.path.basename(path)} needs enough options to disagree over"
+        attrs = {k for o in options for k in o}
+        assert len(attrs) >= 3, f"{os.path.basename(path)} has too few attributes to set a red line on"
+
+
+def test_the_cases_readme_names_only_files_that_exist():
+    """The README lists the cases by filename. A rename would leave a newcomer chasing a dead path."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    cases_dir = os.path.join(here, "..", "examples", "cases")
+    readme = os.path.join(cases_dir, "README.md")
+    assert os.path.isfile(readme), "examples/cases/README.md is missing"
+    text = open(readme, encoding="utf-8").read()
+    named = set(re.findall(r"`([a-z0-9-]+\.json)`", text))
+    assert named, "the README stopped naming any case file"
+    for filename in sorted(named):
+        assert os.path.isfile(os.path.join(cases_dir, filename)), \
+            f"examples/cases/README.md points at {filename}, which does not exist"
