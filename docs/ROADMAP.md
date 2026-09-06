@@ -95,7 +95,11 @@ Every Exp has a kill/continue gate. Small balanced bets, feedback each cycle.
 - **Exp 1:** real people ran a decision end-to-end, each ratified, non-betrayal verified, plus
   one "this is better because …" in a participant's own words. Identical to the gate stated on the
   Exp 1 line above — if these two ever diverge again, the divergence is the bug. Runnable since
-  2026-09-05 via `examples/real_decision.py`; the receipt it writes is the artifact.
+  2026-09-05 via `examples/real_decision.py`; the receipt it writes is the artifact, and since
+  2026-09-06 anyone holding that file can check it: `scripts/verify-receipt.py <receipt>` rebuilds
+  the transcript, re-derives the hash, recomputes the max-min pick, and checks every acceptance is
+  bound to that record. It also prints what it does not prove, which is most of the interesting
+  part until there is an owner-to-key roster.
 
 ## Critical files
 

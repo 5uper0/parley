@@ -1,0 +1,10 @@
+{
+  "title": "Which flat do we take?",
+  "options": [
+    {"id": "centre-small",   "rent_per_person": 620, "commute_min": 10, "bedrooms": 2, "outdoor_space": false, "pets_allowed": false, "furnished": true},
+    {"id": "centre-large",   "rent_per_person": 790, "commute_min": 12, "bedrooms": 3, "outdoor_space": false, "pets_allowed": true,  "furnished": true},
+    {"id": "suburb-large",   "rent_per_person": 540, "commute_min": 38, "bedrooms": 3, "outdoor_space": true,  "pets_allowed": true,  "furnished": false},
+    {"id": "suburb-cheap",   "rent_per_person": 430, "commute_min": 52, "bedrooms": 2, "outdoor_space": true,  "pets_allowed": true,  "furnished": false},
+    {"id": "midtown-middle", "rent_per_person": 665, "commute_min": 22, "bedrooms": 3, "outdoor_space": false, "pets_allowed": false, "furnished": true}
+  ]
+}

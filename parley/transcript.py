@@ -5,11 +5,14 @@ SHA-256 over the canonical record, so any edit is detectable. `verify_non_betray
 lets an owner replay their OWN private sheet against the final decision locally — proving
 no red line was crossed without revealing the sheet to anyone.
 """
+import copy
 import hashlib
 import json
 from typing import Any, Optional
 
 from .preferences import PreferenceSheet
+
+_VERDICT_KEYS = frozenset({"owner", "acceptable", "score", "reason", "sig", "pubkey_hex"})
 
 
 class Transcript:
@@ -32,6 +35,35 @@ class Transcript:
 
     def to_dict(self) -> dict:
         return {"entries": self.entries, "result": self.result}
+
+    @classmethod
+    def from_dict(cls, data: Any) -> "Transcript":
+        """Rebuild a record from `to_dict()` output so its hash can be re-derived by someone
+        who was not in the room. Shape is checked strictly and fails closed: a key `record()`
+        never writes would either ride into the hash unseen or be silently dropped, and both
+        make the re-derived digest mean something other than "this is that record"."""
+        if not isinstance(data, dict) or set(data) != {"entries", "result"}:
+            raise ValueError("transcript must be an object with exactly 'entries' and 'result'")
+        entries, result = data["entries"], data["result"]
+        if not isinstance(entries, list):
+            raise ValueError("transcript 'entries' must be a list")
+        if result is not None and (
+                not isinstance(result, dict) or set(result) != {"status", "decision"}):
+            raise ValueError("transcript 'result' must be null or {status, decision}")
+        t = cls()
+        for i, entry in enumerate(entries):
+            if not isinstance(entry, dict) or set(entry) != {"option", "verdicts"}:
+                raise ValueError(f"entry {i} must be {{option, verdicts}}")
+            if not isinstance(entry["verdicts"], list):
+                raise ValueError(f"entry {i} 'verdicts' must be a list")
+            verdicts = []
+            for j, v in enumerate(entry["verdicts"]):
+                if not isinstance(v, dict) or set(v) != _VERDICT_KEYS:
+                    raise ValueError(f"entry {i} verdict {j} must carry exactly {sorted(_VERDICT_KEYS)}")
+                verdicts.append({k: copy.deepcopy(v[k]) for k in _VERDICT_KEYS})
+            t.entries.append({"option": copy.deepcopy(entry["option"]), "verdicts": verdicts})
+        t.result = copy.deepcopy(result)
+        return t
 
     def hash(self) -> str:
         blob = json.dumps(self.to_dict(), sort_keys=True, ensure_ascii=False, default=str)

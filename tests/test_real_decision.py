@@ -262,3 +262,126 @@ def test_main_runs_the_whole_flow_in_manual_mode_and_writes_a_receipt(tmp_path, 
     assert data["unanimous_acceptance"] is True
     assert data["max_min_verified"] is True
     assert len(data["transcript_hash"]) == 64
+
+
+# --- signed ratification and a checkable receipt ------------------------------------------
+
+def test_receipt_records_who_took_part():
+    parties, result = _agreed_run()
+    ask = scripted(["yes", "", "yes", ""])
+    _, say = collector()
+    acceptances = rd.collect_ratifications(ask, say, parties, result)
+    data = rd.receipt("Pick a slot", result, acceptances, {"Bob", "Ana"})
+    assert data["participants"] == ["Ana", "Bob"]
+
+
+def test_ratification_stays_unsigned_when_no_signer_is_available():
+    parties, result = _agreed_run()
+    ask = scripted(["yes", "", "yes", ""])
+    _, say = collector()
+    acceptances = rd.collect_ratifications(ask, say, parties, result, signers={})
+    assert all(a.sig is None and a.pubkey_hex is None for a in acceptances)
+
+
+def test_default_signers_are_empty_without_pynacl(monkeypatch):
+    monkeypatch.setitem(sys.modules, "nacl", None)
+    monkeypatch.setitem(sys.modules, "parley.net.identity", None)
+    assert rd.default_signers(["Ana", "Bob"]) == {}
+
+
+def test_default_signers_give_each_participant_their_own_key():
+    pytest.importorskip("nacl")
+    signers = rd.default_signers(["Ana", "Bob"])
+    assert set(signers) == {"Ana", "Bob"}
+    payload = b"x"
+    assert signers["Ana"](payload)[1] != signers["Bob"](payload)[1]
+
+
+def test_ratification_is_signed_when_a_signer_is_available():
+    pytest.importorskip("nacl")
+    from parley.net.identity import verify_acceptance
+
+    parties, result = _agreed_run()
+    signers = rd.default_signers(["Ana", "Bob"])
+    ask = scripted(["yes", "", "yes", ""])
+    out, say = collector()
+    acceptances = rd.collect_ratifications(ask, say, parties, result, signers=signers)
+
+    assert all(verify_acceptance(a) for a in acceptances)
+    assert {a.pubkey_hex for a in acceptances} == {signers[n](b"")[1] for n in ("Ana", "Bob")}
+    printed = "\n".join(out)
+    for a in acceptances:  # each person sees the key their acceptance carries
+        assert a.pubkey_hex in printed
+    data = rd.receipt("Pick a slot", result, acceptances, {"Ana", "Bob"})
+    assert data["unanimous_acceptance"] is True
+
+
+def test_a_refused_accept_is_downgraded_and_still_signed():
+    pytest.importorskip("nacl")
+    from parley.net.identity import verify_acceptance
+
+    parties, result = _agreed_run()
+    parties[0] = party("Ana", hard=[Constraint("day", "==", "Wednesday")])
+    ask = scripted(["yes", "", "yes", ""])
+    _, say = collector()
+    acceptances = rd.collect_ratifications(ask, say, parties, result,
+                                          signers=rd.default_signers(["Ana", "Bob"]))
+    assert acceptances[0].accepted is False and verify_acceptance(acceptances[0])
+
+
+def test_main_writes_a_receipt_the_verifier_accepts(tmp_path, monkeypatch):
+    import importlib.util
+    import subprocess
+
+    path = tmp_path / "o.json"
+    path.write_text(json.dumps({"title": "Pick a slot", "options": OPTIONS}))
+    out_path = tmp_path / "receipt.json"
+    script = ["", "reviewed == true", "", "cost 30 1", "", "",
+              "", "day Tuesday 1", "", "", "yes", "", "yes", ""]
+    monkeypatch.setattr(rd, "_default_io", lambda: (scripted(script), lambda *_: None))
+    assert rd.main(["--options", str(path), "--participants", "Ana,Bob",
+                    "--manual", "--receipt", str(out_path)]) == 0
+
+    verifier = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts",
+                            "verify-receipt.py")
+    proc = subprocess.run([sys.executable, verifier, str(out_path)],
+                          capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    data = json.loads(out_path.read_text())
+    assert data["participants"] == ["Ana", "Bob"]
+    spec = importlib.util.spec_from_file_location("verify_receipt", verifier)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    report = mod.verify(data)
+    assert report["ok"] is True
+    # Unsigned is the default on purpose: the keys would be made by this same process, so a
+    # signature could never say who accepted, and an unsigned receipt verifies without pynacl.
+    assert {a["signature"] for a in report["acceptances"]} == {"unsigned"}
+
+
+def test_sign_flag_signs_and_the_receipt_still_verifies(tmp_path, monkeypatch):
+    """--sign is the opt-in path; it must still produce a receipt the verifier accepts."""
+    import importlib.util
+    import subprocess
+
+    pytest.importorskip("nacl")
+    path = tmp_path / "o.json"
+    path.write_text(json.dumps({"title": "Pick a slot", "options": OPTIONS}))
+    out_path = tmp_path / "receipt.json"
+    script = ["", "reviewed == true", "", "cost 30 1", "", "",
+              "", "day Tuesday 1", "", "", "yes", "", "yes", ""]
+    monkeypatch.setattr(rd, "_default_io", lambda: (scripted(script), lambda *_: None))
+    assert rd.main(["--options", str(path), "--participants", "Ana,Bob",
+                    "--manual", "--sign", "--receipt", str(out_path)]) == 0
+
+    verifier = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts",
+                            "verify-receipt.py")
+    proc = subprocess.run([sys.executable, verifier, str(out_path)],
+                          capture_output=True, text=True)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    spec = importlib.util.spec_from_file_location("verify_receipt", verifier)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    report = mod.verify(json.loads(out_path.read_text()))
+    assert report["ok"] is True
+    assert {a["signature"] for a in report["acceptances"]} == {"verified"}
