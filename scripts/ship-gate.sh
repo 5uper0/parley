@@ -61,9 +61,14 @@ echo "  tape hashes come from a live run"
 echo "▸ 5/5 published test-count claims are current"
 # Report what the checker actually found, rather than a sentence written here. The two trees
 # differ — the public mirror carries no data room — so a hardcoded verdict would state
-# something this gate did not verify.
-claims_out="$(bash scripts/claim-freshness-check.sh)" \
-  || fail "a test count is stale or has spread beyond the data room — run scripts/claim-freshness-check.sh"
+# something this gate did not verify. The detail is printed on failure too, so whoever hits
+# this gate sees which file and line is at fault without re-running the checker by hand.
+claims_rc=0
+claims_out="$(bash scripts/claim-freshness-check.sh)" || claims_rc=$?
+if [[ "$claims_rc" -ne 0 ]]; then
+  echo "$claims_out"
+  fail "a test count is stale or has spread beyond the data room"
+fi
 echo "  ${claims_out#OK }"
 
 echo "✓ ship-gate passed — tests green · zero-dep core · examples run · claims true"
