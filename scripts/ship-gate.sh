@@ -59,8 +59,11 @@ echo "▸ 4/5 homepage tape matches a real engine run"
 echo "  tape hashes come from a live run"
 
 echo "▸ 5/5 published test-count claims are current"
-bash scripts/claim-freshness-check.sh >/dev/null \
-  || fail "a live doc states a stale test count — run scripts/claim-freshness-check.sh"
-echo "  every live doc agrees with pytest"
+# Report what the checker actually found, rather than a sentence written here. The two trees
+# differ — the public mirror carries no data room — so a hardcoded verdict would state
+# something this gate did not verify.
+claims_out="$(bash scripts/claim-freshness-check.sh)" \
+  || fail "a test count is stale or has spread beyond the data room — run scripts/claim-freshness-check.sh"
+echo "  ${claims_out#OK }"
 
 echo "✓ ship-gate passed — tests green · zero-dep core · examples run · claims true"
