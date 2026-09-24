@@ -93,8 +93,8 @@ show an adversary; the private constraints stay inside the process.
 - **Malformed body:** missing `option` key (`KeyError`), non-dict `option` (`ValueError`),
   invalid JSON (`json.JSONDecodeError`), or a predicate that raises on a malformed option
   (`KeyError`/`TypeError`/`ValueError`) → `400 {"error":"invalid option"}`. The one exception is
-  the owner's own utility returning NaN (`UtilityError`) → `500 {"error":"internal error"}`, since
-  that is the sheet's fault, not the coordinator's. Empty body reads
+  the owner's own utility returning NaN (`UtilityError`) → `500 {"error":"internal error"}`. The
+  body parser refuses `NaN`/`Infinity` constants (→ 400), so a coordinator cannot trigger it. Empty body reads
   as `{}` then fails the missing-`option` path → 400.
 - **`identity=None` passed to `serve`:** server still answers, but `/card` omits `pubkey_hex`
   and `/consider` omits `sig`/`pubkey_hex` — verdicts are then unsigned (skipped by

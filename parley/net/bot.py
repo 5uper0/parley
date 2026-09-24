@@ -29,6 +29,10 @@ MAX_BODY = 4096  # bytes; a legitimate /consider body is ~100 bytes
 REQUEST_TIMEOUT = 10
 
 
+def _reject_constant(name):
+    raise ValueError(f"non-finite JSON constant {name}")
+
+
 class _RateLimiter:
     """Fixed-window per-client counter. None disables it."""
     def __init__(self, spec):
@@ -104,12 +108,12 @@ def _make_handler(agent, identity, auth_token, limiter):
                 self._send(413, {"error": "payload too large"})
                 return
             try:
-                data = json.loads(self.rfile.read(length) or b"{}")
+                data = json.loads(self.rfile.read(length) or b"{}", parse_constant=_reject_constant)
                 option = data["option"]
                 if not isinstance(option, dict):
                     raise ValueError("option must be an object")
                 v = agent.consider(option)  # predicates may raise on malformed options
-            except UtilityError:  # the owner's sheet is broken; the coordinator did nothing wrong
+            except UtilityError:  # NaN can only come from the sheet: the body parser refuses NaN/Infinity
                 self._send(500, {"error": "internal error"})
                 return
             except (KeyError, ValueError, TypeError, json.JSONDecodeError):

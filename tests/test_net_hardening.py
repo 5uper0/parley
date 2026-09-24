@@ -499,22 +499,41 @@ def test_an_owners_own_nan_utility_is_a_500_not_a_400_blaming_the_coordinator(la
     assert code == 500 and json.loads(body) == {"error": "internal error"}
 
 
-@pytest.mark.parametrize("key", [123, {"k": 1}, ["ab"], "", "not-hex", "abc"])
+@pytest.mark.parametrize("key", [123, {"k": 1}, ["ab"], "", "not-hex", "abc", "ab", "ab cd", "0" * 63, "0" * 65, "g" * 64])
 def test_a_card_with_a_key_that_is_not_hex_is_refused_at_discovery(fake_bot, key):
     with pytest.raises(ValueError):
         RemoteAgent(fake_bot(OK_VERDICT, card={"owner": "Ana", "pubkey_hex": key}).url)
 
 
-def test_the_rate_limiter_forgets_clients_whose_window_has_elapsed(monkeypatch):
+def test_the_rate_limiter_forgets_expired_clients_but_keeps_live_ones(monkeypatch):
     now = [1000.0]
     monkeypatch.setattr(bot_mod.time, "monotonic", lambda: now[0])
-    rl = _RateLimiter((5, 60))
+    rl = _RateLimiter((2, 60))
     for i in range(200):
         rl.allow(f"10.0.0.{i}")
     assert len(rl._hits) == 200
-    now[0] += 61
+    now[0] = 1030
+    assert [rl.allow("live") for _ in range(3)] == [True, True, False]
+    now[0] = 1061
     rl.allow("late")
-    assert len(rl._hits) == 1
+    assert set(rl._hits) == {"live", "late"}
+    assert rl.allow("live") is False  # its window (started 1030) has not elapsed
+
+
+def test_nan_and_infinity_in_the_body_are_a_400_not_the_owners_fault(launch):
+    from parley.preferences import PreferenceSheet
+    sheet = PreferenceSheet("X", utility=lambda o: 1 - o.get("price", 0) / 100)
+    httpd = serve("X", sheet, port=0)
+    threading.Thread(target=httpd.serve_forever, args=(0.05,), daemon=True).start()
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}"
+        for raw in (b'{"option":{"price":NaN}}', b'{"option":{"price":Infinity}}',
+                    b'{"option":{"price":-Infinity}}'):
+            code, body = _request(url, raw=raw)
+            assert code == 400 and json.loads(body) == {"error": "invalid option"}
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
 
 
 def test_an_empty_token_refuses_to_start_instead_of_silently_disabling_auth(monkeypatch):

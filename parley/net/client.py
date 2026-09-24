@@ -13,6 +13,7 @@ checked by `verify_transcript`; the core client imports no crypto.
 """
 import json
 import math
+import string
 import urllib.request
 
 from parley.agent import Verdict
@@ -59,13 +60,8 @@ class RemoteAgent:
 
 
 def _is_hex(value) -> bool:
-    if not isinstance(value, str) or not value:
-        return False
-    try:
-        bytes.fromhex(value)
-    except ValueError:
-        return False
-    return True
+    """An Ed25519 public key is 32 bytes, so exactly 64 hex digits."""
+    return isinstance(value, str) and len(value) == 64 and all(c in string.hexdigits for c in value)
 
 
 def _well_formed(d, owner) -> bool:
