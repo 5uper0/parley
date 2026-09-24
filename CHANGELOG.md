@@ -26,6 +26,19 @@ omitted.
 - Live demo promoted to six scenarios with the Partnership and DAO treasury recipes (#18).
 - Tests covering transcript tamper-evidence edge cases — first external contribution (#21).
 
+### Changed
+- A red-line predicate now passes only when it returns exactly `True`. Any other value crosses the
+  red line, including truthy non-bools: `lambda o: o.get("flag")` used to pass on any non-empty
+  value and now counts as a crossing. This is the change most likely to affect existing sheets —
+  return a real `bool` from every predicate.
+- `PreferenceSheet.evaluate()` raises `ValueError` when the utility returns NaN. The old clamp
+  turned NaN into a score of 1.0.
+- `run_consensus()` with no agents returns an honest deadlock instead of crashing, and refuses
+  duplicate owner names or an unknown `rule` with `ValueError` before any agent is asked.
+- `verify_outcome()` returns `False` when any entry is missing an owner's verdict, carries an
+  owner twice, or has a different owner set from the other entries. Before, a coordinator could
+  drop one owner's veto from the entry it wanted to win and the recomputation agreed with it.
+
 ### Fixed
 - Static demo build now carries the proof cards and brand assets (#45).
 - SHA-256 receipt hash wraps instead of overflowing its box (#19).
