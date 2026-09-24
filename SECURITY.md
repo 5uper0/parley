@@ -28,7 +28,12 @@ framing* is still welcome):
 - **Signatures are tamper-evidence, not authenticity.** `verify_transcript` checks each signature
   against the pubkey carried *in the same record*; there is no trusted `owner → key` roster yet, so a
   coordinator that assembles the transcript could sign a fabricated verdict with its own key. The
-  roster-pinned check (pin each owner's key from its `/card`) lands in v0.2.
+  roster-pinned check (pin each owner's key from its `/card`) lands in v0.2. One client-side piece
+  is in: when a bot's `/card` advertises a key, `RemoteAgent` refuses any `/consider` reply that
+  lacks a signature or carries a different key, so a party between an honest coordinator and a bot
+  cannot slip in verdicts signed with its own key after discovery. It does not help a third party
+  against a dishonest coordinator, and without TLS a party present at discovery can serve its own
+  card.
 - **Signed acceptances have the same gap.** `verify_acceptance` checks the signature against the
   pubkey carried *in the same acceptance*, so anyone with a key can sign an acceptance under another
   owner's name. Unsigned acceptances authenticate nothing: `agreement()` without a `verifier` is

@@ -43,6 +43,10 @@ omitted.
   veto in a one-option record, still passes. `scripts/verify-receipt.py` passes the receipt's
   `participants` (coordinator-written, as its output now says) and reports an owner-set mismatch
   with its own message instead of calling the decision non-max-min.
+- `RemoteAgent.consider()` raises `ValueError` when the bot's card advertised a `pubkey_hex` and
+  the reply carries a different key or no signature. Before, a party between the coordinator and a
+  signed bot could sign verdicts with its own key and `verify_transcript()` accepted them. Bots
+  whose card has no key are unaffected.
 
 ### Fixed
 - Static demo build now carries the proof cards and brand assets (#45).
