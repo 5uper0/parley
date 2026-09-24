@@ -6,15 +6,17 @@ This script does exactly that, from public data alone — no preference sheet is
 
 - rebuilds the transcript (`Transcript.from_dict`) and re-hashes it against the hash the
   receipt claims, so any edit to the record after the receipt was written shows up;
-- recomputes the max-min outcome from the recorded verdicts (`consensus.verify_outcome`);
+- recomputes the max-min outcome from the recorded verdicts (`consensus.verify_outcome`),
+  requiring every entry to carry exactly one verdict from each listed participant;
 - checks every acceptance through `ratify.agreement`'s rules: bound to exactly this hash and
   this decision, by an owner who appears in the record; and, where an acceptance carries a
   signature, validates it (`net.identity.verify_acceptance`, needs the `crypto` extra).
 
 It also prints what it does NOT prove. Per SECURITY.md the public key in a signed acceptance
 or verdict is self-attested by the record that carries it, so a holder of any key can sign
-under another owner's name; unsigned acceptances authenticate nobody; and verdict payloads
-carry no replay binding. None of that is hidden behind a green tick.
+under another owner's name; unsigned acceptances authenticate nobody; the participants list is
+written by the same coordinator as the record; and verdict payloads carry no replay binding.
+None of that is hidden behind a green tick.
 
 Exit 0 only when every check passes; 1 when any check fails or a present signature could not
 be checked; 2 when the file cannot be read as a receipt.
@@ -99,21 +101,27 @@ def verify(receipt: Any) -> dict:
     if not result_ok:
         errors.append("receipt status/decision do not match the finalized record")
 
-    max_min = verify_outcome(transcript)
+    owners = {v["owner"] for e in transcript.entries for v in e["verdicts"]}
+    participants = receipt["participants"]
+    roster_shape_ok = (isinstance(participants, list) and bool(participants)
+                       and all(isinstance(p, str) for p in participants)
+                       and len(set(participants)) == len(participants))
+    roster_ok = roster_shape_ok and set(participants) == owners
+
+    max_min = verify_outcome(transcript,
+                             expected_owners=participants if roster_shape_ok else None)
+    owner_set_mismatch = (not max_min and roster_shape_ok and verify_outcome(transcript))
     max_min_ok = max_min and receipt["max_min_verified"] is True
     report["max_min"] = {"recomputed": max_min, "claimed": receipt["max_min_verified"],
-                         "ok": max_min_ok}
-    if not max_min:
+                         "owner_set_mismatch": owner_set_mismatch, "ok": max_min_ok}
+    if owner_set_mismatch:
+        errors.append("the record's owner set is not exactly the receipt's participants, so "
+                      "the max-min recomputation over it proves nothing (a participant's "
+                      "verdicts are missing, or a stranger's are present)")
+    elif not max_min:
         errors.append("the announced decision is not the max-min option over the recorded verdicts")
     elif receipt["max_min_verified"] is not True:
         errors.append("receipt claims max_min_verified is not true, but the recomputation says it is")
-
-    owners = {v["owner"] for e in transcript.entries for v in e["verdicts"]}
-    participants = receipt["participants"]
-    roster_ok = (isinstance(participants, list) and bool(participants)
-                 and all(isinstance(p, str) for p in participants)
-                 and len(set(participants)) == len(participants)
-                 and set(participants) == owners)
     report["roster"] = {"participants": participants, "transcript_owners": sorted(owners),
                         "ok": roster_ok}
     if not roster_ok:
@@ -202,12 +210,15 @@ def render(report: dict) -> str:
         return "\n".join(lines) + "\n"
     decision = json.dumps(report["decision"], sort_keys=True, ensure_ascii=False)
     lines += [f"  status {report['status']}   decision {decision}", "", "Record"]
+    mm_note = ("owner set does not match participants" if report["max_min"]["owner_set_mismatch"]
+               else "recomputed from the recorded verdicts")
     h = report["hash"]
     lines += [f"  transcript hash   claimed    {h['claimed']}",
               f"                    recomputed {h['recomputed']}   {_mark(h['ok'])}",
               f"  status/decision   match the finalized record   {_mark(report['result']['ok'])}",
               f"  max-min honest    {'yes' if report['max_min']['recomputed'] else 'NO'}"
-              f" (recomputed from the recorded verdicts)   {_mark(report['max_min']['ok'])}",
+              f" ({mm_note})"
+              f"   {_mark(report['max_min']['ok'])}",
               f"  roster            {', '.join(map(str, report['roster']['participants']))}"
               f" (record: {', '.join(report['roster']['transcript_owners'])})"
               f"   {_mark(report['roster']['ok'])}",
@@ -238,7 +249,8 @@ def render(report: dict) -> str:
         "  - the transcript in the receipt hashes to the hash the receipt claims, so the record",
         "    was not edited after the receipt was written",
         "  - the announced decision is the max-min option over the recorded verdicts (or the",
-        "    deadlock is honest: no option cleared everyone's red lines)",
+        "    deadlock is honest: no option cleared everyone's red lines), and every entry",
+        "    carries exactly one verdict from each listed participant",
         "  - every acceptance is bound to exactly this hash and this decision, by an owner who",
         "    appears in the record, and the unanimity claim matches those acceptances",
         "  - a signed acceptance or verdict validates against the public key it carries",
@@ -248,6 +260,9 @@ def render(report: dict) -> str:
         "    anyone holding a key (the coordinator included) can sign an acceptance or a",
         "    verdict under another owner's name. There is no owner -> key roster yet (SECURITY.md).",
         "  - unsigned acceptances authenticate nobody: that tier is tamper-evidence only",
+        "  - that the roster is the right one: the participants list is itself coordinator-written.",
+        "    Checking every entry against it binds the record to the roster you expect only if",
+        "    you check that list against who you know took part.",
         "  - that this is the record the participants saw: the transcript is coordinator-",
         "    authored. Each participant must compare the hash they were shown at ratification",
         "    with the recomputed one above.",

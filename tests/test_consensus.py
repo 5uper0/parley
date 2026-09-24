@@ -217,3 +217,34 @@ def test_verify_outcome_rejects_an_unfinalized_record():
     r = run_consensus([ana(), bob()], OPTIONS)
     r.transcript.result = None
     assert verify_outcome(r.transcript) is False
+
+
+# ---------- verify_outcome against the roster the holder expects ----------
+
+def test_dropping_an_owner_from_every_entry_passes_without_a_roster_but_not_with_one():
+    t = _dropped_veto_record()
+    for e in t.entries:
+        e["verdicts"] = [v for v in e["verdicts"] if v["owner"] != "bob"]
+    t.finalize(status="agreed", decision=slot("fri", 16))
+    assert verify_outcome(t) is True  # self-consistent: bob is simply absent everywhere
+    assert verify_outcome(t, expected_owners=["ana", "bob"]) is False
+
+
+def test_deleting_the_lone_veto_in_a_one_option_record_is_caught_by_the_roster():
+    b = Agent("bob", PreferenceSheet(owner="bob",
+                                     hard=[HardConstraint("no-friday", lambda o: o["day"] != "fri")],
+                                     utility=lambda o: 0.5))
+    r = run_consensus([_fixed("ana", {"fri": 0.9}), b], [slot("fri", 16)])
+    assert r.status == "deadlock"
+    t = r.transcript
+    t.entries[0]["verdicts"] = [v for v in t.entries[0]["verdicts"] if v["owner"] != "bob"]
+    t.finalize(status="agreed", decision=slot("fri", 16))
+    assert verify_outcome(t) is True
+    assert verify_outcome(t, expected_owners={"ana", "bob"}) is False
+
+
+def test_an_honest_record_passes_against_its_own_roster():
+    r = run_consensus([ana(), bob()], OPTIONS)
+    assert verify_outcome(r.transcript, expected_owners=("bob", "ana")) is True
+    assert verify_outcome(r.transcript, expected_owners=["ana", "bob", "cara"]) is False
+    assert verify_outcome(r.transcript, expected_owners=["ana", "ana", "bob"]) is False

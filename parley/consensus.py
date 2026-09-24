@@ -6,7 +6,7 @@ rule — maximise the least-happy agent's soft score (a Rawlsian / max-min socia
 not a majority vote), tie-broken by total welfare. No feasible option => honest deadlock.
 """
 from dataclasses import dataclass
-from typing import Any, List, Optional, Protocol, Sequence, Tuple
+from typing import Any, Iterable, List, Optional, Protocol, Sequence, Tuple
 
 from .agent import Verdict
 from .transcript import Transcript
@@ -57,7 +57,8 @@ def run_consensus(
     return ConsensusResult("agreed", decision, transcript)
 
 
-def verify_outcome(transcript: Transcript) -> bool:
+def verify_outcome(transcript: Transcript, *,
+                   expected_owners: Optional[Iterable[str]] = None) -> bool:
     """Recompute the max-min outcome from the transcript's recorded verdicts and check it matches
     the announced decision. This is what catches a dishonest coordinator that finalized a
     *feasible-but-not-max-min* option (or an infeasible one): `verify_non_betrayal` only proves an
@@ -67,9 +68,15 @@ def verify_outcome(transcript: Transcript) -> bool:
     Every entry must carry exactly one verdict from each owner in the record. Without that, a
     coordinator could drop one owner's veto from the entry it wants to win (or duplicate another
     owner's verdict in its place) and the recomputation would agree with it.
+
+    That check is relative to the record itself, so a coordinator that drops one owner from
+    *every* entry (or the lone veto in a one-option record) still passes it. Pass
+    `expected_owners`, the roster the caller expects, and every entry's owner set must equal it
+    exactly. The check is only as good as that roster: taken from the same coordinator that
+    wrote the record, it binds nothing.
     """
     feasible: List[Tuple[Any, float, float]] = []
-    roster = None
+    roster = None if expected_owners is None else sorted(expected_owners)
     for entry in transcript.entries:
         verdicts = entry["verdicts"]
         owners = sorted(v["owner"] for v in verdicts)

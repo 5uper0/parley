@@ -38,6 +38,11 @@ omitted.
 - `verify_outcome()` returns `False` when any entry is missing an owner's verdict, carries an
   owner twice, or has a different owner set from the other entries. Before, a coordinator could
   drop one owner's veto from the entry it wanted to win and the recomputation agreed with it.
+- `verify_outcome()` takes an optional `expected_owners=`: when given, every entry's owner set must
+  equal it exactly. Without it, a coordinator that drops one owner from every entry, or the lone
+  veto in a one-option record, still passes. `scripts/verify-receipt.py` passes the receipt's
+  `participants` (coordinator-written, as its output now says) and reports an owner-set mismatch
+  with its own message instead of calling the decision non-max-min.
 
 ### Fixed
 - Static demo build now carries the proof cards and brand assets (#45).

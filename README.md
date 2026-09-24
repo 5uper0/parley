@@ -135,8 +135,9 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
 - **Outcome verification.** `verify_outcome(transcript)` (in `parley.consensus`) recomputes the
   max-min winner from the recorded verdicts and checks it matches the announced decision, so a
   coordinator that finalizes a *feasible-but-not-max-min* (or infeasible) option is caught. Anyone
-  can replay it over the public record — no private sheet needed. (`verify_non_betrayal` still only
-  proves your *own* red lines held.)
+  can replay it over the public record — no private sheet needed. Pass
+  `expected_owners=` the roster you expect, or a coordinator that drops one owner from every entry
+  still passes. (`verify_non_betrayal` still only proves your *own* red lines held.)
 
 Not yet (v0.1 honest limits, do not treat as production-secure for adversarial principals):
 - **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster

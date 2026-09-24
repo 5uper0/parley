@@ -43,7 +43,11 @@ Do not deploy v0 against genuinely adversarial principals in production. Reports
 collusion-resistance story, or that break a guarantee we *didn't* list above, are the ones we most
 want, the first three items are on the v0.2 roadmap. Outcome verification closed in v0.2:
 `verify_outcome(transcript)` recomputes the max-min winner from the recorded verdicts and checks it
-matches the announced decision.
+matches the announced decision. On its own it checks the owner set only against the record itself,
+so a coordinator that drops one owner from every entry still passes; pass
+`expected_owners=<the roster you expect>` and every entry must carry exactly that owner set.
+`scripts/verify-receipt.py` passes the receipt's `participants`, which the coordinator also wrote,
+so that binding holds only if the holder checks that list against who actually took part.
 
 ## Supported versions
 
