@@ -166,6 +166,16 @@ def test_an_exact_tie_goes_to_the_first_listed_option_and_verify_outcome_agrees(
     assert verify_outcome(r.transcript) is False
 
 
+def test_duplicate_owner_names_are_refused():
+    # verify_outcome requires one verdict per owner per entry, so a record with two "ana"s
+    # could never verify; refuse it before anyone is asked
+    other_ana = Agent("ana", PreferenceSheet(owner="ana", utility=lambda o: 0.1))
+    with pytest.raises(ValueError):
+        run_consensus([ana(), other_ana], OPTIONS)
+    with pytest.raises(ValueError):
+        run_consensus([ana(), bob(), ana()], [])
+
+
 def test_unknown_rule_is_refused_even_when_nothing_is_feasible():
     with pytest.raises(ValueError):
         run_consensus([ana(), bob()], [], rule="majority")

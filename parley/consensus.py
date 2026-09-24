@@ -32,6 +32,9 @@ def run_consensus(
 ) -> ConsensusResult:
     if rule != "egalitarian":
         raise ValueError(f"unknown rule: {rule!r}")
+    owners = [a.owner for a in agents]
+    if len(set(owners)) != len(owners):
+        raise ValueError("owner names must be distinct")
     transcript = Transcript()
     feasible: List[Tuple[Any, float, float]] = []  # (option, floor_score, total_score)
 
