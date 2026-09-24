@@ -94,7 +94,7 @@ show an adversary; the private constraints stay inside the process.
   invalid JSON (`json.JSONDecodeError`), or a predicate that raises on a malformed option
   (`KeyError`/`TypeError`/`ValueError`) → `400 {"error":"invalid option"}`. The one exception is
   the owner's own utility returning NaN (`UtilityError`) → `500 {"error":"internal error"}`. The
-  body parser refuses `NaN`/`Infinity` constants (→ 400), so a coordinator cannot trigger it. Empty body reads
+  body parser refuses `NaN`/`Infinity` and overflowing numbers such as `1e400` (→ 400), so a coordinator cannot trigger it. Empty body reads
   as `{}` then fails the missing-`option` path → 400.
 - **`identity=None` passed to `serve`:** server still answers, but `/card` omits `pubkey_hex`
   and `/consider` omits `sig`/`pubkey_hex` — verdicts are then unsigned (skipped by

@@ -520,15 +520,16 @@ def test_the_rate_limiter_forgets_expired_clients_but_keeps_live_ones(monkeypatc
     assert rl.allow("live") is False  # its window (started 1030) has not elapsed
 
 
-def test_nan_and_infinity_in_the_body_are_a_400_not_the_owners_fault(launch):
+def test_non_finite_numbers_in_the_body_are_a_400_not_the_owners_fault(launch):
     from parley.preferences import PreferenceSheet
-    sheet = PreferenceSheet("X", utility=lambda o: 1 - o.get("price", 0) / 100)
+    sheet = PreferenceSheet("X", utility=lambda o: o.get("price", 0) * 0)
     httpd = serve("X", sheet, port=0)
     threading.Thread(target=httpd.serve_forever, args=(0.05,), daemon=True).start()
     try:
         url = f"http://127.0.0.1:{httpd.server_address[1]}"
         for raw in (b'{"option":{"price":NaN}}', b'{"option":{"price":Infinity}}',
-                    b'{"option":{"price":-Infinity}}'):
+                    b'{"option":{"price":-Infinity}}', b'{"option":{"price":1e400}}',
+                    b'{"option":{"price":-1e400}}'):
             code, body = _request(url, raw=raw)
             assert code == 400 and json.loads(body) == {"error": "invalid option"}
     finally:

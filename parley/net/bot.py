@@ -12,6 +12,7 @@ Run standalone:  PARLEY_TOKEN=$(openssl rand -hex 16) python -m parley.net.bot -
 import argparse
 import hmac
 import json
+import math
 import os
 import threading
 import time
@@ -31,6 +32,13 @@ REQUEST_TIMEOUT = 10
 
 def _reject_constant(name):
     raise ValueError(f"non-finite JSON constant {name}")
+
+
+def _finite_float(text):
+    value = float(text)  # 1e400 parses to inf without ever being the literal Infinity
+    if not math.isfinite(value):
+        raise ValueError("non-finite JSON number")
+    return value
 
 
 class _RateLimiter:
@@ -108,7 +116,8 @@ def _make_handler(agent, identity, auth_token, limiter):
                 self._send(413, {"error": "payload too large"})
                 return
             try:
-                data = json.loads(self.rfile.read(length) or b"{}", parse_constant=_reject_constant)
+                data = json.loads(self.rfile.read(length) or b"{}", parse_constant=_reject_constant,
+                                  parse_float=_finite_float)
                 option = data["option"]
                 if not isinstance(option, dict):
                     raise ValueError("option must be an object")
@@ -116,7 +125,7 @@ def _make_handler(agent, identity, auth_token, limiter):
             except UtilityError:  # NaN can only come from the sheet: the body parser refuses NaN/Infinity
                 self._send(500, {"error": "internal error"})
                 return
-            except (KeyError, ValueError, TypeError, json.JSONDecodeError):
+            except (KeyError, ValueError, TypeError, OverflowError, json.JSONDecodeError):
                 self._send(400, {"error": "invalid option"})
                 return
             out = {"owner": v.owner, "acceptable": v.acceptable,
