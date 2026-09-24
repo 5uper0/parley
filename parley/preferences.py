@@ -9,6 +9,10 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 
+class UtilityError(ValueError):
+    """The owner's own utility function returned NaN: a fault in the sheet, not in the option."""
+
+
 @dataclass(frozen=True)
 class HardConstraint:
     """A named red line. `predicate(option) is True` means the option is acceptable; any other
@@ -42,6 +46,6 @@ class PreferenceSheet:
         else:
             raw = float(self.utility(option))
             if math.isnan(raw):
-                raise ValueError("utility returned NaN")
+                raise UtilityError("utility returned NaN")
             score = max(0.0, min(1.0, raw))
         return Evaluation(feasible=not violated, violated=violated, score=score)

@@ -483,3 +483,45 @@ def test_run_env_stops_the_scenario_when_signatures_do_not_verify(monkeypatch):
     with pytest.raises(SystemExit) as e:
         run_env.run_scenario(["ana", "bob"], base_port=8401)
     assert "signature check FAILED" in str(e.value.code)
+
+
+# --- follow-ups from the 2026-09-24 audits --------------------------------------------------
+
+def test_an_owners_own_nan_utility_is_a_500_not_a_400_blaming_the_coordinator(launch):
+    from parley.preferences import PreferenceSheet
+    httpd = serve("Nan", PreferenceSheet("Nan", utility=lambda o: float("nan")), port=0)
+    threading.Thread(target=httpd.serve_forever, args=(0.05,), daemon=True).start()
+    try:
+        code, body = _request(f"http://127.0.0.1:{httpd.server_address[1]}", body=GOOD)
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert code == 500 and json.loads(body) == {"error": "internal error"}
+
+
+@pytest.mark.parametrize("key", [123, {"k": 1}, ["ab"], "", "not-hex", "abc"])
+def test_a_card_with_a_key_that_is_not_hex_is_refused_at_discovery(fake_bot, key):
+    with pytest.raises(ValueError):
+        RemoteAgent(fake_bot(OK_VERDICT, card={"owner": "Ana", "pubkey_hex": key}).url)
+
+
+def test_the_rate_limiter_forgets_clients_whose_window_has_elapsed(monkeypatch):
+    now = [1000.0]
+    monkeypatch.setattr(bot_mod.time, "monotonic", lambda: now[0])
+    rl = _RateLimiter((5, 60))
+    for i in range(200):
+        rl.allow(f"10.0.0.{i}")
+    assert len(rl._hits) == 200
+    now[0] += 61
+    rl.allow("late")
+    assert len(rl._hits) == 1
+
+
+def test_an_empty_token_refuses_to_start_instead_of_silently_disabling_auth(monkeypatch):
+    sheet = PROFILES["ana"]()
+    with pytest.raises(ValueError):
+        serve(sheet.owner, sheet, port=0, auth_token="")
+    monkeypatch.setenv("PARLEY_TOKEN", "")
+    monkeypatch.setattr("sys.argv", ["bot", "--profile", "ana", "--port", "0"])
+    with pytest.raises(SystemExit):
+        bot_mod.main()

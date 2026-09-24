@@ -20,6 +20,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from parley.agent import Agent, Verdict
 from parley.net.identity import Identity
 from parley.net.profiles import PROFILES
+from parley.preferences import UtilityError
 
 MAX_BODY = 4096  # bytes; a legitimate /consider body is ~100 bytes
 # Per-read idle timeout (seconds): a client that goes silent is dropped. It is NOT a total
@@ -34,12 +35,16 @@ class _RateLimiter:
         self.max, self.window = (spec or (0, 0))
         self._hits = {}
         self._lock = threading.Lock()
+        self._next_sweep = 0.0
 
     def allow(self, client):
         if not self.max:
             return True
         now = time.monotonic()
         with self._lock:
+            if now >= self._next_sweep:  # drop clients whose window has elapsed, or the map only grows
+                self._hits = {c: h for c, h in self._hits.items() if now - h[1] < self.window}
+                self._next_sweep = now + self.window
             count, start = self._hits.get(client, (0, now))
             if now - start >= self.window:
                 count, start = 0, now
@@ -104,6 +109,9 @@ def _make_handler(agent, identity, auth_token, limiter):
                 if not isinstance(option, dict):
                     raise ValueError("option must be an object")
                 v = agent.consider(option)  # predicates may raise on malformed options
+            except UtilityError:  # the owner's sheet is broken; the coordinator did nothing wrong
+                self._send(500, {"error": "internal error"})
+                return
             except (KeyError, ValueError, TypeError, json.JSONDecodeError):
                 self._send(400, {"error": "invalid option"})
                 return
@@ -120,6 +128,8 @@ def _make_handler(agent, identity, auth_token, limiter):
 def serve(owner, sheet, host="127.0.0.1", port=0, identity="auto",
           auth_token=None, rate_limit=None):
     """Build (don't run) a bot server. `identity='auto'` generates a signing key."""
+    if auth_token == "":  # "" is falsy, so it would silently turn auth off
+        raise ValueError("auth_token is empty; pass None to run without auth")
     agent = Agent(owner, sheet)
     if identity == "auto":
         identity = Identity.generate(owner)
@@ -136,6 +146,8 @@ def main():
     args = ap.parse_args()
     sheet = PROFILES[args.profile]()
     token = os.environ.get("PARLEY_TOKEN")  # auth on if set
+    if token == "":
+        raise SystemExit("PARLEY_TOKEN is set but empty; unset it to run without auth")
     httpd = serve(sheet.owner, sheet, args.host, args.port, auth_token=token)
     auth = "auth ON" if token else "auth off (dev)"
     print(f"[bot:{sheet.owner}] listening on {args.host}:{args.port} — signed, {auth}", flush=True)

@@ -28,6 +28,8 @@ class RemoteAgent:
             raise ValueError(f"malformed card from {self.url}")
         self.owner = card["owner"]
         self.pubkey_hex = card.get("pubkey_hex")
+        if self.pubkey_hex is not None and not _is_hex(self.pubkey_hex):
+            raise ValueError(f"malformed card key from {self.url}")
 
     def _headers(self):
         h = {"Content-Type": "application/json"}
@@ -54,6 +56,16 @@ class RemoteAgent:
             owner=d["owner"], acceptable=d["acceptable"], score=d["score"],
             reason=d["reason"], sig=d.get("sig"), pubkey_hex=d.get("pubkey_hex"),
         )
+
+
+def _is_hex(value) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        bytes.fromhex(value)
+    except ValueError:
+        return False
+    return True
 
 
 def _well_formed(d, owner) -> bool:
