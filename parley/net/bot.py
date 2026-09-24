@@ -3,7 +3,7 @@
   GET  /card      -> {"owner","pubkey_hex","protocol"}      (discovery; no sheet)
   POST /consider  -> {"owner","acceptable","score","reason","sig","pubkey_hex"}
 
-Hardening (Exp 0): Ed25519-signed verdicts (coordinator can't forge), optional bearer
+Hardening (Exp 0): Ed25519-signed verdicts (coordinator can't alter a bot's signed verdict), optional bearer
 auth, per-client rate limiting, body-size cap, and input validation — closing the
 preference-extraction and DoS holes. The private sheet never crosses the wire.
 

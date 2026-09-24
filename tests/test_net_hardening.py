@@ -7,9 +7,9 @@ the masked verdict shape, because run_consensus reads `acceptable` by truthiness
 by ordering. Everything runs on ephemeral ports, headless.
 """
 import json
+import importlib.util
 import os
 import socket
-import sys
 import threading
 import urllib.error
 import urllib.request
@@ -458,9 +458,9 @@ def test_a_signed_run_over_http_carries_the_card_keys_and_verifies(launch):
 # --- examples/run_env.py checks what the client does not ------------------------------------
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-sys.path.insert(0, os.path.join(ROOT, "examples"))
-
-import run_env  # noqa: E402
+_spec = importlib.util.spec_from_file_location("run_env", os.path.join(ROOT, "examples", "run_env.py"))
+run_env = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(run_env)
 
 
 def test_a_garbage_signature_under_the_card_key_passes_the_client_but_stops_run_env(fake_bot):
