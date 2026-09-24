@@ -75,6 +75,33 @@ def test_entry_order_is_part_of_the_transcript_hash():
     assert reordered.hash() != t.hash()
 
 
+def test_every_structural_edit_changes_the_hash():
+    def dropped_verdict(t):
+        t.entries[0]["verdicts"].pop()
+
+    def dropped_entry(t):
+        t.entries.pop()
+
+    def swapped_verdicts(t):
+        t.entries[0]["verdicts"].reverse()
+
+    def changed_option(t):
+        t.entries[0]["option"] = slot("mon", 16)
+
+    def changed_decision(t):
+        t.result["decision"] = slot("tue", 12)
+
+    def changed_status(t):
+        t.result["status"] = "deadlock"
+
+    for edit in (dropped_verdict, dropped_entry, swapped_verdicts, changed_option,
+                 changed_decision, changed_status):
+        t = run_consensus([ana(), bob()], OPTIONS).transcript
+        before = t.hash()
+        edit(t)
+        assert t.hash() != before, edit.__name__
+
+
 def test_owner_can_prove_non_betrayal_locally():
     r = run_consensus([ana(), bob()], OPTIONS)
     # ana replays HER private sheet against the agreed decision: red lines held?
@@ -99,6 +126,13 @@ def test_non_betrayal_replays_the_supplied_sheet_not_transcript_entries():
 
     assert r.transcript.verify_non_betrayal(ana().sheet, slot("mon", 15)) is True
     assert r.transcript.verify_non_betrayal(bob().sheet, slot("fri", 15)) is False
+
+
+def test_non_betrayal_replay_fails_closed_when_a_red_line_cannot_be_evaluated():
+    sheet = PreferenceSheet("ana", hard=[HardConstraint("needs-hour", lambda o: o["hour"] >= 12)])
+    t = run_consensus([ana(), bob()], OPTIONS).transcript
+    with pytest.raises(KeyError):
+        t.verify_non_betrayal(sheet, {"day": "mon"})
 
 
 def test_to_dict_round_trips_through_json_without_loss():
