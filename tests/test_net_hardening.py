@@ -7,6 +7,8 @@ the masked verdict shape, because run_consensus reads `acceptable` by truthiness
 by ordering. Everything runs on ephemeral ports, headless.
 """
 import json
+import importlib.util
+import os
 import socket
 import threading
 import urllib.error
@@ -21,7 +23,7 @@ from parley.consensus import run_consensus
 from parley.net import bot as bot_mod
 from parley.net.bot import MAX_BODY, _RateLimiter, serve
 from parley.net.client import RemoteAgent
-from parley.net.identity import AgentCard, verdict_payload, verify_transcript
+from parley.net.identity import AgentCard, Identity, verdict_payload, verify_transcript
 from parley.net.profiles import OPTIONS, PROFILES
 
 CONSTRAINT_NAMES = ("no-mornings", "no-fridays", "kids-pickup", "no-mondays", "afternoons-only")
@@ -393,3 +395,91 @@ def test_client_sends_bearer_token_and_surfaces_401(launch):
     with pytest.raises(urllib.error.HTTPError) as e:
         RemoteAgent(url, token="wrong").consider({"day": "tue", "hour": 14})
     assert e.value.code == 401
+
+
+# --- the reply must be signed by the key the card advertised -----------------------------
+
+CARD_ID = Identity.generate("Ana")
+MITM_ID = Identity.generate("Ana")
+CARD_KEY = CARD_ID.card().pubkey_hex
+SIGNED_CARD = {"owner": "Ana", "protocol": "parley/0.1", "pubkey_hex": CARD_KEY}
+OPTION = {"day": "tue"}
+
+
+def _signed_by(identity, **kw):
+    v = _with(**kw)
+    sig = identity.sign(verdict_payload(OPTION, v["owner"], v["acceptable"], v["score"],
+                                        v["reason"]))
+    return {**v, "sig": sig, "pubkey_hex": identity.card().pubkey_hex}
+
+
+def test_a_reply_signed_by_the_card_key_is_accepted(fake_bot):
+    v = RemoteAgent(fake_bot(_signed_by(CARD_ID), card=SIGNED_CARD).url).consider(OPTION)
+    assert v.pubkey_hex == CARD_KEY and v.sig
+
+
+def test_a_reply_signed_by_another_key_is_refused(fake_bot):
+    # a man in the middle signs a valid verdict with its own key; verify_transcript alone would
+    # accept it later, because it checks each signature against the key embedded beside it
+    agent = RemoteAgent(fake_bot(_signed_by(MITM_ID), card=SIGNED_CARD).url)
+    with pytest.raises(ValueError):
+        agent.consider(OPTION)
+
+
+@pytest.mark.parametrize("reply", [
+    OK_VERDICT,                                     # signature and key both stripped
+    _with(pubkey_hex=CARD_KEY),                     # key, no sig
+    _with(pubkey_hex=CARD_KEY, sig=""),             # key, empty sig
+    {**_signed_by(CARD_ID), "pubkey_hex": None},    # sig, key dropped
+])
+def test_a_reply_missing_its_signature_is_refused_when_the_card_has_a_key(fake_bot, reply):
+    agent = RemoteAgent(fake_bot(reply, card=SIGNED_CARD).url)
+    with pytest.raises(ValueError):
+        agent.consider(OPTION)
+
+
+def test_an_unsigned_bot_still_works_end_to_end(launch):
+    agents = [RemoteAgent(launch(p, identity=None)[1]) for p in ("ana", "bob")]
+    assert all(a.pubkey_hex is None for a in agents)
+    r = run_consensus(agents, OPTIONS)
+    assert r.status == "agreed"
+    assert all(v["sig"] is None for e in r.transcript.entries for v in e["verdicts"])
+
+
+def test_a_signed_run_over_http_carries_the_card_keys_and_verifies(launch):
+    agents = [RemoteAgent(launch(p)[1]) for p in ("ana", "bob")]
+    r = run_consensus(agents, OPTIONS)
+    keys = {a.owner: a.pubkey_hex for a in agents}
+    assert all(v["pubkey_hex"] == keys[v["owner"]]
+               for e in r.transcript.entries for v in e["verdicts"])
+    assert verify_transcript(r.transcript, require_signed=True) is True
+
+
+# --- examples/run_env.py checks what the client does not ------------------------------------
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+_spec = importlib.util.spec_from_file_location("run_env", os.path.join(ROOT, "examples", "run_env.py"))
+run_env = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(run_env)
+
+
+def test_a_garbage_signature_under_the_card_key_passes_the_client_but_stops_run_env(fake_bot):
+    # the client only checks that a signature is present under the card's key
+    forged = RemoteAgent(fake_bot(_with(pubkey_hex=CARD_KEY, sig="00" * 64), card=SIGNED_CARD).url)
+    r = run_consensus([forged], [OPTION])
+    assert r.status == "agreed"
+    with pytest.raises(SystemExit) as e:
+        run_env.check_signatures(r.transcript)
+    assert e.value.code not in (0, None) and "signature check FAILED" in str(e.value.code)
+
+
+def test_run_env_accepts_a_genuinely_signed_run(signed_run):
+    run_env.check_signatures(signed_run)
+
+
+def test_run_env_stops_the_scenario_when_signatures_do_not_verify(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    monkeypatch.setattr(run_env, "verify_transcript", lambda *a, **kw: False)
+    with pytest.raises(SystemExit) as e:
+        run_env.run_scenario(["ana", "bob"], base_port=8401)
+    assert "signature check FAILED" in str(e.value.code)

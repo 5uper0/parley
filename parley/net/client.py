@@ -6,6 +6,10 @@ and pubkey into the Verdict so the transcript stays verifiable.
 
 The bot's reply is untrusted input: a verdict whose fields are not exactly the masked shape
 is refused, so a string "false" can't read as acceptable and a NaN score can't poison max-min.
+When the card advertised a key, a reply must carry that same key and a signature: otherwise a
+man in the middle could sign with its own key, and `verify_transcript` would accept it later
+because it checks each signature against the key embedded beside it. The signature itself is
+checked by `verify_transcript`; the core client imports no crypto.
 """
 import json
 import math
@@ -43,6 +47,9 @@ class RemoteAgent:
             d = json.loads(r.read())
         if not _well_formed(d, self.owner):
             raise ValueError(f"malformed verdict from {self.url}")
+        if self.pubkey_hex is not None and (d.get("pubkey_hex") != self.pubkey_hex
+                                            or not d.get("sig")):
+            raise ValueError(f"verdict from {self.url} is not signed by the key its card advertised")
         return Verdict(
             owner=d["owner"], acceptable=d["acceptable"], score=d["score"],
             reason=d["reason"], sig=d.get("sig"), pubkey_hex=d.get("pubkey_hex"),

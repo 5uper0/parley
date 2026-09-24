@@ -8,6 +8,8 @@
 # Exit 0 = all gates pass; non-zero = a gate failed (with which one).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# A worktree sharing another tree's .venv would import that tree's editable parley/ otherwise.
+export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 
 PY="${PARLEY_PY:-.venv/bin/python}"
 [ -x "$PY" ] || PY="python3"

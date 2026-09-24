@@ -19,7 +19,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 import real_decision as rd  # noqa: E402
 
+from parley.consensus import verify_outcome  # noqa: E402
 from parley.ratify import Acceptance, ratify  # noqa: E402
+from parley.transcript import Transcript  # noqa: E402
 from parley.spec import Constraint, DecisionSpec, PartySpec, UtilityTerm  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
@@ -183,6 +185,62 @@ def test_a_signature_moved_from_another_owner_fails():
     assert report["ok"] is False and _owner(report, "Bob")["signature"] == "FAILED"
 
 
+def _reseal(data, drop, decision):
+    """Rewrite the record as a dishonest coordinator would: drop one owner's verdicts from every
+    entry, finalize, and re-hash so the receipt is self-consistent again."""
+    t = Transcript.from_dict(data["transcript"])
+    for e in t.entries:
+        e["verdicts"] = [v for v in e["verdicts"] if v["owner"] != drop]
+    t.finalize(status="agreed", decision=decision)
+    assert verify_outcome(t) is True  # without the roster, the forged record recomputes cleanly
+    data.update(transcript=json.loads(json.dumps(t.to_dict())), transcript_hash=t.hash(),
+                status="agreed", decision=decision, max_min_verified=True, acceptances=[],
+                unanimous_acceptance=False)
+    return data
+
+
+OWNER_SET_MSG = "not exactly the receipt's participants"
+MAX_MIN_MSG = "not the max-min option"
+
+
+def _errors(report):
+    return " ".join(report["errors"])
+
+
+def test_an_owner_dropped_from_every_entry_is_reported_as_an_owner_set_mismatch():
+    tue = next(o for o in OPTIONS if o["id"] == "tue")
+    report = vr.verify(_reseal(_receipt(), "Ana", tue))
+    assert report["ok"] is False and report["max_min"]["recomputed"] is False
+    assert OWNER_SET_MSG in _errors(report) and MAX_MIN_MSG not in _errors(report)
+
+
+def test_a_lone_veto_deleted_from_a_one_option_record_is_reported_as_an_owner_set_mismatch():
+    skip = next(o for o in OPTIONS if o["id"] == "skip")  # Ana red-lines it: unreviewed
+    parties = [PartySpec("Ana", hard=[Constraint("reviewed", "==", True)]),
+               PartySpec("Bob", utility=[UtilityTerm("day", weight=1.0, prefer="Tuesday")])]
+    result = DecisionSpec("One option", [skip], parties).run()
+    assert result.status == "deadlock"
+    data = json.loads(json.dumps(rd.receipt("One option", result, [], {"Ana", "Bob"})))
+    report = vr.verify(_reseal(data, "Ana", skip))
+    assert report["ok"] is False and report["max_min"]["recomputed"] is False
+    assert OWNER_SET_MSG in _errors(report) and MAX_MIN_MSG not in _errors(report)
+
+
+def test_a_genuinely_non_max_min_record_keeps_the_max_min_message():
+    data = _receipt()
+    wed = next(o for o in OPTIONS if o["id"] == "wed")
+    t = Transcript.from_dict(data["transcript"])
+    t.finalize(status="agreed", decision=wed)
+    data.update(transcript=json.loads(json.dumps(t.to_dict())), transcript_hash=t.hash(),
+                decision=wed)
+    assert MAX_MIN_MSG in _errors(vr.verify(data))
+    assert OWNER_SET_MSG not in _errors(vr.verify(data))
+
+
+def test_the_output_says_the_participant_list_is_coordinator_written():
+    assert "participants list is itself coordinator-written" in vr.render(vr.verify(_receipt()))
+
+
 def test_a_receipt_missing_a_required_field_is_refused():
     data = _receipt()
     del data["participants"]
@@ -243,3 +301,18 @@ def test_cli_exit_codes_and_report(tmp_path):
     proc = subprocess.run([sys.executable, SCRIPT, str(tmp_path / "missing.json")],
                           capture_output=True, text=True)
     assert proc.returncode == 2
+
+
+@pytest.mark.parametrize("participants", [None, "Ana,Bob", [], ["Ana", "Ana", "Bob"], [1, 2]])
+def test_malformed_participants_fail_the_check_without_a_traceback(tmp_path, participants):
+    # a readable receipt with a bad field is a failed check (exit 1), like a missing field;
+    # exit 2 stays reserved for a file that cannot be read as JSON at all
+    data = _receipt()
+    data["participants"] = participants
+    path = tmp_path / "receipt.json"
+    path.write_text(json.dumps(data))
+    proc = subprocess.run([sys.executable, SCRIPT, str(path)], capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stderr
+    assert "Traceback" not in proc.stderr
+    mm_line = next(ln for ln in proc.stdout.splitlines() if "max-min honest" in ln)
+    assert "owner set unchecked: participants malformed" in mm_line and mm_line.endswith("FAIL")

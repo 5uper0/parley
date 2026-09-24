@@ -38,6 +38,19 @@ omitted.
 - `verify_outcome()` returns `False` when any entry is missing an owner's verdict, carries an
   owner twice, or has a different owner set from the other entries. Before, a coordinator could
   drop one owner's veto from the entry it wanted to win and the recomputation agreed with it.
+- `verify_outcome()` takes an optional `expected_owners=`: when given, every entry's owner set must
+  equal it exactly. Without it, a coordinator that drops one owner from every entry, or the lone
+  veto in a one-option record, still passes. `scripts/verify-receipt.py` passes the receipt's
+  `participants` (coordinator-written, as its output now says) and now names the owner-set mismatch
+  explicitly (the existing roster check already failed such receipts). When `participants` is
+  malformed, the max-min line fails as "owner set unchecked"; `participants: null` no longer
+  crashes the script.
+- `RemoteAgent.consider()` raises `ValueError` when the bot's card advertised a `pubkey_hex` and
+  the reply carries a different key or no signature. Before, a party between the coordinator and a
+  signed bot could sign verdicts with its own key and `verify_transcript()` accepted them. Bots
+  whose card has no key are unaffected. The client checks that a signature is present under the
+  card's key; whether the signature is valid is checked by `verify_transcript(require_signed=True)`,
+  which `examples/run_env.py` now runs (exiting non-zero on failure) and any other caller must run.
 
 ### Fixed
 - Static demo build now carries the proof cards and brand assets (#45).
