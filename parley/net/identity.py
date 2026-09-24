@@ -37,7 +37,7 @@ class AgentCard:
         try:
             VerifyKey(self.pubkey_hex, encoder=HexEncoder).verify(message, bytes.fromhex(sig_hex))
             return True
-        except (BadSignatureError, ValueError):
+        except (BadSignatureError, ValueError, TypeError):
             return False
 
     def to_dict(self) -> dict:

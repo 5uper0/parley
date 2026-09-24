@@ -5,7 +5,7 @@ a MASKED reason. It must never expose which red line was crossed, nor the sheet.
 This is the trust wedge — deterministic, code-enforced non-betrayal.
 """
 from parley.preferences import PreferenceSheet, HardConstraint
-from parley.agent import Agent
+from parley.agent import Agent, Verdict
 
 
 def slot(day, hour):
@@ -43,3 +43,17 @@ def test_verdict_never_leaks_the_sheet_or_which_constraint():
     assert "no-mornings" not in blob  # the private constraint name never escapes
     assert "hard" not in getattr(v, "__dict__", {})
     assert not hasattr(v, "sheet")
+
+
+def test_crossing_different_red_lines_yields_indistinguishable_verdicts():
+    agent = Agent("ana", PreferenceSheet(
+        owner="ana",
+        hard=[HardConstraint("no-mornings", lambda o: o["hour"] >= 12),
+              HardConstraint("no-friday", lambda o: o["day"] != "fri")],
+        utility=lambda o: 0.3,
+    ))
+    morning = agent.consider(slot("mon", 9))
+    friday = agent.consider(slot("fri", 15))
+    both = agent.consider(slot("fri", 9))
+    assert morning == friday == both == Verdict("ana", False, 0.3, "red-line")
+    assert agent.consider(slot("tue", 15)) == Verdict("ana", True, 0.3, "ok")

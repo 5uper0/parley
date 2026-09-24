@@ -1,4 +1,6 @@
 """A PreferenceSheet is an owner's private position: hard red lines + soft utility."""
+import pytest
+
 from parley.preferences import PreferenceSheet, HardConstraint
 
 
@@ -57,3 +59,18 @@ def test_none_utility_yields_exact_neutral_score():
     sheet = PreferenceSheet(owner="eve", hard=[])
     ev = sheet.evaluate(slot("fri", 11))
     assert ev.score == 0.5
+
+
+def test_a_nan_utility_is_refused_not_read_as_top_satisfaction():
+    # min(1.0, nan) is 1.0 in Python, so an unguarded clamp turns a broken utility into a 1.0
+    sheet = PreferenceSheet(owner="eve", hard=[], utility=lambda o: float("nan"))
+    with pytest.raises(ValueError):
+        sheet.evaluate(slot("fri", 11))
+
+
+def test_a_red_line_passes_only_on_an_exact_true():
+    for returned in ["no", 1, [0], None, 0, "", object()]:
+        sheet = PreferenceSheet(owner="eve", hard=[HardConstraint("x", lambda o, r=returned: r)])
+        ev = sheet.evaluate(slot("fri", 11))
+        assert ev.feasible is False, returned
+        assert ev.violated == ["x"]

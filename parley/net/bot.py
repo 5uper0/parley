@@ -10,6 +10,7 @@ preference-extraction and DoS holes. The private sheet never crosses the wire.
 Run standalone:  PARLEY_TOKEN=$(openssl rand -hex 16) python -m parley.net.bot --profile ana --port 8101
 """
 import argparse
+import hmac
 import json
 import os
 import threading
@@ -21,6 +22,10 @@ from parley.net.identity import Identity
 from parley.net.profiles import PROFILES
 
 MAX_BODY = 4096  # bytes; a legitimate /consider body is ~100 bytes
+# Per-read idle timeout (seconds): a client that goes silent is dropped. It is NOT a total
+# deadline — each socket read gets its own 10s, so a client trickling one byte per read can hold
+# a thread for up to ~MAX_BODY reads. A stall is closed quietly by BaseHTTPRequestHandler.
+REQUEST_TIMEOUT = 10
 
 
 class _RateLimiter:
@@ -45,6 +50,8 @@ class _RateLimiter:
 
 def _make_handler(agent, identity, auth_token, limiter):
     class Handler(BaseHTTPRequestHandler):
+        timeout = REQUEST_TIMEOUT
+
         def log_message(self, *args):
             pass
 
@@ -60,7 +67,7 @@ def _make_handler(agent, identity, auth_token, limiter):
             if not auth_token:
                 return True
             got = self.headers.get("Authorization", "")
-            return got == f"Bearer {auth_token}"
+            return hmac.compare_digest(got.encode("utf-8"), f"Bearer {auth_token}".encode("utf-8"))
 
         def do_GET(self):
             if self.path == "/card":
@@ -81,7 +88,13 @@ def _make_handler(agent, identity, auth_token, limiter):
             if not limiter.allow(self.client_address[0]):
                 self._send(429, {"error": "rate limited"})
                 return
-            length = int(self.headers.get("Content-Length", 0) or 0)
+            try:
+                length = int(self.headers.get("Content-Length", 0) or 0)
+            except ValueError:
+                length = -1
+            if length < 0:  # rfile.read(-1) reads to EOF, bypassing MAX_BODY
+                self._send(400, {"error": "invalid content-length"})
+                return
             if length > MAX_BODY:
                 self._send(413, {"error": "payload too large"})
                 return
