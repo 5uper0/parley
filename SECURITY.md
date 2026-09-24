@@ -30,10 +30,12 @@ framing* is still welcome):
   coordinator that assembles the transcript could sign a fabricated verdict with its own key. The
   roster-pinned check (pin each owner's key from its `/card`) lands in v0.2. One client-side piece
   is in: when a bot's `/card` advertises a key, `RemoteAgent` refuses any `/consider` reply that
-  lacks a signature or carries a different key, so a party between an honest coordinator and a bot
-  cannot slip in verdicts signed with its own key after discovery. It does not help a third party
-  against a dishonest coordinator, and without TLS a party present at discovery can serve its own
-  card.
+  lacks a signature or carries a different key. The client checks that a signature is present
+  under the card's key; whether the signature is valid is checked by
+  `verify_transcript(require_signed=True)`, which `examples/run_env.py` now runs and any other
+  caller must run. Together they stop a party between an honest coordinator and a bot from slipping
+  in its own verdicts after discovery. They do not help a third party against a dishonest
+  coordinator, and without TLS a party present at discovery can serve its own card.
 - **Signed acceptances have the same gap.** `verify_acceptance` checks the signature against the
   pubkey carried *in the same acceptance*, so anyone with a key can sign an acceptance under another
   owner's name. Unsigned acceptances authenticate nothing: `agreement()` without a `verifier` is

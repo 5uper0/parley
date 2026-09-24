@@ -142,8 +142,10 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
 Not yet (v0.1 honest limits, do not treat as production-secure for adversarial principals):
 - **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster
   (above); the roster-pinned check (verify against the key from each bot's discovery Agent Card) is v0.2.
-  Today only the coordinator's own client pins it: `RemoteAgent` refuses a reply that is unsigned
-  or signed under a key other than the one the bot's card advertised.
+  Today only the coordinator's own side pins it: the client checks that a signature is present
+  under the card's key; whether the signature is valid is checked by
+  `verify_transcript(require_signed=True)`, which `examples/run_env.py` now runs and any other
+  caller must run.
 - **Replay binding**, verdicts carry no session/nonce, so a signed verdict is replayable into another
   parley that reuses the same option.
 - **Range-masked scores**, the soft cardinal `score` is public in the transcript, so an untrusted

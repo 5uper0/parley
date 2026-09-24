@@ -7,7 +7,9 @@ the masked verdict shape, because run_consensus reads `acceptable` by truthiness
 by ordering. Everything runs on ephemeral ports, headless.
 """
 import json
+import os
 import socket
+import sys
 import threading
 import urllib.error
 import urllib.request
@@ -451,3 +453,33 @@ def test_a_signed_run_over_http_carries_the_card_keys_and_verifies(launch):
     assert all(v["pubkey_hex"] == keys[v["owner"]]
                for e in r.transcript.entries for v in e["verdicts"])
     assert verify_transcript(r.transcript, require_signed=True) is True
+
+
+# --- examples/run_env.py checks what the client does not ------------------------------------
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+sys.path.insert(0, os.path.join(ROOT, "examples"))
+
+import run_env  # noqa: E402
+
+
+def test_a_garbage_signature_under_the_card_key_passes_the_client_but_stops_run_env(fake_bot):
+    # the client only checks that a signature is present under the card's key
+    forged = RemoteAgent(fake_bot(_with(pubkey_hex=CARD_KEY, sig="00" * 64), card=SIGNED_CARD).url)
+    r = run_consensus([forged], [OPTION])
+    assert r.status == "agreed"
+    with pytest.raises(SystemExit) as e:
+        run_env.check_signatures(r.transcript)
+    assert e.value.code not in (0, None) and "signature check FAILED" in str(e.value.code)
+
+
+def test_run_env_accepts_a_genuinely_signed_run(signed_run):
+    run_env.check_signatures(signed_run)
+
+
+def test_run_env_stops_the_scenario_when_signatures_do_not_verify(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    monkeypatch.setattr(run_env, "verify_transcript", lambda *a, **kw: False)
+    with pytest.raises(SystemExit) as e:
+        run_env.run_scenario(["ana", "bob"], base_port=8401)
+    assert "signature check FAILED" in str(e.value.code)

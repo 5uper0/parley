@@ -3,6 +3,10 @@
 The coordinator discovers them over the wire, runs a parley, and each owner verifies
 non-betrayal with their own local sheet. Bots never send their private constraints.
 
+The client only checks that each reply carries a signature under the key its card advertised;
+whether that signature is valid is checked here, by `verify_transcript(require_signed=True)`
+after the parley. A transcript that fails it stops the run with a non-zero exit.
+
     python examples/run_env.py ana bob
     python examples/run_env.py ana bob cara dan eve
     python examples/run_env.py            # runs the 2-bot then 5-bot scenario
@@ -18,6 +22,7 @@ import urllib.request
 
 from parley.consensus import run_consensus
 from parley.net.client import discover
+from parley.net.identity import verify_transcript
 from parley.net.profiles import PROFILES, OPTIONS
 
 
@@ -33,6 +38,13 @@ def _wait_up(url, tries=60):
 
 def _label(o):
     return f'{o["day"].capitalize()} {o["hour"]:02d}:00'
+
+
+def check_signatures(transcript):
+    """Stop the run unless every verdict carries a valid signature."""
+    if not verify_transcript(transcript, require_signed=True):
+        raise SystemExit("signature check FAILED: a verdict is unsigned or its signature does "
+                         "not validate; this transcript proves nothing")
 
 
 def run_scenario(profiles, base_port=8101, as_json=False):
@@ -59,6 +71,7 @@ def run_scenario(profiles, base_port=8101, as_json=False):
             print("  Coordinator asks each bot to /consider every option (HTTP)…\n")
 
         r = run_consensus(agents, OPTIONS)
+        check_signatures(r.transcript)
         non_betrayal = {
             p: r.transcript.verify_non_betrayal(PROFILES[p](), r.decision) for p in profiles
         }
@@ -82,6 +95,7 @@ def run_scenario(profiles, base_port=8101, as_json=False):
         else:
             print("  ⛔ Honest deadlock – no slot clears everyone's red lines.")
         print(f"  transcript sha256: {r.transcript.hash()[:16]}…")
+        print("  every verdict signature validates against the key it carries")
 
         print("\n  Each owner verifies non-betrayal with their OWN local sheet:")
         for p in profiles:
