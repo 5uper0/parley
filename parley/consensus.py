@@ -30,13 +30,15 @@ class ConsensusResult:
 def run_consensus(
     agents: Sequence[AgentLike], options: Sequence[Any], rule: str = "egalitarian"
 ) -> ConsensusResult:
+    if rule != "egalitarian":
+        raise ValueError(f"unknown rule: {rule!r}")
     transcript = Transcript()
     feasible: List[Tuple[Any, float, float]] = []  # (option, floor_score, total_score)
 
     for option in options:
         verdicts = [a.consider(option) for a in agents]
         transcript.record(option, verdicts)
-        if all(v.acceptable for v in verdicts):
+        if verdicts and all(v.acceptable for v in verdicts):
             floor = min(v.score for v in verdicts)
             total = sum(v.score for v in verdicts)
             feasible.append((option, floor, total))
@@ -45,8 +47,6 @@ def run_consensus(
         transcript.finalize(status="deadlock", decision=None)
         return ConsensusResult("deadlock", None, transcript)
 
-    if rule != "egalitarian":
-        raise ValueError(f"unknown rule: {rule!r}")
     # highest floor first, then highest total welfare; stable for reproducibility
     best = max(feasible, key=lambda x: (x[1], x[2]))
     decision = best[0]
@@ -60,10 +60,19 @@ def verify_outcome(transcript: Transcript) -> bool:
     *feasible-but-not-max-min* option (or an infeasible one): `verify_non_betrayal` only proves an
     owner's *own* red lines held, never that the selection itself was computed honestly. Anyone can
     replay this over the public record — no private sheet needed.
+
+    Every entry must carry exactly one verdict from each owner in the record. Without that, a
+    coordinator could drop one owner's veto from the entry it wants to win (or duplicate another
+    owner's verdict in its place) and the recomputation would agree with it.
     """
     feasible: List[Tuple[Any, float, float]] = []
+    roster = None
     for entry in transcript.entries:
         verdicts = entry["verdicts"]
+        owners = sorted(v["owner"] for v in verdicts)
+        if len(set(owners)) != len(owners) or (roster is not None and owners != roster):
+            return False
+        roster = owners
         if verdicts and all(v["acceptable"] for v in verdicts):
             floor = min(v["score"] for v in verdicts)
             total = sum(v["score"] for v in verdicts)
