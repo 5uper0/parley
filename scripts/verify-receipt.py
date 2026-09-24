@@ -111,9 +111,10 @@ def verify(receipt: Any) -> dict:
     max_min = verify_outcome(transcript,
                              expected_owners=participants if roster_shape_ok else None)
     owner_set_mismatch = (not max_min and roster_shape_ok and verify_outcome(transcript))
-    max_min_ok = max_min and receipt["max_min_verified"] is True
+    max_min_ok = max_min and roster_shape_ok and receipt["max_min_verified"] is True
     report["max_min"] = {"recomputed": max_min, "claimed": receipt["max_min_verified"],
-                         "owner_set_mismatch": owner_set_mismatch, "ok": max_min_ok}
+                         "owner_set_mismatch": owner_set_mismatch,
+                         "owner_set_unchecked": not roster_shape_ok, "ok": max_min_ok}
     if owner_set_mismatch:
         errors.append("the record's owner set is not exactly the receipt's participants, so "
                       "the max-min recomputation over it proves nothing (a participant's "
@@ -210,8 +211,16 @@ def render(report: dict) -> str:
         return "\n".join(lines) + "\n"
     decision = json.dumps(report["decision"], sort_keys=True, ensure_ascii=False)
     lines += [f"  status {report['status']}   decision {decision}", "", "Record"]
-    mm_note = ("owner set does not match participants" if report["max_min"]["owner_set_mismatch"]
-               else "recomputed from the recorded verdicts")
+    mm = report["max_min"]
+    if mm["owner_set_unchecked"]:
+        mm_note = "owner set unchecked: participants malformed"
+    elif mm["owner_set_mismatch"]:
+        mm_note = "owner set does not match participants"
+    else:
+        mm_note = "recomputed from the recorded verdicts"
+    participants = report["roster"]["participants"]
+    roster = (", ".join(map(str, participants)) if isinstance(participants, list)
+              else json.dumps(participants))
     h = report["hash"]
     lines += [f"  transcript hash   claimed    {h['claimed']}",
               f"                    recomputed {h['recomputed']}   {_mark(h['ok'])}",
@@ -219,7 +228,7 @@ def render(report: dict) -> str:
               f"  max-min honest    {'yes' if report['max_min']['recomputed'] else 'NO'}"
               f" ({mm_note})"
               f"   {_mark(report['max_min']['ok'])}",
-              f"  roster            {', '.join(map(str, report['roster']['participants']))}"
+              f"  roster            {roster}"
               f" (record: {', '.join(report['roster']['transcript_owners'])})"
               f"   {_mark(report['roster']['ok'])}",
               f"  verdict sigs      {report['verdict_signatures']}", "", "Acceptances"]

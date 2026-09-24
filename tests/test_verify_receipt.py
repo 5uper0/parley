@@ -301,3 +301,18 @@ def test_cli_exit_codes_and_report(tmp_path):
     proc = subprocess.run([sys.executable, SCRIPT, str(tmp_path / "missing.json")],
                           capture_output=True, text=True)
     assert proc.returncode == 2
+
+
+@pytest.mark.parametrize("participants", [None, "Ana,Bob", [], ["Ana", "Ana", "Bob"], [1, 2]])
+def test_malformed_participants_fail_the_check_without_a_traceback(tmp_path, participants):
+    # a readable receipt with a bad field is a failed check (exit 1), like a missing field;
+    # exit 2 stays reserved for a file that cannot be read as JSON at all
+    data = _receipt()
+    data["participants"] = participants
+    path = tmp_path / "receipt.json"
+    path.write_text(json.dumps(data))
+    proc = subprocess.run([sys.executable, SCRIPT, str(path)], capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stderr
+    assert "Traceback" not in proc.stderr
+    mm_line = next(ln for ln in proc.stdout.splitlines() if "max-min honest" in ln)
+    assert "owner set unchecked: participants malformed" in mm_line and mm_line.endswith("FAIL")
