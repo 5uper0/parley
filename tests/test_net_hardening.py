@@ -483,3 +483,65 @@ def test_run_env_stops_the_scenario_when_signatures_do_not_verify(monkeypatch):
     with pytest.raises(SystemExit) as e:
         run_env.run_scenario(["ana", "bob"], base_port=8401)
     assert "signature check FAILED" in str(e.value.code)
+
+
+# --- follow-ups from the 2026-09-24 audits --------------------------------------------------
+
+def test_an_owners_own_nan_utility_is_a_500_not_a_400_blaming_the_coordinator(launch):
+    from parley.preferences import PreferenceSheet
+    httpd = serve("Nan", PreferenceSheet("Nan", utility=lambda o: float("nan")), port=0)
+    threading.Thread(target=httpd.serve_forever, args=(0.05,), daemon=True).start()
+    try:
+        code, body = _request(f"http://127.0.0.1:{httpd.server_address[1]}", body=GOOD)
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert code == 500 and json.loads(body) == {"error": "internal error"}
+
+
+@pytest.mark.parametrize("key", [123, {"k": 1}, ["ab"], "", "not-hex", "abc", "ab", "ab cd", "0" * 63, "0" * 65, "g" * 64])
+def test_a_card_with_a_key_that_is_not_hex_is_refused_at_discovery(fake_bot, key):
+    with pytest.raises(ValueError):
+        RemoteAgent(fake_bot(OK_VERDICT, card={"owner": "Ana", "pubkey_hex": key}).url)
+
+
+def test_the_rate_limiter_forgets_expired_clients_but_keeps_live_ones(monkeypatch):
+    now = [1000.0]
+    monkeypatch.setattr(bot_mod.time, "monotonic", lambda: now[0])
+    rl = _RateLimiter((2, 60))
+    for i in range(200):
+        rl.allow(f"10.0.0.{i}")
+    assert len(rl._hits) == 200
+    now[0] = 1030
+    assert [rl.allow("live") for _ in range(3)] == [True, True, False]
+    now[0] = 1061
+    rl.allow("late")
+    assert set(rl._hits) == {"live", "late"}
+    assert rl.allow("live") is False  # its window (started 1030) has not elapsed
+
+
+def test_non_finite_numbers_in_the_body_are_a_400_not_the_owners_fault(launch):
+    from parley.preferences import PreferenceSheet
+    sheet = PreferenceSheet("X", utility=lambda o: o.get("price", 0) * 0)
+    httpd = serve("X", sheet, port=0)
+    threading.Thread(target=httpd.serve_forever, args=(0.05,), daemon=True).start()
+    try:
+        url = f"http://127.0.0.1:{httpd.server_address[1]}"
+        for raw in (b'{"option":{"price":NaN}}', b'{"option":{"price":Infinity}}',
+                    b'{"option":{"price":-Infinity}}', b'{"option":{"price":1e400}}',
+                    b'{"option":{"price":-1e400}}'):
+            code, body = _request(url, raw=raw)
+            assert code == 400 and json.loads(body) == {"error": "invalid option"}
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+
+
+def test_an_empty_token_refuses_to_start_instead_of_silently_disabling_auth(monkeypatch):
+    sheet = PROFILES["ana"]()
+    with pytest.raises(ValueError):
+        serve(sheet.owner, sheet, port=0, auth_token="")
+    monkeypatch.setenv("PARLEY_TOKEN", "")
+    monkeypatch.setattr("sys.argv", ["bot", "--profile", "ana", "--port", "0"])
+    with pytest.raises(SystemExit):
+        bot_mod.main()

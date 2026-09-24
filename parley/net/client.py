@@ -13,6 +13,7 @@ checked by `verify_transcript`; the core client imports no crypto.
 """
 import json
 import math
+import string
 import urllib.request
 
 from parley.agent import Verdict
@@ -28,6 +29,8 @@ class RemoteAgent:
             raise ValueError(f"malformed card from {self.url}")
         self.owner = card["owner"]
         self.pubkey_hex = card.get("pubkey_hex")
+        if self.pubkey_hex is not None and not _is_hex(self.pubkey_hex):
+            raise ValueError(f"malformed card key from {self.url}")
 
     def _headers(self):
         h = {"Content-Type": "application/json"}
@@ -54,6 +57,11 @@ class RemoteAgent:
             owner=d["owner"], acceptable=d["acceptable"], score=d["score"],
             reason=d["reason"], sig=d.get("sig"), pubkey_hex=d.get("pubkey_hex"),
         )
+
+
+def _is_hex(value) -> bool:
+    """An Ed25519 public key is 32 bytes, so exactly 64 hex digits."""
+    return isinstance(value, str) and len(value) == 64 and all(c in string.hexdigits for c in value)
 
 
 def _well_formed(d, owner) -> bool:

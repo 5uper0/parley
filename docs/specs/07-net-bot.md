@@ -17,7 +17,7 @@ show an adversary; the private constraints stay inside the process.
   `ThreadingHTTPServer`; caller runs `.serve_forever()` (or `.shutdown()`). The returned
   server's bound port is read from `httpd.server_address[1]`.
 - `main()` — CLI entrypoint (`python -m parley.net.bot --profile <name> --port <n> [--host H]`).
-  Loads a sheet from `PROFILES`, reads `PARLEY_TOKEN` from the env (auth on iff set), and
+  Loads a sheet from `PROFILES`, reads `PARLEY_TOKEN` from the env (auth on iff set; set-but-empty exits, as `serve(auth_token="")` raises), and
   runs `serve_forever()`. **Rate limit is not wired to the CLI** — a standalone bot has no
   throttling unless started via `serve(..., rate_limit=...)` in-process.
 - `MAX_BODY = 4096` — hard byte cap on a `/consider` request body.
@@ -87,12 +87,14 @@ show an adversary; the private constraints stay inside the process.
 - **Missing/invalid bearer (auth on):** `401 {"error":"unauthorized"}` before rate-limit or
   body read. Exact check: `Authorization == f"Bearer {auth_token}"`. Auth off ⇒ always allowed.
 - **Over rate limit:** `429 {"error":"rate limited"}` — fixed window per client IP
-  (`self.client_address[0]`); the window resets after `window` seconds.
+  (`self.client_address[0]`); the window resets after `window` seconds, and clients whose window has elapsed are dropped from the map.
 - **Body larger than `MAX_BODY` (4096 B):** `413 {"error":"payload too large"}`, decided from
   the `Content-Length` header *before* reading the socket (bounds the read).
 - **Malformed body:** missing `option` key (`KeyError`), non-dict `option` (`ValueError`),
   invalid JSON (`json.JSONDecodeError`), or a predicate that raises on a malformed option
-  (`KeyError`/`TypeError`/`ValueError`) → `400 {"error":"invalid option"}`. Empty body reads
+  (`KeyError`/`TypeError`/`ValueError`) → `400 {"error":"invalid option"}`. The one exception is
+  the owner's own utility returning NaN (`UtilityError`) → `500 {"error":"internal error"}`. The
+  body parser refuses `NaN`/`Infinity` and overflowing numbers such as `1e400` (→ 400), so a coordinator cannot trigger it. Empty body reads
   as `{}` then fails the missing-`option` path → 400.
 - **`identity=None` passed to `serve`:** server still answers, but `/card` omits `pubkey_hex`
   and `/consider` omits `sig`/`pubkey_hex` — verdicts are then unsigned (skipped by
