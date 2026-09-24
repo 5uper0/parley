@@ -180,7 +180,7 @@ def test_non_numeric_content_length_is_a_400_not_a_dropped_connection(launch):
     assert resp.startswith(b"HTTP/1.0 400")
 
 
-def test_stalled_client_is_disconnected_instead_of_pinning_a_thread(launch):
+def test_stalled_client_is_disconnected_instead_of_pinning_a_thread(launch, capfd):
     httpd, url = launch()
     httpd.RequestHandlerClass.timeout = 0.3  # production value is REQUEST_TIMEOUT
     assert bot_mod.REQUEST_TIMEOUT > 0
@@ -189,6 +189,7 @@ def test_stalled_client_is_disconnected_instead_of_pinning_a_thread(launch):
                 b"POST /consider HTTP/1.1\r\nHost: x\r\nContent-Length: 100\r\n\r\n{", timeout=5)
     assert b'"acceptable"' not in resp
     assert _request(url, path="/card")[0] == 200  # and the server still serves everyone else
+    assert capfd.readouterr().err == ""  # a stall is dropped quietly, not a traceback per client
 
 
 def test_unknown_paths_are_404(launch):

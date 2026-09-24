@@ -22,7 +22,10 @@ from parley.net.identity import Identity
 from parley.net.profiles import PROFILES
 
 MAX_BODY = 4096  # bytes; a legitimate /consider body is ~100 bytes
-REQUEST_TIMEOUT = 10  # seconds; a client that stalls mid-request must not pin a server thread
+# Per-read idle timeout (seconds): a client that goes silent is dropped. It is NOT a total
+# deadline — each socket read gets its own 10s, so a client trickling one byte per read can hold
+# a thread for up to ~MAX_BODY reads. A stall is closed quietly by BaseHTTPRequestHandler.
+REQUEST_TIMEOUT = 10
 
 
 class _RateLimiter:
