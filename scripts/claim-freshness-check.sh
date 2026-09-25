@@ -68,10 +68,13 @@ count_hits() {
   done <<< "$(grep -nE "$COUNT_RE" "$file" 2>/dev/null || true)"
 }
 
-REAL="$(.venv/bin/pytest -q 2>&1 | tail -1 | grep -oE '^[0-9]+' || true)"
+# An unreadable count fails: it used to SKIP with exit 0, and every ship-gate run from a worktree
+# (no .venv of its own) passed step 5 without comparing anything while the data room drifted.
+PY="${PARLEY_PY:-.venv/bin/python}"
+REAL="$("$PY" -m pytest -q 2>&1 | tail -1 | grep -oE '^[0-9]+' || true)"
 if [[ -z "$REAL" ]]; then
-  echo "SKIP could not read a test count from pytest"
-  exit 0
+  echo "STALE could not read a test count from $PY -m pytest; set PARLEY_PY to a python with pytest"
+  exit 1
 fi
 
 problems=""
