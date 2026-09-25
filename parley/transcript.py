@@ -21,7 +21,7 @@ class Transcript:
         self.result: Optional[dict] = None
 
     def record(self, option: Any, verdicts) -> None:
-        json.dumps(option)
+        json.dumps(option, sort_keys=True, ensure_ascii=False)
         self.entries.append({
             "option": option,
             "verdicts": [
@@ -32,7 +32,7 @@ class Transcript:
         })
 
     def finalize(self, status: str, decision: Any) -> None:
-        json.dumps(decision)
+        json.dumps(decision, sort_keys=True, ensure_ascii=False)
         self.result = {"status": status, "decision": decision}
 
     def to_dict(self) -> dict:

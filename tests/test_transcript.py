@@ -247,7 +247,7 @@ def test_from_dict_refuses_a_record_that_is_not_a_transcript():
 
 def test_hash_refuses_a_value_json_cannot_encode():
     """`default=str` hashed a set as its repr, so an option `{1}` and the string "{1}" produced
-    the same digest: two different records, one hash. Refuse instead of guessing an encoding."""
+    the same digest. Refuse instead of guessing an encoding."""
     t = Transcript()
     t.entries.append({"option": {1}, "verdicts": []})
     with pytest.raises(TypeError):
@@ -270,3 +270,5 @@ def test_record_and_finalize_refuse_a_non_json_value_when_written():
         Transcript().record({1}, [])
     with pytest.raises(TypeError):
         Transcript().finalize("agreed", {1})
+    with pytest.raises(TypeError):
+        Transcript().record({1: "a", "b": 2}, [])
