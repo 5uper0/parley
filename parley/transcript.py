@@ -21,6 +21,7 @@ class Transcript:
         self.result: Optional[dict] = None
 
     def record(self, option: Any, verdicts) -> None:
+        json.dumps(option, sort_keys=True, ensure_ascii=False)
         self.entries.append({
             "option": option,
             "verdicts": [
@@ -31,6 +32,7 @@ class Transcript:
         })
 
     def finalize(self, status: str, decision: Any) -> None:
+        json.dumps(decision, sort_keys=True, ensure_ascii=False)
         self.result = {"status": status, "decision": decision}
 
     def to_dict(self) -> dict:
@@ -66,7 +68,7 @@ class Transcript:
         return t
 
     def hash(self) -> str:
-        blob = json.dumps(self.to_dict(), sort_keys=True, ensure_ascii=False, default=str)
+        blob = json.dumps(self.to_dict(), sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
     def verify_non_betrayal(self, sheet: PreferenceSheet, decision: Any) -> bool:

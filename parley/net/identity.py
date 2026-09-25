@@ -23,7 +23,7 @@ def verdict_payload(option, owner, acceptable, score, reason) -> bytes:
     return json.dumps(
         {"type": "verdict/0.1", "owner": owner, "option": option, "acceptable": acceptable,
          "score": score, "reason": reason},
-        sort_keys=True, ensure_ascii=False, default=str,
+        sort_keys=True, ensure_ascii=False,
     ).encode("utf-8")
 
 

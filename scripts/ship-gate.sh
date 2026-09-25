@@ -13,6 +13,7 @@ export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 
 PY="${PARLEY_PY:-.venv/bin/python}"
 [ -x "$PY" ] || PY="python3"
+export PARLEY_PY="$PY"
 
 fail() { echo "✗ ship-gate FAILED: $1" >&2; exit 1; }
 
