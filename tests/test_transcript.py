@@ -243,3 +243,30 @@ def test_from_dict_refuses_a_record_that_is_not_a_transcript():
         tampered = json.loads(json.dumps(good))
         tampered["entries"][0]["verdicts"][0]["sheet"] = {"leak": True}
         Transcript.from_dict(tampered)
+
+
+def test_hash_refuses_a_value_json_cannot_encode():
+    """`default=str` hashed a set as its repr, so an option `{1}` and the string "{1}" produced
+    the same digest: two different records, one hash. Refuse instead of guessing an encoding."""
+    t = Transcript()
+    t.entries.append({"option": {1}, "verdicts": []})
+    with pytest.raises(TypeError):
+        t.hash()
+
+
+def test_payloads_refuse_a_value_json_cannot_encode():
+    from parley.net.identity import verdict_payload
+    from parley.ratify import acceptance_payload
+
+    with pytest.raises(TypeError):
+        verdict_payload({1}, "ana", True, 1.0, "ok")
+    with pytest.raises(TypeError):
+        acceptance_payload("ana", {1}, "0" * 64, True)
+
+
+def test_record_and_finalize_refuse_a_non_json_value_when_written():
+    """Refusing only at hash() lets a run collect every answer first and fail at the receipt."""
+    with pytest.raises(TypeError):
+        Transcript().record({1}, [])
+    with pytest.raises(TypeError):
+        Transcript().finalize("agreed", {1})

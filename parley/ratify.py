@@ -58,7 +58,7 @@ def acceptance_payload(owner: str, decision: Any, transcript_hash: str, accepted
     return json.dumps(
         {"type": "acceptance/0.1", "owner": owner, "decision": decision,
          "transcript_hash": transcript_hash, "accepted": accepted},
-        sort_keys=True, ensure_ascii=False, default=str,
+        sort_keys=True, ensure_ascii=False,
     ).encode("utf-8")
 
 
