@@ -30,6 +30,9 @@ Repository = "https://github.com/5uper0/parley"
 Changelog = "https://github.com/5uper0/parley/blob/main/CHANGELOG.md"
 Issues = "https://github.com/5uper0/parley/issues"
 
+[project.scripts]
+parley-mcp = "parley.mcp:main"   # stdio MCP server; stdlib only, so it ships in the base install
+
 [project.optional-dependencies]
 crypto = ["pynacl>=1.6.2"]   # Ed25519 signed Agent Cards + verdicts (net layer)
 dev = ["pytest>=9.1.1", "pynacl>=1.6.2", "setuptools>=84.0.0"]

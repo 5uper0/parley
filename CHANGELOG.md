@@ -7,6 +7,19 @@ omitted.
 
 ## [Unreleased]
 
+### Added
+- `parley/mcp.py`: a stdlib-only MCP server over stdio (`parley-mcp` console script, or
+  `python -m parley.mcp`) so Claude Desktop, Claude Code and Cursor can call Parley as a tool.
+  Three tools: `parley_decide` (a `DecisionSpec` in, status + decision + transcript +
+  `transcript_sha256` out), `parley_verify_receipt` (recompute the hash over a transcript, and
+  `max_min_verified` via `verify_outcome` over its recorded verdicts) and `parley_check_party`
+  (replay one party's red lines against a decision). In this mode the host holds every party's
+  spec, so there is no privacy from the host; red lines and max-min still hold, and the receipt
+  is tamper-evident provided the hash is kept by someone other than whoever might edit the
+  transcript (it is unsigned and the server does not store it). Private sheets need one process
+  per owner (`examples/run_env.py`). A spec is bounded to 500 options, 50 parties, 10 000
+  option×party evaluations and 1000-item constraint lists; larger ones return a tool error.
+
 ## [0.2.0] - 2026-09-26
 
 ### Added

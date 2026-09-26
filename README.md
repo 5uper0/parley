@@ -66,6 +66,37 @@ before any score is weighed. The coordinator only ever saw `red-line`, never the
 
 Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Status](#status-v0-working-core)).
 
+### Use it from an MCP host (Claude, Cursor)
+
+The base install ships a stdlib-only MCP server over stdio. Point your host at it:
+
+```json
+{"mcpServers": {"parley": {"command": "parley-mcp"}}}
+```
+
+If the console script is not on the host's `PATH`, launch it through the interpreter that has
+the package: `{"command": "python", "args": ["-m", "parley.mcp"]}`.
+
+Three tools appear: `parley_decide` (options + each party's red lines and preferences in,
+`status`, `decision`, `transcript` and `transcript_sha256` out), `parley_verify_receipt`
+(recompute the hash over a transcript, and recompute the max-min decision from its recorded
+verdicts) and `parley_check_party` (replay one party's red lines against a decision). The input
+is the same JSON as the recipes in [`examples/demo/`](examples/demo/). Example prompt:
+
+> Three of us are picking a venue: rooftop (900), garden (600), diner (300). Bob will not go over
+> 700; Ana prefers the rooftop, Cara the garden, Bob the cheapest. Use parley_decide, then verify
+> the receipt hash and check that Bob's red line held.
+
+**What this mode does and does not give you.** The host holds every party's spec and passes them
+all in one call, so there is no privacy between parties or from the host. What still holds is
+what the engine enforces in code: a red line rejects an option deterministically, the max-min
+rule picks among options feasible for everyone, and the receipt hash makes any later edit to the
+transcript visible, provided the hash is kept by someone other than whoever might edit the
+transcript: it is unsigned and the server does not store it, so a hash and a transcript from the
+same hand prove nothing about each other. `max_min_verified` does not depend on the hash: it
+recomputes the winner from the recorded verdicts. For private sheets, run one process per owner over HTTP
+([`examples/run_env.py`](examples/run_env.py)); the coordinator then sees only masked verdicts.
+
 ---
 
 Most agent tooling in 2026 solves either transport/identity (A2A, MCP) or 1:1 agentic
