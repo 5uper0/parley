@@ -1,15 +1,35 @@
 [project]
-name = "parley"
-version = "0.1.0"
+name = "parley-consensus"   # PyPI's `parley` is an unrelated project; the import name stays `parley`
+version = "0.2.0"
 description = "Consensus among personal AI agents that faithfully represent owners with conflicting private interests — deterministic red-line enforcement + verifiable transcripts."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []  # core is zero-dependency, pure stdlib
-classifiers = ["License :: OSI Approved :: Apache Software License"]
+keywords = [
+    "ai-agents", "multi-agent", "consensus", "negotiation", "social-choice", "max-min",
+    "red-lines", "verifiable", "tamper-evident", "transcript", "zero-dependency",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 [project.urls]
+Homepage = "https://parleyprotocol.com"
 Repository = "https://github.com/5uper0/parley"
-Homepage = "https://github.com/5uper0/parley"
+Changelog = "https://github.com/5uper0/parley/blob/main/CHANGELOG.md"
+Issues = "https://github.com/5uper0/parley/issues"
 
 [project.optional-dependencies]
 crypto = ["pynacl>=1.6.2"]   # Ed25519 signed Agent Cards + verdicts (net layer)

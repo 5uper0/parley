@@ -73,3 +73,9 @@ def test_setuptools_discovers_every_package_in_the_tree():
         f"setuptools.find_packages(include={patterns}) misses {sorted(in_tree - discovered)}"
     )
 
+
+
+def test_distribution_name_is_not_the_taken_pypi_name():
+    name = _pyproject()["project"]["name"]
+    assert name != "parley", "PyPI's `parley` is an unrelated project; publish under another name"
+    assert name.startswith("parley"), f"distribution {name!r} should still be findable as parley"
