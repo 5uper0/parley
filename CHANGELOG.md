@@ -7,6 +7,8 @@ omitted.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-26
+
 ### Added
 - `parley/mcp.py`: a stdlib-only MCP server over stdio (`parley-mcp` console script, or
   `python -m parley.mcp`) so Claude Desktop, Claude Code and Cursor can call Parley as a tool.
@@ -19,10 +21,6 @@ omitted.
   transcript (it is unsigned and the server does not store it). Private sheets need one process
   per owner (`examples/run_env.py`). A spec is bounded to 500 options, 50 parties, 10 000
   option×party evaluations and 1000-item constraint lists; larger ones return a tool error.
-
-## [0.2.0] - 2026-09-26
-
-### Added
 - `parley/ratify.py`: an owner's explicit accept of a finished parley, bound to the decision and
   the transcript hash. `ratify()` refuses an accept that the submitted sheet rejects; `agreement()`
   is unanimous over one exact record and fails closed on a stale hash, a swapped decision, a

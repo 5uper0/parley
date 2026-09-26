@@ -68,6 +68,8 @@ Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Statu
 
 ### Use it from an MCP host (Claude, Cursor)
 
+<!-- mcp-name: io.github.5uper0/parley -->
+
 The base install ships a stdlib-only MCP server over stdio. Point your host at it:
 
 ```json

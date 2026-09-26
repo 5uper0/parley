@@ -1,0 +1,24 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.5uper0/parley",
+  "title": "Parley",
+  "description": "Multi-party decisions for agents: red lines rejected in code, max-min pick, SHA-256 receipt. Stdlib.",
+  "websiteUrl": "https://parleyprotocol.com",
+  "repository": {
+    "url": "https://github.com/5uper0/parley",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "parley-consensus",
+      "version": "0.2.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
