@@ -7,6 +7,7 @@ read `pyproject.toml` and match it against the tree, so a new subpackage that th
 patterns miss fails here, before the wheel is built.
 """
 import fnmatch
+import json
 import pathlib
 
 import pytest
@@ -79,3 +80,19 @@ def test_distribution_name_is_not_the_taken_pypi_name():
     name = _pyproject()["project"]["name"]
     assert name != "parley", "PyPI's `parley` is an unrelated project; publish under another name"
     assert name.startswith("parley"), f"distribution {name!r} should still be findable as parley"
+
+
+def test_registry_metadata_matches_the_package():
+    """The MCP Registry verifies a PyPI package by an `mcp-name:` marker in the README of the
+    uploaded version, and hosts launch it as `uvx <distribution>`; both break silently."""
+    tomllib = pytest.importorskip("tomllib")
+    root = pathlib.Path(__file__).resolve().parent.parent
+    project = tomllib.loads((root / "pyproject.toml").read_text())["project"]
+    server = json.loads((root / "server.json").read_text())
+    assert f"mcp-name: {server['name']}" in (root / "README.md").read_text()
+    assert server["version"] == project["version"]
+    package = server["packages"][0]
+    assert package["identifier"] == project["name"]
+    assert package["version"] == project["version"]
+    assert project["scripts"].get(project["name"]) == "parley.mcp:main"
+    assert len(server["description"]) <= 100
