@@ -63,7 +63,10 @@ Cara not betrayed: True
 
 The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red line, so it is rejected
 before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
+
 Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Status](#status-v0-working-core)).
+
+---
 
 Most agent tooling in 2026 solves either transport/identity (A2A, MCP) or 1:1 agentic
 commerce (an agent buys/books for you), or *cooperative* debate between agents of the
