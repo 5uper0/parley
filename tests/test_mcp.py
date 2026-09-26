@@ -230,6 +230,27 @@ def test_verify_receipt_catches_a_forged_decision_the_hash_cannot(recipe, decide
         "a roster the record does not carry must fail the recomputation"
 
 
+def test_verify_receipt_cannot_catch_verdicts_rewritten_to_fit_the_swap(recipe, decided):
+    """Pins the stated limit: unsigned verdicts rewritten to crown a new winner pass both checks."""
+    forged = json.loads(json.dumps(decided["transcript"]))
+    other = next(o for o in recipe["options"] if o["id"] == "fund-literacy")
+    for entry in forged["entries"]:
+        winner = entry["option"] == other
+        for v in entry["verdicts"]:
+            v["acceptable"], v["score"], v["reason"] = (True, 1.0, "ok") if winner else (v["acceptable"], 0.0, v["reason"])
+    forged["result"]["decision"] = other
+    replies, _ = _talk([INIT, _call("parley_verify_receipt",
+                                    {"transcript": forged, "sha256": Transcript.from_dict(forged).hash()}, 1)])
+    payload = _payload(replies[-1])
+    assert payload["match"] is True and payload["max_min_verified"] is True
+
+
+def test_notification_with_a_bad_jsonrpc_field_gets_no_reply():
+    replies, _ = _talk([INIT, {"jsonrpc": "1.0", "method": "notifications/initialized"},
+                        {"jsonrpc": "2.0", "id": 9, "method": "ping"}])
+    assert [r["id"] for r in replies] == [0, 9]
+
+
 def test_verify_receipt_malformed_transcript_is_a_tool_error():
     replies, _ = _talk([INIT, _call("parley_verify_receipt",
                                     {"transcript": {"entries": "nope"}, "sha256": "0" * 64})])

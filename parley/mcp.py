@@ -159,7 +159,9 @@ TOOLS = [
             "whoever could edit the transcript. "
             "max_min_verified recomputes the decision from the recorded verdicts: true when the "
             "announced result is exactly the max-min option over them (or an honest deadlock), "
-            "false when the winner was swapped, even if the hash was re-issued afterwards. It "
+            "false when the announced winner does not follow from the recorded verdicts. Verdicts "
+            "are unsigned, so whoever can rewrite the record can rewrite them to fit a swapped "
+            "winner; only a hash kept by another party, or signed verdicts, rules that out. It "
             "needs every entry to carry exactly one verdict per owner. Pass expected_owners (the "
             "roster you know took part) so a record missing a whole owner also fails; that "
             "roster is only as trustworthy as where you got it. "
@@ -357,6 +359,8 @@ def handle_line(line: bytes) -> Optional[dict]:
     if not _valid_id(req_id):
         return _error(None, INVALID_REQUEST, "id must be a string, an integer or null")
     if message.get("jsonrpc") != "2.0":
+        if "id" not in message:
+            return None  # a notification is never answered, not even with an error
         return _error(req_id, INVALID_REQUEST, "jsonrpc must be \"2.0\"")
     method = message.get("method")
     if not isinstance(method, str):
