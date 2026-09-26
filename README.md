@@ -26,6 +26,47 @@ masked verdicts, and a verifiable non-betrayal transcript.
 
 ---
 
+## Install
+
+```bash
+pip install parley-consensus              # zero-dependency core
+pip install "parley-consensus[crypto]"    # + Ed25519-signed verdicts (parley.net.identity, parley.net.bot)
+```
+
+The distribution is `parley-consensus` (PyPI's `parley` is an unrelated project); the import name is `parley`.
+
+```python
+from parley.agent import Agent
+from parley.consensus import run_consensus
+from parley.preferences import HardConstraint, PreferenceSheet
+
+options = [{"venue": "rooftop", "cost": 900}, {"venue": "garden", "cost": 600}, {"venue": "diner", "cost": 300}]
+ana = PreferenceSheet("Ana", utility=lambda o: 1.0 if o["venue"] == "rooftop" else 0.4)
+bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)],  # a red line: code, not a preference
+                      utility=lambda o: 1 - o["cost"] / 1000)
+cara = PreferenceSheet("Cara", utility=lambda o: 0.9 if o["venue"] == "garden" else 0.5)
+
+result = run_consensus([Agent(s.owner, s) for s in (ana, bob, cara)], options)
+print(result.status, result.decision)
+print("receipt sha256:", result.transcript.hash())
+for sheet in (ana, bob, cara):  # each owner replays their own private sheet, locally
+    print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))
+```
+
+```
+agreed {'venue': 'garden', 'cost': 600}
+receipt sha256: a9cb75c0a15b41360fb2b134e084ca3b577daaf50f5edb657c5c4da43cc2fc72
+Ana not betrayed: True
+Bob not betrayed: True
+Cara not betrayed: True
+```
+
+The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red line, so it is rejected
+before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
+
+Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Status](#status-v0-working-core)).
+
+---
 
 Most agent tooling in 2026 solves either transport/identity (A2A, MCP) or 1:1 agentic
 commerce (an agent buys/books for you), or *cooperative* debate between agents of the

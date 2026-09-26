@@ -7,6 +7,8 @@ omitted.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-26
+
 ### Added
 - `parley/ratify.py`: an owner's explicit accept of a finished parley, bound to the decision and
   the transcript hash. `ratify()` refuses an accept that the submitted sheet rejects; `agreement()`
@@ -27,6 +29,10 @@ omitted.
 - Tests covering transcript tamper-evidence edge cases — first external contribution (#21).
 
 ### Changed
+- Distribution renamed to `parley-consensus` (PyPI's `parley` is an unrelated project); the import
+  name stays `parley`. The wheel now ships `parley.net` (signed verdicts, HTTP bots): the hand-written
+  `packages = ["parley"]` left the subpackage out of `0.1.0`'s build. `tests/test_packaging.py`
+  guards both.
 - A red-line predicate now passes only when it returns exactly `True`. Any other value crosses the
   red line, including truthy non-bools: `lambda o: o.get("flag")` used to pass on any non-empty
   value and now counts as a crossing. This is the change most likely to affect existing sheets —
@@ -81,5 +87,6 @@ First tagged release. Repo went public 2026-07-18.
 ### Fixed
 - Demo scenario tabs are keyboard-reachable with focus and key activation (#10).
 
-[Unreleased]: https://github.com/5uper0/parley/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/5uper0/parley/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/5uper0/parley/releases/tag/v0.2.0
 [0.1.0]: https://github.com/5uper0/parley/releases/tag/v0.1.0
