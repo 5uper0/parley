@@ -17,17 +17,28 @@ import sys
 from importlib import metadata
 from typing import Any, Callable, Dict, Optional
 
+from .consensus import verify_outcome
 from .spec import DecisionSpec, PartySpec
 from .transcript import Transcript
 
 PROTOCOL_VERSION = "2025-06-18"
-SUPPORTED_VERSIONS = frozenset({"2025-06-18", "2025-03-26", "2024-11-05"})
+# 2025-03-26 is left out on purpose: that revision requires JSON-RPC batching, which this
+# server does not implement (2025-06-18 removed it).
+SUPPORTED_VERSIONS = frozenset({"2025-06-18", "2024-11-05"})
 MAX_LINE_BYTES = 1024 * 1024
+
+# A spec is evaluated options × parties times and every constraint list is scanned per option.
+# A 41 KB spec of 2000 × 2000 took 2.3 GB; these bounds keep one call inside a host's patience.
+MAX_OPTIONS = 500
+MAX_PARTIES = 50
+MAX_PRODUCT = 10_000
+MAX_CONSTRAINT_VALUES = 1000
 
 PARSE_ERROR = -32700
 INVALID_REQUEST = -32600
 METHOD_NOT_FOUND = -32601
 INVALID_PARAMS = -32602
+INTERNAL_ERROR = -32603
 
 log = logging.getLogger("parley.mcp")
 
@@ -36,7 +47,9 @@ _NO_PRIVACY = (
     "one call, so there is no privacy between parties or from you. What still holds: red lines "
     "reject an option deterministically (a violating option cannot win), the max-min rule picks "
     "among options feasible for everyone, and the returned transcript is tamper-evident via "
-    "transcript_sha256. For private sheets run one process per owner: examples/run_env.py."
+    "transcript_sha256, provided the hash is kept by someone other than whoever might edit the "
+    "transcript (it is unsigned and this server does not store it). For private sheets run one "
+    "process per owner: examples/run_env.py."
 )
 
 _CONSTRAINT_SCHEMA = {
@@ -46,7 +59,8 @@ _CONSTRAINT_SCHEMA = {
     "properties": {
         "attr": {"type": "string"},
         "op": {"type": "string", "enum": ["==", "!=", "<", "<=", ">", ">=", "in", "not_in"]},
-        "value": {"description": "Compared against option[attr]; a list for in/not_in."},
+        "value": {"description": "Compared against option[attr]; a list for in/not_in.",
+                  "maxItems": MAX_CONSTRAINT_VALUES},
     },
     "required": ["attr", "op", "value"],
 }
@@ -55,7 +69,7 @@ _UTILITY_SCHEMA = {
     "type": "object",
     "description": "One soft-preference term. Categorical: set `prefer`. Numeric: set "
                    "`direction` (higher|lower) with `lo` and `hi` to normalise on. A party's "
-                   "score is the weighted average of its terms, in [0, 1].",
+                   "score is the weighted average of its terms.",
     "properties": {
         "attr": {"type": "string"},
         "weight": {"type": "number", "default": 1.0},
@@ -90,8 +104,10 @@ _SPEC_SCHEMA = {
                       "description": "One candidate outcome as flat attributes; every attr a "
                                      "constraint or utility term names should be present."},
             "minItems": 1,
+            "maxItems": MAX_OPTIONS,
         },
-        "parties": {"type": "array", "items": _PARTY_SCHEMA, "minItems": 1},
+        "parties": {"type": "array", "items": _PARTY_SCHEMA, "minItems": 1,
+                    "maxItems": MAX_PARTIES},
     },
     "required": ["title", "options", "parties"],
 }
@@ -134,12 +150,20 @@ TOOLS = [
     {
         "name": "parley_verify_receipt",
         "description": (
-            "Check that a transcript is the one a transcript_sha256 was issued for. Rebuilds the "
-            "transcript from its dict form (strict shape check) and recomputes the SHA-256 over "
-            "the canonical record. Returns JSON: match (true if the recomputed hash equals "
-            "sha256), expected_sha256 and recomputed_sha256. Any edit to an option, a verdict or "
-            "the result changes the hash, so match=false means the record was altered after the "
-            "hash was issued. A malformed transcript is a tool error, not a mismatch."
+            "Two independent checks on a transcript from parley_decide. Returns JSON: match, "
+            "max_min_verified, expected_sha256, recomputed_sha256. "
+            "match=true means only that this transcript hashes to the sha256 you passed. The "
+            "hash is unsigned and this server does not store it, so if the transcript and the "
+            "hash come from the same party, match proves nothing: whoever edits the record can "
+            "re-hash it. It detects tampering only when the hash was kept by someone other than "
+            "whoever could edit the transcript. "
+            "max_min_verified recomputes the decision from the recorded verdicts: true when the "
+            "announced result is exactly the max-min option over them (or an honest deadlock), "
+            "false when the winner was swapped, even if the hash was re-issued afterwards. It "
+            "needs every entry to carry exactly one verdict per owner. Pass expected_owners (the "
+            "roster you know took part) so a record missing a whole owner also fails; that "
+            "roster is only as trustworthy as where you got it. "
+            "A malformed transcript is a tool error, not a mismatch."
         ),
         "inputSchema": {
             "type": "object",
@@ -147,6 +171,11 @@ TOOLS = [
                 "transcript": _TRANSCRIPT_SCHEMA,
                 "sha256": {"type": "string", "minLength": 64, "maxLength": 64,
                            "description": "The transcript_sha256 you were given, hex."},
+                "expected_owners": {
+                    "type": "array", "items": {"type": "string"},
+                    "description": "Optional. The owners you know took part; every entry must "
+                                   "carry exactly this set for max_min_verified to be true.",
+                },
             },
             "required": ["transcript", "sha256"],
         },
@@ -180,8 +209,32 @@ def _require(arguments: dict, *keys: str) -> None:
         raise ValueError(f"missing argument(s): {', '.join(missing)}")
 
 
+def _check_size(raw: Any) -> None:
+    """Refuse a spec that would run for minutes before `from_dict` even builds it. Shapes that
+    are not lists or dicts are left for `from_dict` to reject with its own message."""
+    if not isinstance(raw, dict):
+        return
+    options = raw.get("options") if isinstance(raw.get("options"), list) else []
+    parties = raw.get("parties") if isinstance(raw.get("parties"), list) else []
+    if len(options) > MAX_OPTIONS:
+        raise ValueError(f"spec exceeds the limit of {MAX_OPTIONS} options ({len(options)})")
+    if len(parties) > MAX_PARTIES:
+        raise ValueError(f"spec exceeds the limit of {MAX_PARTIES} parties ({len(parties)})")
+    if len(options) * len(parties) > MAX_PRODUCT:
+        raise ValueError(f"spec exceeds the limit of {MAX_PRODUCT} option×party evaluations "
+                         f"({len(options)}×{len(parties)})")
+    for party in parties:
+        hard = party.get("hard") if isinstance(party, dict) else None
+        for constraint in hard if isinstance(hard, list) else []:
+            value = constraint.get("value") if isinstance(constraint, dict) else None
+            if isinstance(value, list) and len(value) > MAX_CONSTRAINT_VALUES:
+                raise ValueError(f"a constraint value list exceeds the limit of "
+                                 f"{MAX_CONSTRAINT_VALUES} items ({len(value)})")
+
+
 def tool_decide(arguments: dict) -> dict:
     _require(arguments, "spec")
+    _check_size(arguments["spec"])
     spec = DecisionSpec.from_dict(arguments["spec"])
     result = spec.run(rule=arguments.get("rule", "egalitarian"))
     return {
@@ -197,8 +250,14 @@ def tool_verify_receipt(arguments: dict) -> dict:
     expected = arguments["sha256"]
     if not isinstance(expected, str):
         raise ValueError("sha256 must be a hex string")
-    recomputed = Transcript.from_dict(arguments["transcript"]).hash()
+    owners = arguments.get("expected_owners")
+    if owners is not None and not (isinstance(owners, list)
+                                   and all(isinstance(o, str) for o in owners)):
+        raise ValueError("expected_owners must be a list of owner names")
+    transcript = Transcript.from_dict(arguments["transcript"])
+    recomputed = transcript.hash()
     return {"match": recomputed == expected.lower(),
+            "max_min_verified": verify_outcome(transcript, expected_owners=owners),
             "expected_sha256": expected, "recomputed_sha256": recomputed}
 
 
@@ -274,16 +333,31 @@ def dispatch(method: str, params: Any) -> dict:
     raise RpcError(METHOD_NOT_FOUND, f"method not found: {method}")
 
 
+def _reject_constant(token: str):
+    raise ValueError(f"{token} is not JSON")
+
+
+def _valid_id(value: Any) -> bool:
+    return value is None or isinstance(value, str) or (
+        isinstance(value, int) and not isinstance(value, bool))
+
+
 def handle_line(line: bytes) -> Optional[dict]:
     """One inbound line to at most one reply. None means: say nothing (a notification, or a
     response the client sent us)."""
     try:
-        message = json.loads(line.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError):
+        # NaN/Infinity are Python extensions; echoing one back as an id would put non-JSON on
+        # stdout. Deep nesting raises RecursionError rather than ValueError.
+        message = json.loads(line.decode("utf-8"), parse_constant=_reject_constant)
+    except (UnicodeDecodeError, ValueError, RecursionError):
         return _error(None, PARSE_ERROR, "parse error")
     if not isinstance(message, dict):
         return _error(None, INVALID_REQUEST, "expected a JSON-RPC 2.0 object")
     req_id = message.get("id")
+    if not _valid_id(req_id):
+        return _error(None, INVALID_REQUEST, "id must be a string, an integer or null")
+    if message.get("jsonrpc") != "2.0":
+        return _error(req_id, INVALID_REQUEST, "jsonrpc must be \"2.0\"")
     method = message.get("method")
     if not isinstance(method, str):
         if "id" in message and ("result" in message or "error" in message):
@@ -297,6 +371,9 @@ def handle_line(line: bytes) -> Optional[dict]:
         return {"jsonrpc": "2.0", "id": req_id, "result": dispatch(method, message.get("params"))}
     except RpcError as exc:
         return _error(req_id, exc.code, str(exc))
+    except Exception as exc:
+        log.exception("internal error handling %s", method)
+        return _error(req_id, INTERNAL_ERROR, f"internal error: {type(exc).__name__}")
 
 
 def _error(req_id: Any, code: int, message: str) -> dict:
@@ -331,7 +408,11 @@ def serve(stdin=None, stdout=None) -> None:
         elif not line.strip():
             continue
         else:
-            reply = handle_line(line)
+            try:
+                reply = handle_line(line)
+            except Exception as exc:  # last resort: one bad line must not end the session
+                log.exception("internal error before the request id was known")
+                reply = _error(None, INTERNAL_ERROR, f"internal error: {type(exc).__name__}")
         if reply is None:
             continue
         stdout.write(json.dumps(reply, ensure_ascii=False).encode("utf-8") + b"\n")

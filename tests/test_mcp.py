@@ -6,10 +6,12 @@ and that a decision reached over the wire is byte-for-byte the decision `Decisio
 reaches in-process. Tool failures must come back as `isError` results, never as JSON-RPC errors,
 because a host treats the two differently (one is shown to the model, the other kills the call).
 """
+import io
 import json
 import os
 import subprocess
 import sys
+import time
 
 import pytest
 
@@ -18,7 +20,16 @@ RECIPE = os.path.join(ROOT, "examples", "demo", "recipe_committee.json")
 
 sys.path.insert(0, ROOT)
 
+from parley import mcp  # noqa: E402
 from parley.spec import DecisionSpec, PartySpec  # noqa: E402
+from parley.transcript import Transcript  # noqa: E402
+
+
+def _strict(text: str):
+    """json.loads that refuses NaN/Infinity: what the server writes must be JSON, not Python."""
+    def reject(token):
+        raise ValueError(f"not JSON: {token}")
+    return json.loads(text, parse_constant=reject)
 
 INIT = {"jsonrpc": "2.0", "id": 0, "method": "initialize",
         "params": {"protocolVersion": "2025-06-18", "capabilities": {},
@@ -38,7 +49,7 @@ def _talk(messages, raw: bytes = b""):
                           capture_output=True, env=env, timeout=60)
     assert proc.returncode == 0, proc.stderr.decode("utf-8", "replace")
     lines = [ln for ln in proc.stdout.decode("utf-8").splitlines() if ln.strip()]
-    return [json.loads(ln) for ln in lines], proc.stderr.decode("utf-8", "replace")
+    return [_strict(ln) for ln in lines], proc.stderr.decode("utf-8", "replace")
 
 
 def _call(name, arguments, req_id=2):
@@ -80,12 +91,13 @@ def test_handshake_reports_parley_and_tools_capability():
 
 
 def test_handshake_echoes_a_supported_older_version_and_falls_back_otherwise():
-    older = dict(INIT, params=dict(INIT["params"], protocolVersion="2025-03-26"))
+    older = dict(INIT, params=dict(INIT["params"], protocolVersion="2024-11-05"))
     replies, _ = _talk([older])
-    assert replies[0]["result"]["protocolVersion"] == "2025-03-26"
-    unknown = dict(INIT, params=dict(INIT["params"], protocolVersion="1999-01-01"))
-    replies, _ = _talk([unknown])
-    assert replies[0]["result"]["protocolVersion"] == "2025-06-18"
+    assert replies[0]["result"]["protocolVersion"] == "2024-11-05"
+    for unsupported in ("1999-01-01", "2025-03-26"):  # 2025-03-26 requires batching, which we do not do
+        req = dict(INIT, params=dict(INIT["params"], protocolVersion=unsupported))
+        replies, _ = _talk([req])
+        assert replies[0]["result"]["protocolVersion"] == "2025-06-18"
 
 
 def test_ping_returns_empty_result():
@@ -104,10 +116,21 @@ def test_tools_list_names_and_schemas():
     assert set(tools["parley_decide"]["inputSchema"]["required"]) == {"spec"}
     assert "rule" in tools["parley_decide"]["inputSchema"]["properties"]
     assert set(tools["parley_verify_receipt"]["inputSchema"]["required"]) == {"transcript", "sha256"}
+    assert "expected_owners" in tools["parley_verify_receipt"]["inputSchema"]["properties"]
     assert set(tools["parley_check_party"]["inputSchema"]["required"]) == {"party", "decision"}
     # the host holds every sheet in this mode: the description must say so, not imply privacy
     assert "privacy" in tools["parley_decide"]["description"].lower()
     assert "run_env.py" in tools["parley_decide"]["description"]
+    # the hash is unsigned and not stored here: a caller-supplied hash proves nothing on its own
+    assert "unsigned" in tools["parley_verify_receipt"]["description"]
+    assert "max_min_verified" in tools["parley_verify_receipt"]["description"]
+    spec_schema = tools["parley_decide"]["inputSchema"]["properties"]["spec"]
+    assert spec_schema["properties"]["options"]["maxItems"] == mcp.MAX_OPTIONS
+    assert spec_schema["properties"]["parties"]["maxItems"] == mcp.MAX_PARTIES
+    value_schema = spec_schema["properties"]["parties"]["items"]["properties"]["hard"]["items"]["properties"]["value"]
+    assert value_schema["maxItems"] == mcp.MAX_CONSTRAINT_VALUES
+    utility = spec_schema["properties"]["parties"]["items"]["properties"]["utility"]["items"]
+    assert "[0, 1]" not in utility["description"], "spec.py never clamps; negative weights leave that range"
 
 
 def test_decide_matches_the_in_process_engine(recipe, decided):
@@ -126,11 +149,49 @@ def test_decide_rejects_an_unknown_rule_as_a_tool_error(recipe):
     assert "majority" in result["content"][0]["text"]
 
 
+def _oversized_specs(recipe):
+    """One spec per bound: a real recipe stretched past exactly one limit."""
+    option, party = recipe["options"][0], recipe["parties"][0]
+    too_many_options = dict(recipe, options=[dict(option, id=str(i)) for i in range(mcp.MAX_OPTIONS + 1)])
+    too_many_parties = dict(recipe, parties=[dict(party, owner=str(i)) for i in range(mcp.MAX_PARTIES + 1)])
+    n_opts = mcp.MAX_PRODUCT // mcp.MAX_PARTIES + 1
+    assert n_opts <= mcp.MAX_OPTIONS and n_opts * mcp.MAX_PARTIES > mcp.MAX_PRODUCT
+    too_big_product = dict(recipe,
+                           options=[dict(option, id=str(i)) for i in range(n_opts)],
+                           parties=[dict(party, owner=str(i)) for i in range(mcp.MAX_PARTIES)])
+    long_list = dict(party, hard=[{"attr": "id", "op": "in",
+                                   "value": list(range(mcp.MAX_CONSTRAINT_VALUES + 1))}])
+    too_long_value = dict(recipe, parties=[long_list])
+    return {"options": too_many_options, "parties": too_many_parties,
+            "product": too_big_product, "value_list": too_long_value}
+
+
+def test_oversized_spec_is_refused_before_it_runs(recipe):
+    specs = _oversized_specs(recipe)
+    calls = [_call("parley_decide", {"spec": s}, i) for i, s in enumerate(specs.values(), 1)]
+    started = time.monotonic()
+    replies, _ = _talk([INIT, *calls])
+    elapsed = time.monotonic() - started
+    results = {r["id"]: r["result"] for r in replies if r["id"] != 0}
+    assert len(results) == len(specs)
+    for name, result in zip(specs, results.values()):
+        assert result["isError"] is True, name
+        assert "limit" in result["content"][0]["text"].lower(), name
+    assert elapsed < 5, f"refusal must be cheap, took {elapsed:.1f}s"
+    # the largest spec that passes every bound still runs
+    limit_ok = dict(recipe, options=[dict(recipe["options"][0], id=str(i)) for i in range(mcp.MAX_OPTIONS)],
+                    parties=[dict(recipe["parties"][0], owner=str(i))
+                             for i in range(mcp.MAX_PRODUCT // mcp.MAX_OPTIONS)])
+    replies, _ = _talk([INIT, _call("parley_decide", {"spec": limit_ok})])
+    assert replies[-1]["result"]["isError"] is False
+
+
 def test_verify_receipt_round_trip_and_tamper(decided):
     ok = _call("parley_verify_receipt",
                {"transcript": decided["transcript"], "sha256": decided["transcript_sha256"]})
     replies, _ = _talk([INIT, ok])
-    assert _payload(replies[-1])["match"] is True
+    out = _payload(replies[-1])
+    assert out["match"] is True and out["max_min_verified"] is True
 
     tampered = json.loads(json.dumps(decided["transcript"]))
     verdict = tampered["entries"][0]["verdicts"][0]
@@ -141,6 +202,32 @@ def test_verify_receipt_round_trip_and_tamper(decided):
     out = _payload(replies[-1])
     assert out["match"] is False
     assert out["recomputed_sha256"] != decided["transcript_sha256"]
+
+
+def test_verify_receipt_catches_a_forged_decision_the_hash_cannot(recipe, decided):
+    """A caller who edits the record and re-hashes it gets match=true; only the recomputation
+    over the recorded verdicts notices the winner was swapped."""
+    forged = json.loads(json.dumps(decided["transcript"]))
+    other = next(o for o in recipe["options"] if o["id"] == "fund-literacy")
+    assert other != decided["decision"]
+    forged["result"]["decision"] = other
+    rehashed = Transcript.from_dict(forged).hash()
+    assert rehashed != decided["transcript_sha256"]
+    owners = [p["owner"] for p in recipe["parties"]]
+    replies, _ = _talk([
+        INIT,
+        _call("parley_verify_receipt", {"transcript": forged, "sha256": rehashed}, 1),
+        _call("parley_verify_receipt",
+              {"transcript": forged, "sha256": rehashed, "expected_owners": owners}, 2),
+        _call("parley_verify_receipt",
+              {"transcript": decided["transcript"], "sha256": decided["transcript_sha256"],
+               "expected_owners": owners + ["Stranger"]}, 3),
+    ])
+    by_id = {r["id"]: _payload(r) for r in replies if r["id"] in (1, 2, 3)}
+    assert by_id[1]["match"] is True and by_id[1]["max_min_verified"] is False
+    assert by_id[2]["match"] is True and by_id[2]["max_min_verified"] is False
+    assert by_id[3]["match"] is True and by_id[3]["max_min_verified"] is False, \
+        "a roster the record does not carry must fail the recomputation"
 
 
 def test_verify_receipt_malformed_transcript_is_a_tool_error():
@@ -194,6 +281,48 @@ def test_parse_error_is_minus_32700_and_the_session_survives():
     assert replies[2] == {"jsonrpc": "2.0", "id": 5, "result": {}}
 
 
+def test_deeply_nested_line_is_a_parse_error_and_the_session_survives():
+    """`json.loads` raises RecursionError, not ValueError, on 200k open brackets."""
+    ping = {"jsonrpc": "2.0", "id": 8, "method": "ping"}
+    replies, _ = _talk([INIT], raw=b"[" * 200000 + b"\n" + json.dumps(ping).encode() + b"\n")
+    assert replies[1]["error"]["code"] == -32700 and replies[1]["id"] is None
+    assert replies[2] == {"jsonrpc": "2.0", "id": 8, "result": {}}
+
+
+def test_unexpected_exception_in_a_request_is_minus_32603_and_the_session_survives(monkeypatch):
+    def boom(method, params):
+        if method == "tools/list":
+            raise RuntimeError("wiring fault")
+        return {}
+    monkeypatch.setattr(mcp, "dispatch", boom)
+    stdin = io.BytesIO(b'{"jsonrpc":"2.0","id":"a","method":"tools/list"}\n'
+                       b'{"jsonrpc":"2.0","id":"b","method":"ping"}\n')
+    stdout = io.BytesIO()
+    mcp.serve(stdin, stdout)
+    replies = [_strict(ln) for ln in stdout.getvalue().decode().splitlines()]
+    assert replies[0]["id"] == "a" and replies[0]["error"]["code"] == -32603
+    assert replies[1] == {"jsonrpc": "2.0", "id": "b", "result": {}}
+
+
+def test_invalid_ids_and_non_json_constants_never_reach_stdout():
+    """A NaN id echoed back is not JSON; a bool or float id is not a JSON-RPC id we accept."""
+    raw = b"\n".join([
+        b'{"jsonrpc":"2.0","id":NaN,"method":"ping"}',
+        b'{"jsonrpc":"2.0","id":true,"method":"ping"}',
+        b'{"jsonrpc":"2.0","id":1.5,"method":"ping"}',
+        b'{"id":3,"method":"ping"}',
+        b'{"jsonrpc":"1.0","id":4,"method":"ping"}',
+        b'{"jsonrpc":"2.0","id":"ok","method":"ping"}',
+    ]) + b"\n"
+    replies, _ = _talk([], raw=raw)  # _talk's strict parser rejects NaN on stdout
+    assert replies[0]["error"]["code"] == -32700 and replies[0]["id"] is None
+    assert replies[1]["error"]["code"] == -32600 and replies[1]["id"] is None
+    assert replies[2]["error"]["code"] == -32600 and replies[2]["id"] is None
+    assert replies[3]["error"]["code"] == -32600 and replies[3]["id"] == 3
+    assert replies[4]["error"]["code"] == -32600 and replies[4]["id"] == 4
+    assert replies[5] == {"jsonrpc": "2.0", "id": "ok", "result": {}}
+
+
 def test_oversize_line_is_rejected_without_killing_the_session():
     ping = {"jsonrpc": "2.0", "id": 6, "method": "ping"}
     huge = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "ping", "params": {"pad": "x" * (1024 * 1024)}})
@@ -208,6 +337,7 @@ def test_stdout_carries_only_json_rpc(recipe):
     replies, stderr = _talk([INIT, INITIALIZED, _call("parley_decide", {"spec": recipe})])
     assert all(r.get("jsonrpc") == "2.0" for r in replies)
     assert len(replies) == 2
+    assert "parley MCP server" in stderr and "ready" in stderr, stderr
 
 
 def test_console_script_is_declared():
