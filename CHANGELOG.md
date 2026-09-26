@@ -87,5 +87,6 @@ First tagged release. Repo went public 2026-07-18.
 ### Fixed
 - Demo scenario tabs are keyboard-reachable with focus and key activation (#10).
 
-[Unreleased]: https://github.com/5uper0/parley/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/5uper0/parley/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/5uper0/parley/releases/tag/v0.2.0
 [0.1.0]: https://github.com/5uper0/parley/releases/tag/v0.1.0

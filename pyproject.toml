@@ -16,7 +16,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -33,7 +32,7 @@ Issues = "https://github.com/5uper0/parley/issues"
 
 [project.optional-dependencies]
 crypto = ["pynacl>=1.6.2"]   # Ed25519 signed Agent Cards + verdicts (net layer)
-dev = ["pytest>=9.1.1", "pynacl>=1.6.2"]
+dev = ["pytest>=9.1.1", "pynacl>=1.6.2", "setuptools>=84.0.0"]
 # The voice layer (voice/) is stdlib-only: the brain calls OpenRouter's OpenAI-compatible
 # endpoint over urllib, so there is no extra to install.
 
