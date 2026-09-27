@@ -288,3 +288,17 @@ def test_hash_of_a_pure_json_native_record_is_unchanged_by_the_tag():
     t.record({"a": [1, 2], "b": "x"}, [])
     t.finalize("agreed", {"a": [1, 2]})
     assert t.hash() == "eb2bd81057c744776771bc8df7c0541cb6a21d834abf8546058dde55d5e8e354"
+
+
+def test_hash_refuses_a_dict_that_collides_with_the_tuple_tag():
+    """A dict `{"__tuple__": [1, 2]}` is plain JSON and can cross the wire; if it canonicalized
+    to the same bytes as the tuple `(1, 2)`, the tag would trade one collision for a worse one —
+    the new one needs no live Python tuple, so an untrusted coordinator could trigger it. Refused
+    at record() time, same as any other value the canonical encoding cannot represent."""
+    with pytest.raises(TypeError):
+        Transcript().record({"__tuple__": [1, 2]}, [])
+
+
+def test_hash_refuses_the_tag_key_nested_inside_another_dict():
+    with pytest.raises(TypeError):
+        Transcript().record({"a": {"__tuple__": []}}, [])

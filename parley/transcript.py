@@ -15,16 +15,26 @@ from .preferences import PreferenceSheet
 _VERDICT_KEYS = frozenset({"owner", "acceptable", "score", "reason", "sig", "pubkey_hex"})
 
 
+_TUPLE_TAG = "__tuple__"
+
+
 def _tag_tuples(obj: Any) -> Any:
     """`json.dumps` encodes a tuple the same way as a list, so `(1, 2)` and `[1, 2]` used to hash
     (and sign) identically — two different records, one hash. Recursively mark a tuple before it
     reaches `json.dumps`; a structure with no tuple in it serializes to the exact same bytes as
-    before, so every hash already on record for a JSON-native option is unaffected."""
+    before, so every hash already on record for a JSON-native option is unaffected.
+
+    A plain dict `{"__tuple__": [...]}` is JSON an untrusted coordinator can send over the wire,
+    with no live Python tuple involved; letting it canonicalize to the same bytes as the tag
+    would trade the collision being fixed for a worse one. Refuse it instead, the same way a
+    value `json.dumps` itself cannot encode is refused."""
     if isinstance(obj, tuple):
-        return {"__tuple__": [_tag_tuples(v) for v in obj]}
+        return {_TUPLE_TAG: [_tag_tuples(v) for v in obj]}
     if isinstance(obj, list):
         return [_tag_tuples(v) for v in obj]
     if isinstance(obj, dict):
+        if _TUPLE_TAG in obj:
+            raise TypeError(f"a dict key {_TUPLE_TAG!r} is reserved for the tuple/list canonicalization")
         return {k: _tag_tuples(v) for k, v in obj.items()}
     return obj
 
