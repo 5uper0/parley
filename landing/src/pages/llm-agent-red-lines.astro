@@ -1,0 +1,373 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const contrast = [
+  {
+    k: "Where it lives",
+    prompt: "In the system prompt, as natural language the model is asked to honour.",
+    parley: "In a PreferenceSheet, as a Python callable the engine runs on every option.",
+  },
+  {
+    k: "Who decides it was crossed",
+    prompt: "The model, in context, on every turn, under whatever pressure the other side applies.",
+    parley: "PreferenceSheet.evaluate. The predicate returns True or the option is infeasible.",
+  },
+  {
+    k: "Can a strong enough offer override it",
+    prompt: "Yes. A constraint in a prompt competes with everything else in the prompt.",
+    parley: "No. Scores are only compared among options that already cleared every red line.",
+  },
+  {
+    k: "What the other side learns",
+    prompt: "Whatever the model says while explaining its refusal, which may be the constraint itself.",
+    parley: "The word \"red-line\". Not the name of the constraint and not the sheet.",
+  },
+  {
+    k: "How the owner checks afterwards",
+    prompt: "Read the chat log and hope the model's account of itself is accurate.",
+    parley: "verify_non_betrayal(sheet, decision) re-runs the sheet locally and returns a boolean.",
+  },
+];
+
+const faqs = [
+  {
+    q: "What exactly counts as crossing a red line?",
+    a: "Any return value other than the literal True. The predicate is called with the option; PreferenceSheet.evaluate lists a constraint as violated unless predicate(option) is True. A truthy value such as 1 or a non-empty string still counts as crossed, and so do False and None. The check fails closed by design.",
+  },
+  {
+    q: "Can a red line be weighted, softened, or traded against a very high score?",
+    a: "No. Hard constraints and soft utility are separate fields on the sheet and are combined nowhere. run_consensus only computes scores for options where every agent returned acceptable, so an infeasible option never enters the comparison, whatever its scores would have been.",
+  },
+  {
+    q: "What does the coordinator see when my red line fires?",
+    a: "A Verdict with acceptable set to False, your soft score, and the reason \"red-line\". The names of the crossed constraints are computed inside evaluate and kept in an Evaluation object that never leaves your agent. The score itself is public in the transcript; SECURITY.md lists that as a known limit.",
+  },
+  {
+    q: "Does this need an LLM at all?",
+    a: "No. The core is standard-library Python with no dependencies, and a red line is a plain function. A language model can sit upstream, in parley.elicit, to draft a sheet from a participant's answers, but it only proposes plain data that is validated against a fixed schema and then confirmed by the participant. The enforcement path never consults a model.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/llm-agent-red-lines/#article",
+      headline: "Red lines for LLM agents: enforced in code, not in the prompt",
+      description:
+        "What a red line is in Parley: a code predicate that rejects an option outright and is never traded away as soft utility. Why that differs from telling a model to never do X, and how the owner verifies it afterwards.",
+      url: "https://parleyprotocol.com/llm-agent-red-lines/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/llm-agent-red-lines/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="Red lines for LLM agents, enforced in code — Parley"
+  description="A red line in Parley is a code predicate that rejects an option outright, never a soft preference a model can be argued out of. How HardConstraint and PreferenceSheet.evaluate enforce it, and how the owner checks afterwards."
+  path="/llm-agent-red-lines/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          A red line an LLM can be talked out of is not a red line.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          "Never agree to more than 700" in a system prompt is a request. The model weighs
+          it against everything else in the context, including the other side's best
+          argument. In Parley a red line is a predicate the engine runs on every option,
+          and an option that fails it cannot win. This page shows the mechanism, the
+          fields it touches, and the check the owner runs afterwards.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Every mechanism named here lives in{" "}
+          <code class={code}>parley/preferences.py</code> and{" "}
+          <code class={code}>parley/agent.py</code> in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>
+            source repository
+          </a>. Companion guide:{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Definition -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What a red line is, in one dataclass</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          A hard constraint is a name and a predicate. The name is for the owner. The
+          predicate is a function of the option, and the contract is strict: the option is
+          acceptable only if the predicate returns the literal <code class={code}>True</code>.
+          Any other return value, truthy or not, crosses it.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`@dataclass(frozen=True)
+class HardConstraint:
+    name: str
+    predicate: Callable[[Any], bool]
+
+# a red line: code, not a preference
+HardConstraint("budget", lambda o: o["cost"] <= 700)`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          A <code class={code}>PreferenceSheet</code> holds a list of these under
+          <code class={code}>hard</code>, and separately an optional
+          <code class={code}>utility</code> function that returns a soft score. The two
+          fields are never mixed. That separation is the whole design: soft utility ranks
+          options that already clear every red line, and nothing else.
+        </p>
+      </section>
+
+      <!-- evaluate -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What PreferenceSheet.evaluate does with it</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>evaluate(option)</code> returns an
+          <code class={code}>Evaluation</code> with three fields. It runs every predicate,
+          collects the names of the ones that did not return <code class={code}>True</code>,
+          and sets <code class={code}>feasible</code> only when that list is empty. The
+          soft score is computed regardless: the owner's utility clamped to [0, 1], or a
+          neutral 0.5 when no utility was given. A utility that returns NaN raises
+          <code class={code}>UtilityError</code>, since that is a fault in the sheet, not in
+          the option.
+        </p>
+        <div class={`${deviceBlock} mt-5`} aria-label="The shape of an Evaluation">
+          <span class="text-muted">Evaluation(</span><br />
+          &nbsp;&nbsp;feasible=<span class="text-redline-text">False</span>, <span class="text-muted"># every predicate returned True?</span><br />
+          &nbsp;&nbsp;violated=<span class="text-masked">["budget"]</span>, <span class="text-muted"># stays private to the owner</span><br />
+          &nbsp;&nbsp;score=0.1, <span class="text-muted"># soft utility in [0, 1]</span><br />
+          <span class="text-muted">)</span>
+        </div>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The <code class={code}>violated</code> list is where the constraint names end up,
+          and it is the last place they exist. The next layer discards it.
+        </p>
+      </section>
+
+      <!-- Masking -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What leaves the agent</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>Agent.consider(option)</code> calls
+          <code class={code}>evaluate</code> and returns a <code class={code}>Verdict</code>.
+          The verdict carries <code class={code}>acceptable</code>, the score, and a
+          <code class={code}>reason</code> that is the string <code class={code}>"ok"</code>
+          when the option is feasible and <code class={code}>"red-line"</code> when it is
+          not. The sheet is never handed to the coordinator, and the coordinator is untrusted
+          by construction: it sees that a line was crossed, never which one.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`def consider(self, option):
+    ev = self.sheet.evaluate(option)
+    return Verdict(
+        owner=self.owner,
+        acceptable=ev.feasible,
+        score=ev.score,
+        reason="ok" if ev.feasible else "red-line",
+    )`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Downstream, <code class={code}>run_consensus</code> treats a single
+          <code class={code}>acceptable=False</code> as a veto: an option is a candidate
+          only when every agent accepted it, and scores are compared among candidates only.
+          A red line is therefore never outvoted and never outbid.
+        </p>
+      </section>
+
+      <!-- Contrast -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Prompted constraint versus enforced red line</h2>
+        <div class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface">
+          <table class="w-full min-w-[680px] border-collapse text-left">
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase"></th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-muted">"Never do X" in a prompt</th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-indigo-text">A Parley red line</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                contrast.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th
+                      scope="row"
+                      class="px-5 py-3.5 align-top font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase"
+                    >
+                      {r.k}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-muted">{r.prompt}</td>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r.parley}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Verification -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Checking it held, without showing anyone the sheet</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          After a decision, each owner runs
+          <code class={code}>transcript.verify_non_betrayal(sheet, decision)</code> on their
+          own machine. It re-evaluates the private sheet against the decision and returns
+          <code class={code}>feasible</code>. Nothing is transmitted; the sheet never leaves.
+          A deadlock, where no option cleared every red line, returns
+          <code class={code}>True</code> for everyone, since a deadlock forces nothing on
+          anyone. The transcript itself hashes with SHA-256 over its canonical JSON, so an
+          edit to the record after the fact changes the digest.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          From an MCP host such as Claude or Cursor, the same replay is the
+          <code class={code}>parley_check_party</code> tool, which takes one party's red
+          lines and a decision. In that mode the host holds every party's spec in one call,
+          so there is no privacy between parties; what still holds is the deterministic
+          rejection.
+        </p>
+      </section>
+
+      <!-- Limits -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What a red line does not do</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">It does not read minds.</strong> Non-betrayal is
+              provable with respect to the predicates the owner actually wrote. A
+              constraint that was meant but not encoded is not enforced, and Parley does
+              not judge whether a sheet captures what someone intended.
+            </li>
+            <li>
+              <strong class="text-ink">It does not hide the soft score.</strong> The score
+              is public in the transcript. An untrusted coordinator can infer preference
+              ordering and, over enough options, the shape of the feasible region.
+            </li>
+            <li>
+              <strong class="text-ink">It does not sign anything by default.</strong> The
+              transcript digest is an unsigned SHA-256. Ed25519-signed verdicts are an
+              optional extra, and SECURITY.md describes even those as tamper-evidence
+              rather than proof of who signed.
+            </li>
+            <li>
+              <strong class="text-ink">A model never writes the predicate.</strong>
+              <code class={code}>parley.elicit</code> can draft a sheet from a participant's
+              own answers, but the language model sits behind an injectable callable and
+              can only propose plain data. Every proposed item is validated against the
+              declarative <code class={code}>Constraint</code> schema in
+              <code class={code}>spec.py</code>, never evaluated as code, and nothing is
+              binding until the participant confirms every hard constraint by id.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Watch a red line block an option, then read the predicate that did it.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo runs the real engine in your browser with no signup. The repository is
+          Apache-2.0; <code class={code}>preferences.py</code> is under sixty lines.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>
+            Read the source
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a> &middot;{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>Next: how the whole negotiation stays fair</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

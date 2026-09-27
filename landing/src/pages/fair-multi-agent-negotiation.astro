@@ -1,0 +1,449 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const propBase =
+  "rounded-[14px] border-t border-r border-b-[3px] border-l-[3px] border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const failureModes = [
+  {
+    n: "01",
+    head: "An agent can be argued out of its owner's constraint.",
+    body: "If the constraint lives in a prompt, the other side's agent only has to be more persuasive than the instruction. The owner finds out afterwards, if at all.",
+  },
+  {
+    n: "02",
+    head: "Whoever runs the room sees everyone's cards.",
+    body: "A coordinator that collects full preference sheets to compute an outcome can also sell them, or steer toward the option that suits it.",
+  },
+  {
+    n: "03",
+    head: "Nobody can check the result without seeing the private inputs.",
+    body: "An audit that requires every party to disclose its position is one no party with a real position will agree to.",
+  },
+];
+
+const compareCols = [
+  "Parley",
+  "Single-owner orchestration (AutoGen, CrewAI)",
+  "On-chain agent commerce (Fetch.ai, Olas)",
+];
+
+const compareRows = [
+  ["Whose interests", "Several rival owners", "One principal, many workers", "Two counterparties"],
+  ["Parties per decision", "N, multilateral", "N workers, one goal", "Typically bilateral"],
+  ["Trust anchor", "Code predicates and a local replay", "The orchestrator", "A chain and a token"],
+  ["Crypto required", "No", "No", "Yes"],
+  ["Deployment", "Self-hosted, no external calls", "Self-hosted or SaaS", "Public network"],
+];
+
+const faqs = [
+  {
+    q: "Is this a voting system?",
+    a: "No. A majority cannot outvote a red line: an option is a candidate only if every agent returned acceptable. Among those candidates, run_consensus picks the one with the highest minimum score, breaking ties on the highest total. The least-happy participant is lifted, not outnumbered.",
+  },
+  {
+    q: "What happens when no option clears everyone's red lines?",
+    a: "run_consensus returns status \"deadlock\" with decision None, and the transcript records it that way. The engine never picks a fallback. A deadlock forces nothing on anyone, so verify_non_betrayal returns True for every owner.",
+  },
+  {
+    q: "What does the coordinator learn about my preferences?",
+    a: "Per option: acceptable or not, a soft score in [0, 1], and a reason that is exactly \"ok\" or \"red-line\". It never receives the sheet or the name of a crossed constraint. The score is public in the transcript, so an untrusted coordinator can infer your preference ordering and feasible region; SECURITY.md lists this as a known limit.",
+  },
+  {
+    q: "Can my existing agent framework take part?",
+    a: "run_consensus accepts anything with an owner attribute and a consider(option) method that returns a Verdict. The in-process Agent and the HTTP RemoteAgent both satisfy that protocol. Sheets are written as Python predicates and utility functions, or as declarative constraints from parley.spec. parley.elicit lets a language model draft a sheet from a participant's own answers, but the model sits behind a callable you inject, proposes plain data only, and nothing binds until the participant confirms each hard constraint. No LLM SDK ships in the core.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/fair-multi-agent-negotiation/#article",
+      headline: "Fair multi-agent negotiation when the agents are not on the same side",
+      description:
+        "How AI agents representing owners with conflicting, private interests reach a decision none of them can rig: red lines enforced as code predicates, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone.",
+      url: "https://parleyprotocol.com/fair-multi-agent-negotiation/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/fair-multi-agent-negotiation/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="Fair multi-agent negotiation for rival owners — Parley"
+  description="How AI agents representing owners with conflicting, private interests reach a decision none of them can rig: red lines enforced in code, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone."
+  path="/fair-multi-agent-negotiation/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Fair multi-agent negotiation when the agents are not on the same side.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Most multi-agent frameworks assume every agent serves one owner and a shared
+          goal. The moment several owners with conflicting, private interests each send
+          an agent, "fair" stops meaning polite and starts meaning: no party can rig the
+          outcome, and every party can check that afterwards. This page explains how
+          Parley enforces that in code rather than asking a model to behave.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Every mechanism named below is in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>
+            source repository
+          </a>{" "}
+          under <code class={code}>parley/</code>. Companion guide:{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Problem -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What goes wrong without a referee</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Transport is solved: with MCP and A2A, agents can find each other and exchange
+          messages. What those standards leave open is the adversarial case. When your
+          agent and my agent negotiate a delivery window, a contract clause or a shared
+          budget, three failure modes follow.
+        </p>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            failureModes.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <!-- Three properties -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Three properties, each enforced by a function you can read</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Parley closes each failure mode with a property of the program, not a property
+          of the model. The pieces are small: four short files in a zero-dependency
+          package, each readable in one sitting.
+        </p>
+
+        <div class="mt-6 grid gap-5">
+          <article class={`${propBase} border-b-redline border-l-redline grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}>
+            <div>
+              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
+                1. Deterministic red lines
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px]/[23px] text-muted">
+                A hard constraint is a <code class={code}>HardConstraint(name, predicate)</code>.
+                <code class={code}>PreferenceSheet.evaluate</code> marks an option feasible
+                only when every predicate returns <code class={code}>True</code>. A crossed
+                red line rejects the option outright; no score, however high, can buy it
+                back.
+              </p>
+              <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">preferences.py</span>
+            </div>
+            <div class={deviceBlock} aria-label="Example: a red line rejecting an option">
+              <span class="text-muted">option: rooftop, cost 900</span><br />
+              Ana &rarr; acceptable, score 1.0<br />
+              <span class="text-redline-text">Bob &rarr; red-line</span><br />
+              Cara &rarr; acceptable, score 0.5<br />
+              <span class="text-ink">rooftop is out, regardless of Ana's 1.0</span>
+            </div>
+          </article>
+
+          <article class={`${propBase} border-b-masked border-l-masked grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}>
+            <div>
+              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
+                2. Max-min consensus over masked verdicts
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px]/[23px] text-muted">
+                The only thing that leaves an agent is a <code class={code}>Verdict</code>:
+                acceptable or not, a soft score, and a reason that is exactly
+                <code class={code}>"ok"</code> or <code class={code}>"red-line"</code>. The
+                coordinator never sees the sheet or which constraint fired.
+                <code class={code}>run_consensus</code> keeps the options every agent
+                accepted, then picks the one with the highest minimum score, ties broken
+                by the highest total. No candidate means an honest deadlock.
+              </p>
+              <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">agent.py &middot; consensus.py</span>
+            </div>
+            <div class={deviceBlock} aria-label="Example: what the coordinator sees and how it ranks">
+              <span class="text-muted">leaves each agent:</span><br />
+              <span class="text-verify">acceptable</span> &middot; score 0.4 &middot; reason "ok"<br />
+              <span class="text-muted">rule over feasible options:</span><br />
+              max(min score), then max(total score)<br />
+              <span class="text-muted">no feasible option:</span> <span class="text-ink">status "deadlock"</span>
+            </div>
+          </article>
+
+          <article class={`${propBase} border-b-verify border-l-verify grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}>
+            <div>
+              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
+                3. A transcript each owner verifies alone
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px]/[23px] text-muted">
+                <code class={code}>Transcript.hash()</code> is a SHA-256 over the canonical
+                JSON of every masked verdict and the result, so any later edit changes the
+                digest. Two replays run over it. <code class={code}>verify_non_betrayal</code>
+                re-evaluates your own private sheet against the decision, on your machine,
+                revealing nothing. <code class={code}>verify_outcome</code> recomputes the
+                max-min winner from the recorded verdicts, so a coordinator that announces
+                some other option is caught by anyone holding the record.
+              </p>
+              <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">transcript.py &middot; consensus.py</span>
+            </div>
+            <div class={deviceBlock} aria-label="Example: the two local checks">
+              transcript.hash()<br />
+              <span class="text-verify">&rarr; a9cb75c0a15b&hellip;cc2fc72</span><br />
+              transcript.verify_non_betrayal(my_sheet, decision)<br />
+              <span class="text-verify">&rarr; True</span><br />
+              verify_outcome(transcript, expected_owners=roster)<br />
+              <span class="text-verify">&rarr; True</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Worked example -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The whole thing in eleven lines</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three owners pick a venue. Ana wants the rooftop. Bob will not spend more than
+          700, written as a predicate rather than a preference. Cara likes the garden.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`from parley.agent import Agent
+from parley.consensus import run_consensus
+from parley.preferences import HardConstraint, PreferenceSheet
+
+options = [{"venue": "rooftop", "cost": 900}, {"venue": "garden", "cost": 600}, {"venue": "diner", "cost": 300}]
+ana = PreferenceSheet("Ana", utility=lambda o: 1.0 if o["venue"] == "rooftop" else 0.4)
+bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)],
+                      utility=lambda o: 1 - o["cost"] / 1000)
+cara = PreferenceSheet("Cara", utility=lambda o: 0.9 if o["venue"] == "garden" else 0.5)
+
+result = run_consensus([Agent(s.owner, s) for s in (ana, bob, cara)], options)
+print(result.status, result.decision)
+for sheet in (ana, bob, cara):
+    print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))`}</code></pre>
+        <pre class={`${deviceBlock} mt-3 whitespace-pre`}><code>{`agreed {'venue': 'garden', 'cost': 600}
+Ana not betrayed: True
+Bob not betrayed: True
+Cara not betrayed: True`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget line,
+          so it is rejected before any score is weighed. The coordinator only ever saw
+          <code class={code}>red-line</code>, never the number 700 or the sheet it came
+          from. Between the remaining two, the floors tie: Ana scores both the garden and
+          the diner 0.4. The tie-break is total welfare, and the garden's 0.4 + 0.4 + 0.9
+          = 1.7 beats the diner's 0.4 + 0.7 + 0.5 = 1.6, so max-min picks the garden.
+        </p>
+      </section>
+
+      <!-- Comparison -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>How this differs from the tools you may already use</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Single-owner orchestration coordinates workers that share a goal; it has no
+          concept of a party whose loss is another party's gain. On-chain agent commerce
+          handles a buyer and a seller and anchors trust in a chain and a token. Parley is
+          multilateral, needs no chain, and anchors trust in predicates you can read and a
+          replay you run yourself.
+        </p>
+        <div class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface">
+          <table class="w-full min-w-[680px] border-collapse text-left">
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase"></th>
+                {
+                  compareCols.map((c, i) => (
+                    <th
+                      scope="col"
+                      class:list={[
+                        "px-5 py-3.5 text-[13px] font-semibold",
+                        i === 0 ? "text-indigo-text" : "text-muted",
+                      ]}
+                    >
+                      {c}
+                    </th>
+                  ))
+                }
+              </tr>
+            </thead>
+            <tbody>
+              {
+                compareRows.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th
+                      scope="row"
+                      class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase"
+                    >
+                      {r[0]}
+                    </th>
+                    {r.slice(1).map((cell, i) => (
+                      <td
+                        class:list={[
+                          "px-5 py-3.5 text-[14px]/[22px]",
+                          i === 0 ? "text-ink" : "text-muted",
+                        ]}
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Limits -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What this does not give you yet</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">The hash is unsigned by default.</strong> A SHA-256
+              digest proves the record was not edited after the digest was taken; it
+              proves nothing about who produced the record. Ed25519-signed verdicts are an
+              optional extra (<code class={code}>pip install "parley-consensus[crypto]"</code>),
+              and even then a signature binds a key to an exact option-and-verdict pair
+              without proving the key belongs to the owner. SECURITY.md calls this
+              tamper-evidence, not authenticity.
+            </li>
+            <li>
+              <strong class="text-ink">Scores are public.</strong> The soft score rides
+              in the transcript, so an untrusted coordinator can infer preference ordering
+              and each party's feasible region. The reason and the sheet stay hidden.
+            </li>
+            <li>
+              <strong class="text-ink">Privacy needs one process per owner.</strong> In the
+              in-process and MCP modes, whoever calls <code class={code}>run_consensus</code>
+              holds every sheet. The masked-verdict guarantee applies when each agent runs
+              as its own bot over HTTP.
+            </li>
+            <li>
+              <strong class="text-ink">No collusion resistance.</strong> The max-min rule
+              is not yet hardened against parties that coordinate their reported scores.
+              That is the research track, and SECURITY.md says not to deploy v0 against
+              genuinely adversarial principals in production.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          See a decision resolve, then read the code that resolved it.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo runs the same engine in your browser with no signup. The repository
+          is Apache-2.0 and the core has no dependencies.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>
+            Read the source
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a> &middot;{" "}
+          <a href="/llm-agent-red-lines/" class={link}>Next: what a red line is, exactly</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
