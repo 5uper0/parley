@@ -85,7 +85,13 @@ def verify(receipt: Any) -> dict:
         errors.append(f"transcript cannot be rebuilt: {exc}")
         return report
 
-    recomputed, claimed = transcript.hash(), receipt["transcript_hash"]
+    try:
+        recomputed = transcript.hash()
+    except TypeError as exc:
+        errors.append(f"transcript cannot be hashed: {exc}")
+        return report
+
+    claimed = receipt["transcript_hash"]
     hash_ok = recomputed == claimed
     report["hash"] = {"claimed": claimed, "recomputed": recomputed, "ok": hash_ok}
     if not hash_ok:
