@@ -44,3 +44,7 @@ def test_signed_verdict_is_bound_to_its_option_and_content():
     # …nor flip acceptable/score/reason
     assert card.verify(verdict_payload(option, "Ana", False, 1.0, "ok"), sig) is False
     assert card.verify(verdict_payload(option, "Ana", True, 0.0, "ok"), sig) is False
+
+
+def test_verdict_payload_distinguishes_a_tuple_option_from_an_equal_valued_list():
+    assert verdict_payload((1, 2), "ana", True, 1.0, "ok") != verdict_payload([1, 2], "ana", True, 1.0, "ok")

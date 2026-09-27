@@ -272,3 +272,19 @@ def test_record_and_finalize_refuse_a_non_json_value_when_written():
         Transcript().finalize("agreed", {1})
     with pytest.raises(TypeError):
         Transcript().record({1: "a", "b": 2}, [])
+
+
+def test_hash_distinguishes_a_tuple_option_from_an_equal_valued_list():
+    """json.dumps encodes a tuple as a JSON array, same as a list, so `(1, 2)` and `[1, 2]`
+    used to hash identically — two different records, one hash."""
+    as_tuple, as_list = Transcript(), Transcript()
+    as_tuple.record((1, 2), [])
+    as_list.record([1, 2], [])
+    assert as_tuple.hash() != as_list.hash()
+
+
+def test_hash_of_a_pure_json_native_record_is_unchanged_by_the_tag():
+    t = Transcript()
+    t.record({"a": [1, 2], "b": "x"}, [])
+    t.finalize("agreed", {"a": [1, 2]})
+    assert t.hash() == "eb2bd81057c744776771bc8df7c0541cb6a21d834abf8546058dde55d5e8e354"
