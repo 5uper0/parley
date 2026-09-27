@@ -148,9 +148,10 @@ worked proof: [`docs/dogfood-01-p2p-escrow.md`](docs/dogfood-01-p2p-escrow.md).
 ## Status: v0 (working core)
 
 Pure-stdlib, zero-dependency core. In-process transport with a clean seam where **A2A**
-(distributed discovery + signed Agent Cards) and **LLM-elicited preference sheets** drop
-in next. This v0 deliberately isolates the novel part, the consensus + non-betrayal,
-and reuses nothing that's already a commodity.
+(distributed discovery + signed Agent Cards) drops in next. LLM-elicited preference sheets
+(`parley/elicit.py`) and Ed25519-signed transcripts (`parley/net/identity.py`, optional
+`crypto` extra) already ship. This v0 deliberately isolates the novel part, the consensus +
+non-betrayal, and reuses nothing that's already a commodity.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
@@ -251,17 +252,17 @@ that hits an honest deadlock instead of forcing a bad decision.
 | Layer | v0 | Next |
 |-------|----|------|
 | Transport / discovery / identity | in-process | **A2A** (signed Agent Cards, mDNS/registry), *reuse, don't rebuild* |
-| Agent brain | pure code | Claude or local model elicits the preference sheet |
+| Agent brain | pure code, or `parley/elicit.py` (LLM drafts, participant confirms) | wider elicitation UX |
 | **Red-line enforcement** | `parley/preferences.py` (code predicates) | the core; stays deterministic |
 | **Consensus** | `parley/consensus.py` (max-min) | Nash bargaining, weighted rules |
-| **Verifiability** | `parley/transcript.py` (hash + local replay) | signed transcripts; range-masked scores (MPC) |
+| **Verifiability** | `parley/transcript.py` (hash + local replay), optional Ed25519 signing | range-masked scores (MPC) |
 | Adversarial | N/A | **Byzantine/collusion resistance**, the research-grade contribution |
 
 ## Roadmap → open-core
 
 - **Now:** consensus core + red-line guard + verifiable transcript (this repo, Apache-2.0).
-- **Next:** A2A transport so agents on different machines discover and parley over a LAN;
-  LLM-elicited sheets; signed transcripts.
+- **Next:** A2A transport so agents on different machines discover and parley over a LAN.
+  (LLM-elicited sheets and Ed25519-signed transcripts already ship.)
 - **Research:** inject a lying/colluding agent and show max-min + Byzantine-robust
   aggregation resists it. This is the part potentially interesting to frontier R&D.
 - **Paid (self-host):** hosted relay/trust-registry so agents meet safely beyond the LAN,
