@@ -316,3 +316,17 @@ def test_malformed_participants_fail_the_check_without_a_traceback(tmp_path, par
     assert "Traceback" not in proc.stderr
     mm_line = next(ln for ln in proc.stdout.splitlines() if "max-min honest" in ln)
     assert "owner set unchecked: participants malformed" in mm_line and mm_line.endswith("FAIL")
+
+
+def test_transcript_with_the_reserved_tuple_tag_key_fails_closed_without_a_traceback(tmp_path):
+    """A dict `{"__tuple__": [...]}` in the transcript is refused by hash() (parley/transcript.py);
+    the CLI must report that as a failed check, not crash."""
+    data = _receipt()
+    data["transcript"]["entries"][0]["option"]["__tuple__"] = [1, 2]
+    path = tmp_path / "receipt.json"
+    path.write_text(json.dumps(data))
+    proc = subprocess.run([sys.executable, SCRIPT, str(path)], capture_output=True, text=True)
+    assert proc.returncode == 1, proc.stderr
+    assert "Traceback" not in proc.stderr
+    assert "Result: FAILED" in proc.stdout
+    assert "transcript cannot be hashed" in proc.stdout

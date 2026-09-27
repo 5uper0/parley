@@ -6,7 +6,6 @@ signed verdict or move it to a different option. Signatures verify against the p
 in the same record: with no trusted owner -> key roster yet (v0.2), that is tamper-evidence,
 not proof of who signed. See SECURITY.md.
 """
-import json
 from dataclasses import dataclass
 
 from nacl.encoding import HexEncoder
@@ -14,16 +13,16 @@ from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
 from ..ratify import acceptance_payload
+from ..transcript import canonical_json
 
 
 def verdict_payload(option, owner, acceptable, score, reason) -> bytes:
     """Canonical bytes a bot signs for one verdict — binds owner+option+content.
 
     `type` separates this domain from acceptance signatures (`ratify.acceptance_payload`)."""
-    return json.dumps(
+    return canonical_json(
         {"type": "verdict/0.1", "owner": owner, "option": option, "acceptable": acceptable,
          "score": score, "reason": reason},
-        sort_keys=True, ensure_ascii=False,
     ).encode("utf-8")
 
 

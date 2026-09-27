@@ -15,13 +15,42 @@ from .preferences import PreferenceSheet
 _VERDICT_KEYS = frozenset({"owner", "acceptable", "score", "reason", "sig", "pubkey_hex"})
 
 
+_TUPLE_TAG = "__tuple__"
+
+
+def _tag_tuples(obj: Any) -> Any:
+    """`json.dumps` encodes a tuple the same way as a list, so `(1, 2)` and `[1, 2]` used to hash
+    (and sign) identically — two different records, one hash. Recursively mark a tuple before it
+    reaches `json.dumps`; a structure with no tuple in it serializes to the exact same bytes as
+    before, so every hash already on record for a JSON-native option is unaffected.
+
+    A plain dict `{"__tuple__": [...]}` is JSON an untrusted coordinator can send over the wire,
+    with no live Python tuple involved; letting it canonicalize to the same bytes as the tag
+    would trade the collision being fixed for a worse one. Refuse it instead, the same way a
+    value `json.dumps` itself cannot encode is refused."""
+    if isinstance(obj, tuple):
+        return {_TUPLE_TAG: [_tag_tuples(v) for v in obj]}
+    if isinstance(obj, list):
+        return [_tag_tuples(v) for v in obj]
+    if isinstance(obj, dict):
+        if _TUPLE_TAG in obj:
+            raise TypeError(f"a dict key {_TUPLE_TAG!r} is reserved for the tuple/list canonicalization")
+        return {k: _tag_tuples(v) for k, v in obj.items()}
+    return obj
+
+
+def canonical_json(obj: Any) -> str:
+    """The one encoding every hash and every signed payload in this package uses."""
+    return json.dumps(_tag_tuples(obj), sort_keys=True, ensure_ascii=False)
+
+
 class Transcript:
     def __init__(self):
         self.entries = []              # [{"option":..., "verdicts":[{owner,acceptable,score,reason}]}]
         self.result: Optional[dict] = None
 
     def record(self, option: Any, verdicts) -> None:
-        json.dumps(option, sort_keys=True, ensure_ascii=False)
+        canonical_json(option)
         self.entries.append({
             "option": option,
             "verdicts": [
@@ -32,7 +61,7 @@ class Transcript:
         })
 
     def finalize(self, status: str, decision: Any) -> None:
-        json.dumps(decision, sort_keys=True, ensure_ascii=False)
+        canonical_json(decision)
         self.result = {"status": status, "decision": decision}
 
     def to_dict(self) -> dict:
@@ -68,7 +97,7 @@ class Transcript:
         return t
 
     def hash(self) -> str:
-        blob = json.dumps(self.to_dict(), sort_keys=True, ensure_ascii=False)
+        blob = canonical_json(self.to_dict())
         return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
     def verify_non_betrayal(self, sheet: PreferenceSheet, decision: Any) -> bool:

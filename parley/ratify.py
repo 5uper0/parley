@@ -20,12 +20,11 @@ injected signer, checked by an injected verifier. The core imports no crypto; `n
 supplies both. Every `Acceptance` field is public, so the unsigned tier authenticates nothing —
 it is tamper-evidence only (a hash/decision mismatch is caught, a fabricated record is not).
 """
-import json
 from dataclasses import dataclass, replace
 from typing import Any, Callable, Optional, Sequence, Set, Tuple
 
 from .preferences import PreferenceSheet
-from .transcript import Transcript
+from .transcript import Transcript, canonical_json
 
 Signer = Callable[[bytes], Tuple[str, str]]  # canonical payload -> (sig_hex, pubkey_hex)
 Verifier = Callable[["Acceptance"], bool]
@@ -55,10 +54,9 @@ def acceptance_payload(owner: str, decision: Any, transcript_hash: str, accepted
 
     `type` separates this domain from verdict signatures, so a key that signs both can never
     have one signature re-read as the other."""
-    return json.dumps(
+    return canonical_json(
         {"type": "acceptance/0.1", "owner": owner, "decision": decision,
          "transcript_hash": transcript_hash, "accepted": accepted},
-        sort_keys=True, ensure_ascii=False,
     ).encode("utf-8")
 
 

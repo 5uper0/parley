@@ -7,6 +7,17 @@ omitted.
 
 ## [Unreleased]
 
+### Fixed
+- `Transcript.hash()`, `verdict_payload` and `acceptance_payload` no longer hash or sign a tuple
+  option/decision the same as an equal-valued list; a dict carrying the reserved key
+  `__tuple__` is refused rather than allowed to collide with the tag. A record built with a live
+  tuple hashes differently from its own JSON export (JSON has no tuple type, so `from_dict`
+  always rebuilds it as a list) — `verify_outcome`, `verify-receipt.py` and `ratify.agreement`
+  all report that mismatch honestly rather than treating it as agreement (the hash check itself
+  is the MCP `parley_verify_receipt` tool and `scripts/verify-receipt.py`, not `verify_outcome`,
+  which checks the max-min outcome instead). Pass JSON-native
+  options (lists, not tuples) if a record needs to round-trip through JSON and still verify.
+
 ## [0.2.0] - 2026-09-26
 
 ### Added

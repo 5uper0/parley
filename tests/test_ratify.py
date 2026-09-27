@@ -274,3 +274,9 @@ def test_verdict_and_acceptance_payloads_are_domain_separated():
 
     assert b'"type": "acceptance/0.1"' in acceptance_payload("ana", None, "0" * 64, True)
     assert b'"type": "verdict/0.1"' in verdict_payload(None, "ana", True, 0.0, "ok")
+
+
+def test_acceptance_payload_distinguishes_a_tuple_decision_from_an_equal_valued_list():
+    a = acceptance_payload("ana", (1, 2), "0" * 64, True)
+    b = acceptance_payload("ana", [1, 2], "0" * 64, True)
+    assert a != b
