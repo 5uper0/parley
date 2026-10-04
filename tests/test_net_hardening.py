@@ -61,7 +61,10 @@ def _raw(port, payload, timeout=5, half_close=False):
     with socket.create_connection(("127.0.0.1", port), timeout=timeout) as c:
         c.sendall(payload)
         if half_close:
-            c.shutdown(socket.SHUT_WR)
+            try:
+                c.shutdown(socket.SHUT_WR)
+            except OSError:
+                pass  # the server already answered and closed; its reply is still readable below
         chunks = []
         while True:
             chunk = c.recv(4096)
