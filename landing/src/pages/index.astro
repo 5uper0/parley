@@ -32,13 +32,13 @@ const faqs = [
   },
   {
     q: "How are red lines enforced, and what does the other side learn?",
-    a: "A red line is a code predicate on an option, such as cost <= 700. An option that fails it is rejected before any score is weighed, and it is never traded against a preference. The only thing that leaves an agent is a verdict per option: acceptable or not, a score between 0 and 1, and the word ok or red-line, never which rule was behind it. The score is public, so a reader of the record can still infer preference ordering, and the engine enforces whatever limit you typed; it cannot tell a real limit from a tactical one.",
+    a: "A red line is a code predicate on an option, such as cost <= 700. An option that fails it is rejected before any score is weighed, and it is never traded against a preference. The only thing that leaves an agent is a verdict per option: acceptable or not, a score between 0 and 1, and the word ok or red-line, never which rule was behind it. The score is public, so a reader of the record can infer preference ordering and the feasible region, and across enough options the pass/fail pattern shows roughly where a red line sits, even though the reason field stays masked. The engine enforces whatever limit you typed; it cannot tell a real limit from a tactical one.",
     href: "/llm-agent-red-lines/",
     guide: "Red lines for LLM agents, enforced in code",
   },
   {
     q: "How does the group pick one option, and what happens when nothing fits?",
-    a: "Only options acceptable to every participant are candidates. Among them the engine picks the option whose lowest score across participants is highest, and breaks ties by the sum of scores; this is a max-min rule, not a majority vote, so a majority cannot outvote one owner's floor. When no option clears everyone's red lines the result is a deadlock with no decision, and a deadlock forces nothing on anyone.",
+    a: "Only options acceptable to every participant are candidates. Among them the engine picks the option whose lowest score across participants is highest, and breaks ties by the sum of scores; this is a max-min rule, not a majority vote, so a majority cannot outvote one owner's floor. When no option clears everyone's red lines the result is a deadlock with no decision, and a deadlock forces nothing on anyone. Scores are self-reported too, and there is no resistance yet to an owner misreporting them strategically or to collusion (SECURITY.md).",
     href: "/fair-multi-agent-negotiation/",
     guide: "Fair multi-agent negotiation for rival owners",
   },
@@ -50,7 +50,7 @@ const faqs = [
   },
   {
     q: "How do I try it, and what does it need?",
-    a: "pip install parley-consensus gives you the core with no third-party dependencies on Python 3.10 or later, plus the parley-mcp command, a stdio MCP server you can point Claude or Cursor at. Signed verdicts need the crypto extra, pip install \"parley-consensus[crypto]\". The examples and scripts, including the receipt verifier, are not in the PyPI wheel; clone the repository, which is Apache-2.0. The demo on this site replays pre-computed runs of the same engine.",
+    a: "pip install parley-consensus gives you the core with no third-party dependencies on Python 3.10 or later (tested on 3.11 to 3.14), plus the parley-mcp command, a stdio MCP server you can point Claude or Cursor at. Signed verdicts need the crypto extra, pip install \"parley-consensus[crypto]\". The examples and scripts, including the receipt verifier, are not in the PyPI wheel; clone the repository, which is Apache-2.0. It is Alpha (v0): do not run it against genuinely adversarial principals in production. The demo on this site replays pre-computed runs of the same engine.",
     href: "/mcp-multi-party-decisions/",
     guide: "Parley as an MCP server for multi-party agent decisions",
   },
