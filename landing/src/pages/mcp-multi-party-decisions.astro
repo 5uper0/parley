@@ -1,0 +1,416 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const MCP_SOURCE_URL = "https://github.com/5uper0/parley/blob/main/parley/mcp.py";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const tools = [
+  {
+    name: "parley_decide",
+    input: "spec: the shared options plus every party's red lines (hard) and soft utility terms. Optional rule, where only \"egalitarian\" exists.",
+    output: "status (\"agreed\" or \"deadlock\"), decision (the winning option object or null), transcript (every option with each party's masked verdict), transcript_sha256.",
+  },
+  {
+    name: "parley_verify_receipt",
+    input: "transcript and sha256 from a previous parley_decide call. Optional expected_owners, the roster you know took part.",
+    output: "match (the transcript hashes to the sha256 you passed), max_min_verified (the announced decision is the max-min option over the recorded verdicts), expected_sha256, recomputed_sha256.",
+  },
+  {
+    name: "parley_check_party",
+    input: "party: one party object, the same shape as in the spec. decision: the decision from parley_decide, or null for a deadlock.",
+    output: "owner and holds. holds is true when every red line of that party holds on the decision; soft preferences are not judged.",
+  },
+];
+
+const limits = [
+  ["Transport", "stdio, newline-delimited JSON-RPC 2.0, at most 1 MB per line"],
+  ["Protocol versions", "2025-06-18 (default) and 2024-11-05"],
+  ["Options per call", "500"],
+  ["Parties per call", "50"],
+  ["Option times party evaluations per call", "10,000"],
+  ["Values in one in / not_in constraint", "1,000"],
+  ["Selection rule", "egalitarian (max-min) only"],
+  ["Dependencies", "none; the base install is standard-library Python"],
+];
+
+const faqs = [
+  {
+    q: "Do I need an API key or a hosted service?",
+    a: "No. parley-mcp is a local process that reads JSON-RPC from stdin and writes replies to stdout. It makes no network calls, needs no key, and the base install has no third-party dependencies. The host launches it and talks to it over a pipe.",
+  },
+  {
+    q: "Is my party's preference sheet private from the host?",
+    a: "No, and the tool description says so. In MCP mode the host holds every party's spec and passes them all in one parley_decide call, so there is no privacy between parties or from the host. What still holds is what the engine enforces in code: a red line rejects an option deterministically, the max-min rule picks among options feasible for everyone, and the transcript hash makes later edits visible. For private sheets, run one process per owner over HTTP with examples/run_env.py.",
+  },
+  {
+    q: "What does transcript_sha256 prove?",
+    a: "Only that a transcript hashes to that value. The hash is an unsigned SHA-256 over the canonical transcript and the server does not store it. If the transcript and the hash come from the same hand, match=true proves nothing, because whoever edits the record can re-hash it. It detects tampering when the hash was kept by someone other than whoever could edit the transcript. max_min_verified does not depend on the hash: it recomputes the winner from the recorded verdicts.",
+  },
+  {
+    q: "What happens when the spec is too large or malformed?",
+    a: "The server refuses before running. A spec over 500 options, 50 parties, 10,000 option times party evaluations, or a constraint list over 1,000 values is rejected with a tool error naming the limit. A malformed spec or transcript is also a tool error with the exception text, not a silent mismatch. A line over 1 MB gets a parse error and the session continues.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/mcp-multi-party-decisions/#article",
+      headline: "Run Parley as an MCP server for multi-party agent decisions, self-hosted",
+      description:
+        "How to install Parley's stdio MCP server, point Claude Desktop, Claude Code or Cursor at it, and call its three tools: parley_decide, parley_verify_receipt and parley_check_party. What the mode guarantees in code and what it does not.",
+      url: "https://parleyprotocol.com/mcp-multi-party-decisions/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/mcp-multi-party-decisions/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="Parley as an MCP server for multi-party agent decisions"
+  description="Install Parley's stdio MCP server, add it to Claude Desktop, Claude Code or Cursor, and call parley_decide, parley_verify_receipt and parley_check_party. Self-hosted, no API key, no third-party dependencies."
+  path="/mcp-multi-party-decisions/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Run Parley as an MCP tool, on your own machine.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          The base install ships a stdio MCP server. Any MCP host, including Claude
+          Desktop, Claude Code and Cursor, can launch it as a local process and get three
+          tools: decide among parties with conflicting interests, verify the receipt, and
+          replay one party's red lines against the outcome. No API key, no hosted
+          service, no third-party dependencies. This page is the setup, one checked call,
+          and the limits.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Commands and values here were checked against version 0.2.0 from PyPI; the
+          server is{" "}
+          <a href={MCP_SOURCE_URL} target="_blank" rel="noopener" class={link}>
+            parley/mcp.py
+          </a>{" "}
+          in the source repository. Companion guides:{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>{" "}
+          and{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Install -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>1. Install</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The distribution is <code class={code}>parley-consensus</code>; the import name
+          is <code class={code}>parley</code>. The server needs nothing beyond the base
+          package, so the console script <code class={code}>parley-mcp</code> is part of
+          the plain install.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`pip install parley-consensus`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The same server is also registered under the distribution name, so a host that
+          runs Python tools through <code class={code}>uv</code> can start it without a
+          separate install step:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`uvx parley-consensus`}</code></pre>
+      </section>
+
+      <!-- Point the host at it -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>2. Point your host at it</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Add one stdio server entry to the host's MCP configuration. This is the entry
+          from the README:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "parley-mcp"}}}`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          If the console script is not on the host's <code class={code}>PATH</code>, launch
+          it through the interpreter that has the package:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "python", "args": ["-m", "parley.mcp"]}}}`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Or let <code class={code}>uv</code> fetch and run it:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "uvx", "args": ["parley-consensus"]}}}`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Once connected, three tools appear in the host's tool list. The README's example
+          prompt is a venue decision: "Three of us are picking a venue: rooftop (900), garden
+          (600), diner (300). Bob will not go over 700; Ana prefers the rooftop, Cara the
+          garden, Bob the cheapest. Use parley_decide, then verify the receipt hash and
+          check that Bob's red line held."
+        </p>
+      </section>
+
+      <!-- Check by hand -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>3. Check it without a host</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The wire format is one JSON-RPC 2.0 message per line, so a shell pipe is a
+          complete client. Send an <code class={code}>initialize</code> request and the
+          server answers with its protocol version and name, then exits when stdin
+          closes. Logs go to stderr; stdout carries replies only.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`echo '{"jsonrpc":"2.0","id":0,"method":"initialize","params":{}}' | parley-mcp`}</code></pre>
+        <pre class={`${deviceBlock} mt-3 whitespace-pre`}><code>{`{"jsonrpc": "2.0", "id": 0, "result": {"protocolVersion": "2025-06-18", "capabilities": {"tools": {}}, "serverInfo": {"name": "parley", "version": "0.2.0"}}}`}</code></pre>
+      </section>
+
+      <!-- Tools -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The three tools</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The input is the same JSON as the recipes under
+          <code class={code}>examples/demo/</code> in the repository. A red line is an
+          object with <code class={code}>attr</code>, <code class={code}>op</code> (one of
+          ==, !=, &lt;, &lt;=, &gt;, &gt;=, in, not_in) and <code class={code}>value</code>; a
+          missing attribute fails closed. A soft term is categorical
+          (<code class={code}>prefer</code>) or numeric (<code class={code}>direction</code>
+          with <code class={code}>lo</code> and <code class={code}>hi</code>), and a
+          party's score is the weighted average of its terms.
+        </p>
+        <div class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface">
+          <table class="w-full min-w-[680px] border-collapse text-left">
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">Tool</th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-muted">Takes</th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-muted">Returns</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                tools.map((t) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">
+                      {t.name}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-muted">{t.input}</td>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{t.output}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Worked call -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>One decision, start to finish</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The venue decision as a <code class={code}>parley_decide</code> spec. Bob's budget
+          is a red line, not a preference; the other two parties only have soft terms.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{
+  "title": "Pick a venue",
+  "options": [
+    {"venue": "rooftop", "cost": 900},
+    {"venue": "garden",  "cost": 600},
+    {"venue": "diner",   "cost": 300}
+  ],
+  "parties": [
+    {"owner": "Ana",  "utility": [{"attr": "venue", "prefer": "rooftop"}]},
+    {"owner": "Bob",  "hard": [{"attr": "cost", "op": "<=", "value": 700}],
+                      "utility": [{"attr": "cost", "direction": "lower", "lo": 0, "hi": 1000}]},
+    {"owner": "Cara", "utility": [{"attr": "venue", "prefer": "garden"}]}
+  ]
+}`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          What came back, with the transcript shortened to the rooftop entry and scores
+          rounded to one decimal:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`status:            agreed
+decision:          {"cost": 600, "venue": "garden"}
+transcript_sha256: 8904d3475702417dfea9faa29cba1a8fb3f9fd001037d6b371717be2757385a1
+
+transcript.entries[0]:
+  option: {"cost": 900, "venue": "rooftop"}
+  Ana   acceptable=true   reason="ok"        score=1.0
+  Bob   acceptable=false  reason="red-line"  score=0.1
+  Cara  acceptable=true   reason="ok"        score=0.0`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget line, so
+          it is rejected before any score is weighed. The verdict says
+          <code class={code}>red-line</code>, not which line. Then the two checks, passing
+          the transcript and hash straight back, and Bob's party object with the decision:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`parley_verify_receipt(transcript, sha256, expected_owners=["Ana","Bob","Cara"])
+  {"match": true, "max_min_verified": true, "expected_sha256": "8904d3...85a1", "recomputed_sha256": "8904d3...85a1"}
+
+parley_check_party(party=Bob, decision={"cost": 600, "venue": "garden"})
+  {"owner": "Bob", "holds": true}
+
+parley_check_party(party=Bob, decision={"cost": 900, "venue": "rooftop"})
+  {"owner": "Bob", "holds": false}`}</code></pre>
+      </section>
+
+      <!-- Honesty -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What this mode guarantees, and what it does not</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">No privacy from the host.</strong> The host holds
+              every party's spec and passes them all in one call. Each tool description
+              carries this note so the model reads it too. For private sheets, run one
+              process per owner over HTTP (<code class={code}>examples/run_env.py</code>);
+              the coordinator then sees only masked verdicts.
+            </li>
+            <li>
+              <strong class="text-ink">The red line still holds in code.</strong> An option
+              that crosses any party's red line cannot win, whatever its scores. No option
+              acceptable to everyone yields <code class={code}>status: "deadlock"</code>
+              with <code class={code}>decision: null</code>, never a forced choice.
+            </li>
+            <li>
+              <strong class="text-ink">The hash is unsigned and not stored.</strong>
+              <code class={code}>transcript_sha256</code> detects a later edit only when
+              someone other than the editor kept the hash. The server keeps nothing between
+              calls. <code class={code}>max_min_verified</code> is the independent check: it
+              recomputes the winner from the recorded verdicts.
+            </li>
+            <li>
+              <strong class="text-ink">Verdicts are unsigned in this mode.</strong> Whoever
+              can rewrite the record can rewrite the verdicts to fit a swapped winner.
+              Ed25519-signed verdicts exist in the HTTP layer as an optional extra, not here.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Limits -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Limits, as set in the server</h2>
+        <div class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface">
+          <table class="w-full min-w-[520px] border-collapse text-left">
+            <tbody>
+              {
+                limits.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          A spec over a limit is refused before it runs, with a tool error naming the
+          limit. The bounds exist because a spec is evaluated options times parties times,
+          and every constraint list is scanned per option.
+        </p>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Try the engine in the browser first, then wire it into your host.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo runs the same engine with no signup. The repository is Apache-2.0, and
+          <code class={code}>parley/mcp.py</code> is the whole server.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={MCP_SOURCE_URL} target="_blank" rel="noopener" class={btnGhost}>
+            Read the server source
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a> &middot;{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>Next: how the whole negotiation stays fair</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
