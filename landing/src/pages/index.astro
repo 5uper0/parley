@@ -20,18 +20,68 @@ const propBase =
 const deviceBlock =
   "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
 
+const faqLink =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const faqs = [
+  {
+    q: "What is Parley, and what problem does it solve?",
+    a: "Parley is an open-source Python library for one decision among AI agents whose owners have conflicting, private interests. Each owner states red lines and preferences in private; the engine drops every option that crosses anyone's red line, picks among the rest by the max-min rule, and writes a transcript of masked verdicts that each owner can check afterwards. It is multilateral (more than two owners), uses no cryptocurrency or blockchain, and runs on your own machine.",
+    href: "/fair-group-decision-private-limits/",
+    guide: "A fair group decision when everyone has private limits",
+  },
+  {
+    q: "How are red lines enforced, and what does the other side learn?",
+    a: "A red line is a code predicate on an option, such as cost <= 700. An option that fails it is rejected before any score is weighed, and it is never traded against a preference. The only thing that leaves an agent is a verdict per option: acceptable or not, a score between 0 and 1, and the word ok or red-line, never which rule was behind it. The score is public, so a reader of the record can infer preference ordering and the feasible region, and across enough options the pass/fail pattern shows roughly where a red line sits, even though the reason field stays masked. The engine enforces whatever limit you typed; it cannot tell a real limit from a tactical one.",
+    href: "/llm-agent-red-lines/",
+    guide: "Red lines for LLM agents, enforced in code",
+  },
+  {
+    q: "How does the group pick one option, and what happens when nothing fits?",
+    a: "Only options acceptable to every participant are candidates. Among them the engine picks the option whose lowest score across participants is highest, and breaks ties by the sum of scores; this is a max-min rule, not a majority vote, so a majority cannot outvote one owner's floor. When no option clears everyone's red lines the result is a deadlock with no decision, and a deadlock forces nothing on anyone. Scores are self-reported too, and there is no resistance yet to an owner misreporting them strategically or to collusion (SECURITY.md).",
+    href: "/fair-multi-agent-negotiation/",
+    guide: "Fair multi-agent negotiation for rival owners",
+  },
+  {
+    q: "What can I check afterwards, and what does the receipt not prove?",
+    a: "You can re-hash the transcript (SHA-256 over its canonical JSON), recompute the max-min winner from the recorded verdicts, and replay your own private sheet against the decision with verify_non_betrayal, all on your own machine and without showing the sheet to anyone. The hash is unsigned, so it catches a later edit only when someone other than the editor kept the hash; verdicts are unsigned unless the run signed them, and a signed verdict is checked against the key carried in the same record, with no trusted owner-to-key roster yet. The participants list is written by the coordinator, scores are public and leak preference ordering, and every limit is self-reported.",
+    href: "/verify-ai-agent-decision/",
+    guide: "Verify an AI-agent decision without trusting the coordinator",
+  },
+  {
+    q: "How do I try it, and what does it need?",
+    a: "pip install parley-consensus gives you the core with no third-party dependencies on Python 3.10 or later (tested on 3.11 to 3.14), plus the parley-mcp command, a stdio MCP server you can point Claude or Cursor at. Signed verdicts need the crypto extra, pip install \"parley-consensus[crypto]\". The examples and scripts, including the receipt verifier, are not in the PyPI wheel; clone the repository, which is Apache-2.0. It is Alpha (v0): do not run it against genuinely adversarial principals in production. The demo on this site replays pre-computed runs of the same engine.",
+    href: "/mcp-multi-party-decisions/",
+    guide: "Parley as an MCP server for multi-party agent decisions",
+  },
+];
+
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "Parley",
-  url: "https://parleyprotocol.com/",
-  applicationCategory: "DeveloperApplication",
-  operatingSystem: "Any",
-  description:
-    "Provable consensus for AI agents of rival owners: deterministic red lines, max-min consensus over masked verdicts, and a verifiable non-betrayal transcript. No cryptocurrency or blockchain; self-hosted, open source.",
-  license: "https://github.com/5uper0/parley/blob/main/LICENSE",
-  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-  codeRepository: "https://github.com/5uper0/parley",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://parleyprotocol.com/#software",
+      name: "Parley",
+      url: "https://parleyprotocol.com/",
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Any",
+      description:
+        "Provable consensus for AI agents of rival owners: deterministic red lines, max-min consensus over masked verdicts, and a verifiable non-betrayal transcript. No cryptocurrency or blockchain; self-hosted, open source.",
+      license: "https://github.com/5uper0/parley/blob/main/LICENSE",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      codeRepository: "https://github.com/5uper0/parley",
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
 });
 ---
 
@@ -517,6 +567,38 @@ const jsonLd = JSON.stringify({
           <a href="/verify-ai-agent-decision/" class="text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current">how to verify a decision receipt afterwards</a>,{" "}
           <a href="/fair-group-decision-private-limits/" class="text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current">a fair group decision when everyone has private limits</a>.
         </p>
+      </div>
+    </section>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <!-- Questions -->
+    <section id="questions" class="py-14 lg:py-20" aria-labelledby="questions-head">
+      <div class={wrap}>
+        <h2
+          id="questions-head"
+          class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted uppercase"
+        >
+          Questions
+        </h2>
+        <div class="mt-7 flex max-w-[76ch] flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class="rounded-[14px] border border-hairline bg-surface px-5 py-4">
+                <summary class="cursor-pointer text-[15px] leading-[1.6] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px] leading-[1.6] text-muted">{f.a}</p>
+                <p class="mt-3 text-[13px] text-subtle">
+                  Guide:{" "}
+                  <a href={f.href} class={faqLink}>
+                    {f.guide}
+                  </a>
+                </p>
+              </details>
+            ))
+          }
+        </div>
       </div>
     </section>
 
