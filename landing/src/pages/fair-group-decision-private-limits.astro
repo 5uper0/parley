@@ -1,0 +1,570 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const CASES_URL = "https://github.com/5uper0/parley/tree/main/examples/cases";
+const FLOW_URL = "https://github.com/5uper0/parley/blob/main/examples/real_decision.py";
+const CONSENSUS_URL = "https://github.com/5uper0/parley/blob/main/parley/consensus.py";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const rules = [
+  ["A limit is a veto", "A red line is a rule about one attribute, such as cost_each <= 250. An option that breaks anyone's red line is out, whatever everyone else thinks of it. It is never traded against a preference."],
+  ["Lift the least-happy person", "Among the options nobody vetoed, each person's preferences give a score from 0 to 1. The winner is the option whose lowest score is highest. Ties go to the higher total. This is not a vote and not a sum."],
+  ["No option means no decision", "If every option breaks someone's red line, the result is a deadlock, written into the record as such. The engine never picks a least-bad option over somebody's limit."],
+];
+
+const cases = [
+  ["pick-a-date.json", "Which weekend to go: weeks away, cost each, days off needed, weather risk, who misses out."],
+  ["split-the-bill.json", "How to split a shared cost when people used it unevenly: each share, admin effort, whether receipts are needed."],
+  ["flatshare.json", "Which flat to take: rent per person, commute, bedrooms, outdoor space, pets, furnished."],
+  ["who-does-what.json", "Who takes which part of the work: hours per person, who is on call, whether swaps are allowed, extra cost."],
+];
+
+const options = [
+  ["oct-third", "3", "210", "1", "low", "none"],
+  ["oct-fourth", "4", "180", "1", "low", "c"],
+  ["nov-second", "7", "140", "0", "medium", "none"],
+  ["dec-first", "12", "260", "2", "high", "none"],
+  ["next-week", "1", "320", "2", "low", "b"],
+];
+
+const faqs = [
+  {
+    q: "How do we pick a fair option when everyone has private limits?",
+    a: "Agree the list of options in public, then let each person state two things in private: red lines, which are rules an option must satisfy, and preferences, which only rank the options that survive. The engine drops every option that breaks anyone's red line and, among the rest, picks the option whose least-happy person is happiest. The record shows each person's masked verdict per option (acceptable or not, a score, and the word ok or red-line) and never which rule was behind it. Each person then replays the winner against their own rules on their own side before accepting.",
+  },
+  {
+    q: "How is this different from a vote or from adding up everyone's scores?",
+    a: "A vote lets a majority pick an option that crosses one person's limit. A sum lets two very happy people outweigh one very unhappy one. Here a red line removes an option before any score is weighed, and among the survivors the option with the highest minimum score wins, with the total only breaking ties. In the run on this page the option with the highest total (2.25 against 1.75) lost because its lowest score was 0.25 against 0.5.",
+  },
+  {
+    q: "What stays private, and from whom?",
+    a: "The record never holds a red line or a preference, only verdicts. What leaves a person's side is, per option, acceptable or not, a score between 0 and 1, and the word ok or red-line. The scores are public, so they reveal which option a person liked more; the record does not reveal why an option was unacceptable or which rule it broke. In the pass-the-keyboard flow all three positions live in one process on one machine, so this is privacy from the other people and from the record, not from whoever operates that machine. For separate processes per owner, the repository's examples/run_env.py runs each party as its own HTTP server.",
+  },
+  {
+    q: "What do we do when the result is a deadlock?",
+    a: "A deadlock means no option on the table satisfied everyone's red lines. The receipt still records every verdict and the deadlock itself, and the verifier confirms the deadlock is honest. The way out is a new option list: add an option, change the numbers, or let a person loosen a rule they set, then run again. The engine will not pick an option over someone's red line to avoid the deadlock.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/fair-group-decision-private-limits/#article",
+      headline: "A fair group decision when everyone has private limits: red lines, max-min, deadlock and a receipt",
+      description:
+        "How a group picks one option when each person has limits they would rather not share: a red line removes an option for everyone, the max-min rule lifts the least-happy person, no feasible option gives an honest deadlock, and a receipt anyone can re-check. Walked through on the pick-a-date case from the Parley repository.",
+      url: "https://parleyprotocol.com/fair-group-decision-private-limits/",
+      inLanguage: "en",
+      datePublished: "2026-10-09",
+      dateModified: "2026-10-09",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/fair-group-decision-private-limits/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="A fair group decision when everyone has private limits"
+  description="Pick a date, split a bill, choose a flat or share out work when each person has a limit they would rather not share. A red line removes an option for everyone, the max-min rule lifts the least-happy person, and a receipt anyone can re-check. Walked through on a real case file."
+  path="/fair-group-decision-private-limits/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          One fair decision for a group, when nobody wants to say where their limit is.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Picking a date, splitting a bill, choosing a flat, sharing out the work: the
+          argument usually stalls on a limit somebody has but would rather not explain.
+          This page walks one such decision through the repository's real-decision flow.
+          Each person states their red lines and preferences alone at the keyboard, the
+          engine drops every option that crosses anyone's red line, picks the option whose
+          least-happy person is happiest, and writes a receipt that each person can check
+          against their own rules and that anyone can re-check for honesty.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          The run on this page was made with version 0.2.0: the
+          <code class={code}>parley-consensus</code> wheel from PyPI, plus the v0.2.0
+          checkout of the repository for the case files under{" "}
+          <a href={CASES_URL} target="_blank" rel="noopener" class={link}>examples/cases/</a>,
+          the flow script{" "}
+          <a href={FLOW_URL} target="_blank" rel="noopener" class={link}>examples/real_decision.py</a>{" "}
+          and the verifier, none of which are in the wheel. Companion guides:{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>,{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>,{" "}
+          <a href="/mcp-multi-party-decisions/" class={link}>running Parley as an MCP tool</a>{" "}
+          and{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- The three rules -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What fair means here</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three rules, each one enforced in{" "}
+          <a href={CONSENSUS_URL} target="_blank" rel="noopener" class={link}>parley/consensus.py</a>{" "}
+          rather than left to anyone's judgement:
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="The three rules of the selection, scrollable table"
+        >
+          <table class="w-full min-w-[560px] border-collapse text-left">
+            <caption class="sr-only">The three rules the engine applies to a group decision</caption>
+            <tbody>
+              {
+                rules.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Step 1: options -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>1. Agree the options in public</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The option list is the one thing everyone must see identically, so it comes from a
+          file the group looks at together. The repository ships four ready-made ones; each
+          option is a flat set of attributes that somebody might refuse over.
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="The four case files, scrollable table"
+        >
+          <table class="w-full min-w-[560px] border-collapse text-left">
+            <caption class="sr-only">The four case files under examples/cases/ and the argument each encodes</caption>
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">File</th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-muted">The argument it encodes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                cases.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-muted">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          This page uses <code class={code}>pick-a-date.json</code>, five weekends for a trip:
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="The five options in pick-a-date.json, scrollable table"
+        >
+          <table class="w-full min-w-[640px] border-collapse text-left">
+            <caption class="sr-only">The five options in examples/cases/pick-a-date.json with their attributes</caption>
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">id</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">weeks_away</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">cost_each</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">days_off_needed</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">weather_risk</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">someone_misses</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                options.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">{r[0]}</th>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[1]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[2]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[3]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[4]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[5]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The command, from a checkout of the repository, with three names and manual entry
+          (no model, no network):
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Shell: run the real-decision flow on the pick-a-date case, scrollable code"><code>{`python examples/real_decision.py --options examples/cases/pick-a-date.json \\
+    --participants Ana,Bob,Cara --manual --receipt receipt.json`}</code></pre>
+      </section>
+
+      <!-- Step 2: private positions -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>2. Each person states limits and preferences alone</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The flow clears the screen and calls one person at a time. A red line is typed as
+          <code class={code}>attribute operator value</code>; a preference as
+          <code class={code}>attribute value weight</code>. A person's score for an option is
+          the weight of the preferences it matches divided by the weight of all their
+          preferences, so it sits between 0 and 1. Nothing typed here is shown to the next
+          person or written into the record.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The three positions below were typed for this page by one person at one keyboard, so
+          they can be shown. No real group has used this run. In a real run each person sees
+          only their own.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="The three positions as typed in manual mode, scrollable code"><code>{`Ana
+  red line >  cost_each <= 250
+  prefer >    someone_misses none 1
+  prefer >    cost_each 140 1
+
+Bob
+  red line >  someone_misses != b
+  red line >  days_off_needed <= 1
+  prefer >    someone_misses none 1
+  prefer >    days_off_needed 0 1
+
+Cara
+  red line >  someone_misses != c
+  prefer >    weather_risk low 3
+  prefer >    weeks_away 7 1`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Ana will not pay over 250. Bob will not be the one who misses the trip and cannot
+          take two days off. Cara will not be the one who misses it either. Everything else
+          is a preference, and a preference only ranks the options that survive everyone's red
+          lines.
+        </p>
+      </section>
+
+      <!-- Step 3: the record and the pick -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>3. What the record holds, and what wins</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The engine asks each person's sheet about each option and records only the answer:
+          acceptable or not, the score, and the word <code class={code}>ok</code> or
+          <code class={code}>red-line</code>. These are the five entries from the receipt
+          written by the command above. The scores are exact; none were rounded.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="The five transcript entries with each person's masked verdict, scrollable code"><code>{`oct-third    (weeks_away 3, cost_each 210, days_off_needed 1, weather_risk low, someone_misses none)
+  Ana   acceptable=true   reason="ok"        score=0.50
+  Bob   acceptable=true   reason="ok"        score=0.50
+  Cara  acceptable=true   reason="ok"        score=0.75
+
+oct-fourth   (weeks_away 4, cost_each 180, days_off_needed 1, weather_risk low, someone_misses c)
+  Ana   acceptable=true   reason="ok"        score=0.00
+  Bob   acceptable=true   reason="ok"        score=0.00
+  Cara  acceptable=false  reason="red-line"  score=0.75
+
+nov-second   (weeks_away 7, cost_each 140, days_off_needed 0, weather_risk medium, someone_misses none)
+  Ana   acceptable=true   reason="ok"        score=1.00
+  Bob   acceptable=true   reason="ok"        score=1.00
+  Cara  acceptable=true   reason="ok"        score=0.25
+
+dec-first    (weeks_away 12, cost_each 260, days_off_needed 2, weather_risk high, someone_misses none)
+  Ana   acceptable=false  reason="red-line"  score=0.50
+  Bob   acceptable=false  reason="red-line"  score=0.50
+  Cara  acceptable=true   reason="ok"        score=0.00
+
+next-week    (weeks_away 1, cost_each 320, days_off_needed 2, weather_risk low, someone_misses b)
+  Ana   acceptable=false  reason="red-line"  score=0.00
+  Bob   acceptable=false  reason="red-line"  score=0.00
+  Cara  acceptable=true   reason="ok"        score=0.75`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three options are out: <code class={code}>oct-fourth</code> crosses one of Cara's
+          lines, <code class={code}>dec-first</code> and <code class={code}>next-week</code>
+          cross lines of Ana's and Bob's. The record says <code class={code}>red-line</code>
+          and nothing more; it does not say that Cara's line was about who misses out or that
+          Ana's was about money.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Two options survive. <code class={code}>nov-second</code> has the higher total
+          (2.25 against 1.75) and is the favourite of two people out of three. It loses.
+          Its lowest score is Cara's 0.25; the lowest score on
+          <code class={code}>oct-third</code> is 0.50. The option whose least-happy person is
+          happiest is <code class={code}>oct-third</code>, and that is the decision. A vote or
+          a sum would have picked the other one.
+        </p>
+      </section>
+
+      <!-- Step 4: ratification -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>4. Each person checks, then accepts</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Before anything is final, the flow again calls each person alone, shows them the
+          decision and the record hash, and replays the decision against their own sheet on
+          their side. The line that says whether a red line was crossed is shown only to that
+          person. The code refuses an acceptance when the sheet it was given rejects the
+          decision. This is what Ana saw, exactly as printed:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Ratification prompt as printed for one participant, scrollable code"><code>{`--- Ana, review the outcome privately. ---
+
+Decision: {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
+Record hash: 6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
+
+Replayed against your own sheet: no red line of yours was crossed.
+
+Do you accept this outcome? yes / no >`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          All three answered yes. The closing report and the receipt:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="The closing report of the run, scrollable code"><code>{`==================================================================
+  Which weekend do we actually go?
+==================================================================
+Decision: {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
+
+Record hash          6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
+Max-min honest       yes   (the announced option really is the max-min one)
+Unanimously accepted yes   (every participant accepted this exact record)
+
+  Ana              accepted
+  Bob              accepted
+  Cara             accepted
+
+Receipt written to receipt.json`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The replay checks the sheet the person submits, nothing more: a rule they left out is
+          not checked, and the acceptance records the owner, the decision, the hash and a
+          boolean, not why the rules held.
+        </p>
+      </section>
+
+      <!-- Deadlock -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>When nothing clears everyone's limits</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The same case was run a second time with two extra red lines: Bob added
+          <code class={code}>cost_each &lt;= 200</code>, which removes
+          <code class={code}>oct-third</code>, and Cara added
+          <code class={code}>weeks_away &lt;= 4</code>, which removes
+          <code class={code}>nov-second</code>. Every option now crosses somebody's line. The
+          flow skips ratification, since there is nothing to accept, and prints this:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="The closing report of the deadlocked run, scrollable code"><code>{`==================================================================
+  Which weekend do we actually go?
+==================================================================
+DEADLOCK. No option cleared every participant's red lines.
+This is an honest outcome, not a failure: forcing an agreement that crosses
+somebody's red line is exactly what this tool exists to prevent.
+
+Record hash          28685bcd5bc067ca005db387f858ee548af9857be63df377510d43fb79d2949d
+Max-min honest       yes   (the announced option really is the max-min one)
+Unanimously accepted no   (every participant accepted this exact record)
+
+Receipt written to receipt-deadlock.json`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The deadlock receipt carries <code class={code}>"status": "deadlock"</code>,
+          <code class={code}>"decision": null</code>, every verdict, and no acceptances. The
+          verifier passes it, because a deadlock over a record in which no option is
+          acceptable to everyone is the honest result. Which person's line blocked which
+          option is not in the file. The way forward is a new option list, not a different
+          rule.
+        </p>
+      </section>
+
+      <!-- The receipt -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The receipt anyone can re-check</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The receipt holds the title, status, decision, a SHA-256 hash over the record, the
+          roster, every acceptance and the full masked record. The verifier in the repository
+          rebuilds the hash, recomputes the winner from the recorded verdicts and checks that
+          every acceptance is bound to exactly this hash and this decision. Its output on the
+          first run, with the trailing explanation of what it checked cut for length (the
+          script prints it every time):
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the pick-a-date receipt, scrollable code"><code>{`$ python scripts/verify-receipt.py receipt.json
+Parley receipt check: Which weekend do we actually go?
+  status agreed   decision {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
+
+Record
+  transcript hash   claimed    6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
+                    recomputed 6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877   OK
+  status/decision   match the finalized record   OK
+  max-min honest    yes (recomputed from the recorded verdicts)   OK
+  roster            Ana, Bob, Cara (record: Ana, Bob, Cara)   OK
+  verdict sigs      none
+
+Acceptances
+  Ana              accepted  bound to this record      signature unsigned   OK
+  Bob              accepted  bound to this record      signature unsigned   OK
+  Cara             accepted  bound to this record      signature unsigned   OK
+  unanimous         yes (receipt says yes; tamper-evidence only: unsigned)   OK
+
+Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Someone who was not in the room can run this and learn that the announced weekend
+          really is the max-min pick over the recorded verdicts and that all three acceptances
+          are bound to this exact record. What each check proves and what it does not is the
+          subject of the{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verification guide</a>.
+        </p>
+      </section>
+
+      <!-- Honesty -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What stays private, and what does not</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">The rules stay out of the record.</strong> No red
+              line and no preference is written anywhere. A verdict says
+              <code class={code}>red-line</code>, never which line, and the acceptance says
+              yes or no, never why.
+            </li>
+            <li>
+              <strong class="text-ink">The scores are public.</strong> Each verdict carries
+              the person's soft score for that option, so the record shows that Cara scored
+              <code class={code}>oct-third</code> at 0.75 and <code class={code}>nov-second</code>
+              at 0.25. That reveals which option she liked more. It does not reveal her
+              preferences themselves (<a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>).
+            </li>
+            <li>
+              <strong class="text-ink">One keyboard means one process.</strong> In the
+              pass-the-keyboard flow all three sheets live in the same process on the same
+              machine. The privacy is from the other people and from the record, not from
+              whoever runs that machine. Separate processes per owner exist in the repository
+              as <code class={code}>examples/run_env.py</code>, one HTTP server per party.
+            </li>
+            <li>
+              <strong class="text-ink">The receipt is unsigned by default.</strong> Verdicts
+              and acceptances carry <code class={code}>sig: null</code>. The hash makes a later
+              edit visible to anyone who kept the hash from the ratification screen; it does not
+              say who accepted. The roster is written by the same process that writes the
+              record. <code class={code}>--sign</code> adds Ed25519 signatures with keys made by
+              that same process, which proves the file was not altered afterwards, not who
+              signed.
+            </li>
+            <li>
+              <strong class="text-ink">The replay checks what it is given.</strong>
+              A person's acceptance is checked against the sheet they submitted. A rule they
+              did not type, or typed wrong, is not checked. The flow validates the operator
+              and the shape of each rule as it is typed; it cannot know what the person meant.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Put your own argument in a file and run it.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo runs the same engine in the browser with no signup. The repository is
+          Apache-2.0; copy one of the four case files, change the numbers to your own, and
+          run <code class={code}>examples/real_decision.py</code> with the people in the room.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={CASES_URL} target="_blank" rel="noopener" class={btnGhost}>
+            Open the case files
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a> &middot;{" "}
+          <a href="/llm-agent-red-lines/" class={link}>Next: what a red line is, exactly</a> &middot;{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>Then: verify the receipt afterwards</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
