@@ -155,9 +155,10 @@ const jsonLd = JSON.stringify({
           </a>{" "}
           in the source repository. Companion guides:{" "}
           <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>,{" "}
-          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>,{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>{" "}
           and{" "}
-          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>.
+          <a href="/fair-group-decision-private-limits/" class={link}>a fair group decision with private limits</a>.
         </p>
         <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
       </section>
@@ -389,14 +390,14 @@ parley_check_party(party=Bob, decision={"cost": 900, "venue": "rooftop"})
       <section class={`${wrap} mt-14`}>
         <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
         <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
-          Try the engine in the browser first, then wire it into your host.
+          See a pre-computed run first, then wire the engine into your host.
         </h2>
         <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
-          The demo runs the same engine with no signup. The repository is Apache-2.0, and
+          The demo replays pre-computed runs of the same engine, no signup. The repository is Apache-2.0, and
           <code class={code}>parley/mcp.py</code> is the whole server.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-6">
-          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
           <a href={MCP_SOURCE_URL} target="_blank" rel="noopener" class={btnGhost}>
             Read the server source
             <span
@@ -408,7 +409,8 @@ parley_check_party(party=Bob, decision={"cost": 900, "venue": "rooftop"})
         <p class="mt-8 text-[13.5px] text-subtle">
           <a href="/" class={link}>Back to the overview</a> &middot;{" "}
           <a href="/fair-multi-agent-negotiation/" class={link}>Next: how the whole negotiation stays fair</a> &middot;{" "}
-          <a href="/verify-ai-agent-decision/" class={link}>Then: verify the receipt afterwards</a>
+          <a href="/verify-ai-agent-decision/" class={link}>Then: verify the receipt afterwards</a> &middot;{" "}
+          <a href="/fair-group-decision-private-limits/" class={link}>Worked case: a group decision with private limits</a>
         </p>
       </section>
     </main>
