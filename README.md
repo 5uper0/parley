@@ -276,8 +276,9 @@ agent, agents find the common decision" is exactly this.
 
 The core is small on purpose; the best contributions right now are **adversarial tests** and a
 second opinion on the consensus protocol. Start with [CONTRIBUTING.md](CONTRIBUTING.md), file a bug
-with a reproducing recipe, or open a discussion. Report security issues privately via
-[SECURITY.md](SECURITY.md).
+with a reproducing recipe, or open a discussion. Six small, single-file tasks (type hints, tests,
+a CI check) are open under [good first issue](https://github.com/5uper0/parley/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+Report security issues privately via [SECURITY.md](SECURITY.md).
 
 ## Star history
 
