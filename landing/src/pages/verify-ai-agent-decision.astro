@@ -1,0 +1,520 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const VERIFIER_URL = "https://github.com/5uper0/parley/blob/main/scripts/verify-receipt.py";
+const TRANSCRIPT_URL = "https://github.com/5uper0/parley/blob/main/parley/transcript.py";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const fields = [
+  ["title", "The decision's name, as given to the run."],
+  ["status", "\"agreed\" or \"deadlock\"."],
+  ["decision", "The winning option object, or null on a deadlock."],
+  ["transcript_hash", "SHA-256 hex digest of the canonical transcript."],
+  ["max_min_verified", "Whether the coordinator's own recomputation of the max-min rule matched the announced decision."],
+  ["unanimous_acceptance", "Whether every participant accepted this exact hash and decision."],
+  ["participants", "The roster the coordinator wrote down."],
+  ["acceptances", "One object per participant: owner, decision, transcript_hash, accepted, and sig / pubkey_hex, which are null unless signing was on."],
+  ["transcript", "Every option with each party's masked verdict: owner, acceptable, score, reason (\"ok\" or \"red-line\"), sig, pubkey_hex."],
+];
+
+const checks = [
+  ["Hash", "Rebuilds the transcript from the receipt and re-hashes it. A mismatch means the record was edited after the receipt was written."],
+  ["Status and decision", "The receipt's status and decision equal the finalized result inside the transcript, and a deadlock carries no decision."],
+  ["Max-min", "Recomputes the winner from the recorded verdicts. Every entry must carry exactly one verdict from each listed participant."],
+  ["Roster", "The participants list equals the set of owners that appear in the transcript."],
+  ["Acceptances", "Each one is bound to exactly this hash and this decision, by an owner in the record, with no duplicate names."],
+  ["Signatures", "Where a verdict or acceptance carries sig and pubkey_hex, it is checked against that key. Needs the crypto extra; otherwise it is reported as unchecked and the run fails."],
+];
+
+const exits = [
+  ["0", "Every check passed."],
+  ["1", "A check failed, or a signature was present and could not be checked."],
+  ["2", "The file could not be read as a receipt."],
+];
+
+const faqs = [
+  {
+    q: "How can I prove my agent did not betray me without showing anyone my preferences?",
+    a: "Call Transcript.verify_non_betrayal(sheet, decision) with your own PreferenceSheet and the public decision. It re-evaluates your hard constraints against the decision locally and returns True only when every red line held. The sheet is an input and never leaves your process; the transcript itself holds only masked verdicts. In the Exp 1 flow, parley.ratify.ratify(accept=True) runs this replay first and refuses an acceptance the sheet rejects.",
+  },
+  {
+    q: "What does the SHA-256 receipt hash actually prove?",
+    a: "That the transcript in front of you hashes to that value. The hash is SHA-256 over canonical JSON of the transcript (sorted keys, the six public verdict fields per party, the finalized result). It catches an edit made after the receipt was written only when the hash was kept by someone other than whoever could edit the transcript, for example each participant writing it down at ratification. It is unsigned, and the coordinator can re-hash a rewritten record.",
+  },
+  {
+    q: "Can a dishonest coordinator pick a worse option and still produce a valid-looking receipt?",
+    a: "Not one that passes scripts/verify-receipt.py. The script recomputes the max-min winner from the recorded verdicts, independent of the hash, so a swapped winner shows up as \"max-min honest NO\" even when the hash was recomputed honestly. What the script cannot catch is a coordinator that rewrites the verdicts themselves to fit the swapped winner, because verdicts are unsigned unless the run signed them (the per-process HTTP bots in examples/run_env.py do, with the crypto extra installed). That is the gap signed verdicts exist to close.",
+  },
+  {
+    q: "Does the check need the parley-consensus package, or anything else installed?",
+    a: "The receipt check needs Python 3.10 or later and the base package; the script imports parley.consensus, parley.ratify and parley.transcript. No network, no key. Signature checks additionally need pynacl, installed with pip install \"parley-consensus[crypto]\". Without it the script still runs, prints a note, and fails any receipt that carries a signature it could not check.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/verify-ai-agent-decision/#article",
+      headline: "Verify an AI-agent decision after the fact, without trusting the coordinator",
+      description:
+        "How a Parley receipt is checked after a multi-party agent decision: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and running scripts/verify-receipt.py. What each check proves and what it does not.",
+      url: "https://parleyprotocol.com/verify-ai-agent-decision/",
+      inLanguage: "en",
+      datePublished: "2026-10-09",
+      dateModified: "2026-10-09",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/verify-ai-agent-decision/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="Verify an AI-agent decision without trusting the coordinator"
+  description="Check a multi-party agent decision after the fact: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and scripts/verify-receipt.py. What each check proves and what it does not."
+  path="/verify-ai-agent-decision/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- Hero -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Check the decision afterwards, without trusting the coordinator.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          The repository's real-decision flow ends with a receipt file: the masked
+          transcript, a SHA-256 hash over it, the announced decision and each participant's
+          acceptance. This page is what you
+          can re-derive from that file on your own machine, how to replay your own red
+          lines against the outcome without showing them to anyone, and the list of
+          things the check does not prove.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Commands and values here were checked against version 0.2.0 from PyPI; the
+          verifier is{" "}
+          <a href={VERIFIER_URL} target="_blank" rel="noopener" class={link}>
+            scripts/verify-receipt.py
+          </a>{" "}
+          in the source repository. Companion guides:{" "}
+          <a href="/mcp-multi-party-decisions/" class={link}>running Parley as an MCP tool</a>,{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>{" "}
+          and{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Threat model -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Who you are checking against</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The coordinator is the process that asks every agent for a verdict, writes the
+          transcript and announces the winner. Parley treats it as untrusted by
+          construction: it only ever sees masked verdicts, never a preference sheet. But it
+          does author the record, so a dishonest coordinator could finalize an option that is
+          feasible but not the max-min one, edit a verdict after the fact, or drop a
+          participant from the roster. The checks below exist for exactly those three moves.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          There are two separate questions, and one check does not answer the other.
+          <strong class="text-ink">Was I betrayed?</strong> is answered by you alone,
+          replaying your own sheet. <strong class="text-ink">Was the selection honest?</strong>
+          is answered by anyone holding the receipt, recomputing the max-min rule over the
+          public verdicts.
+        </p>
+      </section>
+
+      <!-- Receipt fields -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>1. What a receipt contains</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>examples/real_decision.py --receipt receipt.json</code> writes a
+          JSON object with nine fields. The verifier refuses a file that is missing any of
+          them.
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="Receipt fields, scrollable table"
+        >
+          <table class="w-full min-w-[560px] border-collapse text-left">
+            <caption class="sr-only">The nine fields of a Parley receipt and what each holds</caption>
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">Field</th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] font-semibold text-muted">Holds</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                fields.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-muted">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Nothing private is in the file. A verdict names its owner, a boolean, a soft score
+          and the masked reason; it never says which red line was crossed, and no sheet is
+          stored anywhere in the record.
+        </p>
+      </section>
+
+      <!-- The hash -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>2. What the SHA-256 hash covers</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>Transcript.hash()</code> is SHA-256 over the canonical JSON of
+          <code class={code}>{`{"entries": [...], "result": {...}}`}</code>: keys sorted,
+          non-ASCII kept as is, and tuples tagged so a tuple and a list cannot hash the same.
+          Two honest assemblies of the same parley produce the same digest; changing one
+          <code class={code}>acceptable</code> flag changes it. The transcript does not store
+          the hash and does not sign it. It is tamper-evident only against a copy of the hash
+          kept outside the record, which is why the ratification step shows each participant
+          the hash before they accept.
+        </p>
+      </section>
+
+      <!-- Replay your own sheet -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>3. Replay your own sheet</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>verify_non_betrayal(sheet, decision)</code> re-evaluates your
+          hard constraints against the decision and returns <code class={code}>True</code>
+          only when every one holds. It does not read the recorded verdicts; it needs your
+          sheet and the public decision, and nothing else. A <code class={code}>None</code>
+          decision (a deadlock) returns <code class={code}>True</code>, since it forces nothing
+          on anyone. This is the README quickstart, run under 0.2.0:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Python: the README quickstart with verify_non_betrayal, scrollable code"><code>{`from parley.agent import Agent
+from parley.consensus import run_consensus
+from parley.preferences import HardConstraint, PreferenceSheet
+
+options = [{"venue": "rooftop", "cost": 900}, {"venue": "garden", "cost": 600}, {"venue": "diner", "cost": 300}]
+ana = PreferenceSheet("Ana", utility=lambda o: 1.0 if o["venue"] == "rooftop" else 0.4)
+bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)],
+                      utility=lambda o: 1 - o["cost"] / 1000)
+cara = PreferenceSheet("Cara", utility=lambda o: 0.9 if o["venue"] == "garden" else 0.5)
+
+result = run_consensus([Agent(s.owner, s) for s in (ana, bob, cara)], options)
+print(result.status, result.decision)
+print("receipt sha256:", result.transcript.hash())
+for sheet in (ana, bob, cara):
+    print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))`}</code></pre>
+        <pre class={`${deviceBlock} mt-3 whitespace-pre`} tabindex="0" aria-label="Output of the quickstart, scrollable code"><code>{`agreed {'venue': 'garden', 'cost': 600}
+receipt sha256: a9cb75c0a15b41360fb2b134e084ca3b577daaf50f5edb657c5c4da43cc2fc72
+Ana not betrayed: True
+Bob not betrayed: True
+Cara not betrayed: True`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          In the Exp 1 flow this replay is not optional: <code class={code}>parley.ratify.ratify(sheet, transcript, accept=True)</code>
+          runs it first and raises if the submitted sheet rejects the decision, so an
+          acceptance can never mean "I did not look". The acceptance it returns carries the
+          owner, the decision, the transcript hash and the boolean, and nothing about why the
+          red lines held.
+        </p>
+      </section>
+
+      <!-- Worked check -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>4. Check the whole receipt</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The interactive flow from the repository writes a receipt when given a path:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Shell: write a receipt with real_decision.py and check it, scrollable code"><code>{`python examples/real_decision.py --options examples/cases/flatshare.json \\
+    --participants Ana,Bob,Cara --manual --receipt receipt.json
+python scripts/verify-receipt.py receipt.json`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          For this page the receipt was produced in process from
+          <code class={code}>examples/demo/recipe_committee.json</code>, a grant committee
+          with three reviewers, in a fresh virtual environment with only
+          <code class={code}>parley-consensus==0.2.0</code> installed: the recipe was run,
+          each party's acceptance was made with <code class={code}>ratify</code>, and the
+          nine fields were written exactly as <code class={code}>real_decision.py</code>
+          writes them. The Budget reviewer's one red line is
+          <code class={code}>reviewed == true</code>. The unreviewed option has the best
+          numbers and is rejected before any score is weighed. Two transcript entries, scores
+          rounded to two decimals:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Two transcript entries from the committee receipt, scrollable code"><code>{`rubber-stamp   (impact 9, cost 5, novelty 8, reviewed false)
+  Impact   acceptable=true   reason="ok"        score=1.00
+  Budget   acceptable=false  reason="red-line"  score=0.94
+  Novelty  acceptable=true   reason="ok"        score=0.89
+
+fund-biotech   (impact 5, cost 20, novelty 9, reviewed true)
+  Impact   acceptable=true   reason="ok"        score=0.56
+  Budget   acceptable=true   reason="ok"        score=0.78
+  Novelty  acceptable=true   reason="ok"        score=1.00`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          <code class={code}>fund-biotech</code> wins: among the three options feasible for
+          everyone it has the highest minimum score. Then the verifier, from the file alone,
+          with the trailing explanation of what it checked cut for length (the script prints it
+          every time):
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the clean receipt, scrollable code"><code>{`$ python scripts/verify-receipt.py receipt.json
+Parley receipt check: Fund a grant proposal (committee vote)
+  status agreed   decision {"cost": 20, "id": "fund-biotech", "impact": 5, "label": "Fund the diagnostics pilot", "novelty": 9, "reviewed": true}
+
+Record
+  transcript hash   claimed    d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc
+                    recomputed d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc   OK
+  status/decision   match the finalized record   OK
+  max-min honest    yes (recomputed from the recorded verdicts)   OK
+  roster            Budget, Impact, Novelty (record: Budget, Impact, Novelty)   OK
+  verdict sigs      none
+
+Acceptances
+  Impact           accepted  bound to this record      signature unsigned   OK
+  Budget           accepted  bound to this record      signature unsigned   OK
+  Novelty          accepted  bound to this record      signature unsigned   OK
+  unanimous         yes (receipt says yes; tamper-evidence only: unsigned)   OK
+
+Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Now the two moves a dishonest coordinator might make. First, the winner is swapped
+          to the climate initiative (Impact's favourite) and the record is re-hashed honestly,
+          so the hash line passes:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with a swapped winner, scrollable code"><code>{`  transcript hash   claimed    733058d64bb9085c43b870e468a5587d9a80da6fb39e776af67a5c441fc90878
+                    recomputed 733058d64bb9085c43b870e468a5587d9a80da6fb39e776af67a5c441fc90878   OK
+  status/decision   match the finalized record   OK
+  max-min honest    NO (recomputed from the recorded verdicts)   FAIL
+  ...
+  Impact           accepted  NOT bound to this record  signature unsigned   FAIL
+
+Result: FAILED
+  - the announced decision is not the max-min option over the recorded verdicts
+  - Impact: acceptance is not bound to this record and decision`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Second, one verdict is edited after the receipt was written (Budget's rejection of
+          the unreviewed option flipped to acceptable) and the hash is left as it was:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with an edited verdict, scrollable code"><code>{`  transcript hash   claimed    d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc
+                    recomputed 2f0eaae11316761c9c9a9fc58c6fbb78b37ca675a2465ba84fe75c36fcca3084   FAIL
+  ...
+Result: FAILED
+  - transcript hash mismatch: the record was edited after the receipt was written
+  - the announced decision is not the max-min option over the recorded verdicts`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Both tampered runs exit 1; the clean run exits 0. In the second case the edited
+          record would also make the unreviewed option the max-min winner, which is why the
+          max-min line fails too.
+        </p>
+      </section>
+
+      <!-- What the verifier checks -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What the verifier re-derives</h2>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="Verifier checks, scrollable table"
+        >
+          <table class="w-full min-w-[560px] border-collapse text-left">
+            <caption class="sr-only">The six checks scripts/verify-receipt.py performs on a receipt</caption>
+            <tbody>
+              {
+                checks.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="Exit codes, scrollable table"
+        >
+          <table class="w-full min-w-[360px] border-collapse text-left">
+            <caption class="sr-only">Exit codes of scripts/verify-receipt.py</caption>
+            <tbody>
+              {
+                exits.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">
+                      exit {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Honesty -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What the check does not prove</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          The verifier prints this list under every result, green or red. It is the part of
+          the page to read twice.
+        </p>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">Nothing is signed unless signing was on.</strong> By
+              default verdicts and acceptances carry <code class={code}>sig: null</code>. That
+              tier is tamper-evidence only: a hash or decision mismatch is caught, a record
+              fabricated from scratch is not, because every field in it is public. Whoever can
+              rewrite the verdicts can rewrite them to fit a swapped winner and the max-min
+              check will agree. Ed25519 signing exists behind the <code class={code}>crypto</code>
+              extra: <code class={code}>examples/run_env.py</code> signs each bot's verdicts over
+              HTTP, and <code class={code}>real_decision.py --sign</code> signs each acceptance
+              with a fresh key generated at the keyboard.
+            </li>
+            <li>
+              <strong class="text-ink">A signature does not say who signed.</strong> Each
+              public key is self-attested by the record that carries it; there is no owner to
+              key roster yet. A holder of any key, the coordinator included, can sign under
+              another owner's name. A verified signature proves the content was not altered
+              after signing, not who produced it. See{" "}
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>.
+            </li>
+            <li>
+              <strong class="text-ink">The roster is coordinator-written.</strong> The
+              participants list comes from the same hand as the transcript. The roster check
+              binds the record to the roster you expect only if you compare that list against
+              who you know took part.
+            </li>
+            <li>
+              <strong class="text-ink">It is the record the coordinator kept, not
+              necessarily the one you saw.</strong> Each participant has to compare the hash
+              shown to them at ratification with the recomputed one. Without that out-of-band
+              copy, a consistent rewrite passes.
+            </li>
+            <li>
+              <strong class="text-ink">No red line is checked here.</strong> No sheet is in the
+              receipt or read by the script. Whether your own red lines held is answered only
+              by <code class={code}>verify_non_betrayal</code> on your side, section 3 above.
+            </li>
+            <li>
+              <strong class="text-ink">No freshness.</strong> Verdict payloads carry no session
+              id or nonce, so a genuine signed verdict can be replayed into another parley over
+              the same option.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Run one decision, keep the receipt, check it on another machine.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo runs the same engine with no signup. The repository is Apache-2.0;
+          <code class={code}>parley/transcript.py</code> is the hash and the replay, and
+          <code class={code}>scripts/verify-receipt.py</code> is the whole verifier.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={TRANSCRIPT_URL} target="_blank" rel="noopener" class={btnGhost}>
+            Read transcript.py
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a> &middot;{" "}
+          <a href="/mcp-multi-party-decisions/" class={link}>Setup: Parley as an MCP tool</a> &middot;{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>Next: how the whole negotiation stays fair</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
