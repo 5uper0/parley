@@ -61,7 +61,7 @@ const exits = [
 const faqs = [
   {
     q: "How can I prove my agent did not betray me without showing anyone my preferences?",
-    a: "Call Transcript.verify_non_betrayal(sheet, decision) with your own PreferenceSheet and the public decision. It re-evaluates your hard constraints against the decision locally and returns True only when every red line held. The sheet is an input and never leaves your process; the transcript itself holds only masked verdicts. In the Exp 1 flow, parley.ratify.ratify(accept=True) runs this replay first and refuses an acceptance the sheet rejects.",
+    a: "Call Transcript.verify_non_betrayal(sheet, decision) with your own PreferenceSheet and the public decision. It re-evaluates your hard constraints against the decision locally and returns True only when every red line held. The sheet is an input and never leaves your process; the transcript itself holds only masked verdicts. In the real-decision flow, parley.ratify.ratify refuses an acceptance that the sheet you submit rejects. It cannot tell whether that sheet is current or complete.",
   },
   {
     q: "What does the SHA-256 receipt hash actually prove?",
@@ -69,11 +69,11 @@ const faqs = [
   },
   {
     q: "Can a dishonest coordinator pick a worse option and still produce a valid-looking receipt?",
-    a: "Not one that passes scripts/verify-receipt.py. The script recomputes the max-min winner from the recorded verdicts, independent of the hash, so a swapped winner shows up as \"max-min honest NO\" even when the hash was recomputed honestly. What the script cannot catch is a coordinator that rewrites the verdicts themselves to fit the swapped winner, because verdicts are unsigned unless the run signed them (the per-process HTTP bots in examples/run_env.py do, with the crypto extra installed). That is the gap signed verdicts exist to close.",
+    a: "Not one that passes scripts/verify-receipt.py. The script recomputes the max-min winner from the recorded verdicts, independent of the hash, so a swapped winner shows up as \"max-min honest NO\" even when the hash was recomputed honestly. What the script cannot catch is a coordinator that rewrites the verdicts themselves to fit the swapped winner, because verdicts are unsigned unless the run signed them (the per-process HTTP bots in examples/run_env.py do, with the crypto extra installed). Signed verdicts narrow this only once an owner-to-key roster exists; today the key is self-attested (SECURITY.md).",
   },
   {
     q: "Does the check need the parley-consensus package, or anything else installed?",
-    a: "The receipt check needs Python 3.10 or later and the base package; the script imports parley.consensus, parley.ratify and parley.transcript. No network, no key. Signature checks additionally need pynacl, installed with pip install \"parley-consensus[crypto]\". Without it the script still runs, prints a note, and fails any receipt that carries a signature it could not check.",
+    a: "The verifier script and the examples are not in the PyPI wheel: clone the repository (or check out the v0.2.0 tag) and install the base package with Python 3.10 or later. The script imports parley.consensus, parley.ratify and parley.transcript. No network, no key. Signature checks additionally need pynacl, installed with pip install \"parley-consensus[crypto]\". Without it the script still runs, prints a note, and fails any receipt that carries a signature it could not check.",
   },
 ];
 
@@ -150,12 +150,11 @@ const jsonLd = JSON.stringify({
           things the check does not prove.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          Commands and values here were checked against version 0.2.0 from PyPI; the
-          verifier is{" "}
+          Library calls and values here were checked against version 0.2.0. The verifier,{" "}
           <a href={VERIFIER_URL} target="_blank" rel="noopener" class={link}>
             scripts/verify-receipt.py
-          </a>{" "}
-          in the source repository. Companion guides:{" "}
+          </a>, and the examples are not in the PyPI wheel: they need a clone of the
+          repository (or the v0.2.0 tag) plus the base package. Companion guides:{" "}
           <a href="/mcp-multi-party-decisions/" class={link}>running Parley as an MCP tool</a>,{" "}
           <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>{" "}
           and{" "}
@@ -173,7 +172,9 @@ const jsonLd = JSON.stringify({
           construction: it only ever sees masked verdicts, never a preference sheet. But it
           does author the record, so a dishonest coordinator could finalize an option that is
           feasible but not the max-min one, edit a verdict after the fact, or drop a
-          participant from the roster. The checks below exist for exactly those three moves.
+          participant from the roster. The checks below exist for those three moves: the
+          first two are caught in the file itself; dropping a participant only if you check
+          the roster yourself.
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           There are two separate questions, and one check does not answer the other.
@@ -220,9 +221,9 @@ const jsonLd = JSON.stringify({
           </table>
         </div>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
-          Nothing private is in the file. A verdict names its owner, a boolean, a soft score
-          and the masked reason; it never says which red line was crossed, and no sheet is
-          stored anywhere in the record.
+          No sheet and no constraint name is in the file. A verdict names its owner, a
+          boolean, a soft score and the masked reason; it never says which red line was
+          crossed. Soft scores are public and leak preference ordering (SECURITY.md).
         </p>
       </section>
 
@@ -273,9 +274,9 @@ Ana not betrayed: True
 Bob not betrayed: True
 Cara not betrayed: True`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
-          In the Exp 1 flow this replay is not optional: <code class={code}>parley.ratify.ratify(sheet, transcript, accept=True)</code>
-          runs it first and raises if the submitted sheet rejects the decision, so an
-          acceptance can never mean "I did not look". The acceptance it returns carries the
+          In the real-decision flow, <code class={code}>parley.ratify.ratify</code> refuses
+          an acceptance that the sheet you submit rejects. It cannot tell whether that sheet
+          is current or complete. The acceptance it returns carries the
           owner, the decision, the transcript hash and the boolean, and nothing about why the
           red lines held.
         </p>
@@ -294,10 +295,10 @@ python scripts/verify-receipt.py receipt.json`}</code></pre>
           For this page the receipt was produced in process from
           <code class={code}>examples/demo/recipe_committee.json</code>, a grant committee
           with three reviewers, in a fresh virtual environment with only
-          <code class={code}>parley-consensus==0.2.0</code> installed: the recipe was run,
-          each party's acceptance was made with <code class={code}>ratify</code>, and the
-          nine fields were written exactly as <code class={code}>real_decision.py</code>
-          writes them. The Budget reviewer's one red line is
+          <code class={code}>parley-consensus==0.2.0</code> installed, with the verifier
+          script taken from a checkout of the repository: the recipe was run, each party's
+          acceptance was made with <code class={code}>ratify</code>, and the nine fields were
+          written exactly as <code class={code}>real_decision.py</code> writes them. The Budget reviewer's one red line is
           <code class={code}>reviewed == true</code>. The unreviewed option has the best
           numbers and is rejected before any score is weighed. Two transcript entries, scores
           rounded to two decimals:
@@ -350,7 +351,10 @@ Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}<
 
 Result: FAILED
   - the announced decision is not the max-min option over the recorded verdicts
-  - Impact: acceptance is not bound to this record and decision`}</code></pre>
+  - Impact: acceptance is not bound to this record and decision
+  - Budget: acceptance is not bound to this record and decision
+  - Novelty: acceptance is not bound to this record and decision
+  - receipt's unanimous_acceptance claim does not match the recomputation`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Second, one verdict is edited after the receipt was written (Budget's rejection of
           the unreviewed option flipped to acceptable) and the hash is left as it was:
@@ -360,7 +364,11 @@ Result: FAILED
   ...
 Result: FAILED
   - transcript hash mismatch: the record was edited after the receipt was written
-  - the announced decision is not the max-min option over the recorded verdicts`}</code></pre>
+  - the announced decision is not the max-min option over the recorded verdicts
+  - Impact: acceptance is not bound to this record and decision
+  - Budget: acceptance is not bound to this record and decision
+  - Novelty: acceptance is not bound to this record and decision
+  - receipt's unanimous_acceptance claim does not match the recomputation`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Both tampered runs exit 1; the clean run exits 0. In the second case the edited
           record would also make the unreviewed option the max-min winner, which is why the
@@ -419,7 +427,7 @@ Result: FAILED
       <section class={`${wrap} mt-14`}>
         <h2 class={sectionLabel}>What the check does not prove</h2>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
-          The verifier prints this list under every result, green or red. It is the part of
+          The verifier prints this list under every completed check, pass or fail. It is the part of
           the page to read twice.
         </p>
         <div class={`${card} mt-5 px-5 py-[18px]`}>
@@ -433,7 +441,7 @@ Result: FAILED
               check will agree. Ed25519 signing exists behind the <code class={code}>crypto</code>
               extra: <code class={code}>examples/run_env.py</code> signs each bot's verdicts over
               HTTP, and <code class={code}>real_decision.py --sign</code> signs each acceptance
-              with a fresh key generated at the keyboard.
+              with a fresh key generated by the same process that writes the receipt.
             </li>
             <li>
               <strong class="text-ink">A signature does not say who signed.</strong> Each
