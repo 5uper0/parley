@@ -33,7 +33,7 @@ const btnGhost =
   "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
 
 const rules = [
-  ["A limit is a veto", "A red line is a rule about one attribute, such as cost_each <= 250. An option that breaks anyone's red line is out, whatever everyone else thinks of it. It is never traded against a preference."],
+  ["A limit is a veto", "A red line is a rule about one attribute, such as cost_each <= 250. An option that breaks anyone's red line is out, whatever everyone else thinks of it. It is never traded against a preference. It is also self-reported: the engine enforces what you type and cannot tell a real limit from a tactical one."],
   ["Lift the least-happy person", "Among the options nobody vetoed, each person's preferences give a score from 0 to 1. The winner is the option whose lowest score is highest. Ties go to the higher total. This is not a vote and not a sum."],
   ["No option means no decision", "If every option breaks someone's red line, the result is a deadlock, written into the record as such. The engine never picks a least-bad option over somebody's limit."],
 ];
@@ -56,7 +56,7 @@ const options = [
 const faqs = [
   {
     q: "How do we pick a fair option when everyone has private limits?",
-    a: "Agree the list of options in public, then let each person state two things in private: red lines, which are rules an option must satisfy, and preferences, which only rank the options that survive. The engine drops every option that breaks anyone's red line and, among the rest, picks the option whose least-happy person is happiest. The record shows each person's masked verdict per option (acceptable or not, a score, and the word ok or red-line) and never which rule was behind it. Each person then replays the winner against their own rules on their own side before accepting.",
+    a: "Agree the list of options in public, then let each person state two things in private: red lines, which are rules an option must satisfy, and preferences, which only rank the options that survive. The engine drops every option that breaks anyone's red line and, among the rest, picks the option whose least-happy person is happiest. The record shows each person's masked verdict per option (acceptable or not, a score, and the word ok or red-line) and never which rule was behind it. Each person then replays the winner against their own rules on their own side before accepting. The limits are self-reported: the engine enforces what each person types and cannot tell a real limit from a tactical one.",
   },
   {
     q: "How is this different from a vote or from adding up everyone's scores?",
@@ -64,7 +64,7 @@ const faqs = [
   },
   {
     q: "What stays private, and from whom?",
-    a: "The record never holds a red line or a preference, only verdicts. What leaves a person's side is, per option, acceptable or not, a score between 0 and 1, and the word ok or red-line. The scores are public, so they reveal which option a person liked more; the record does not reveal why an option was unacceptable or which rule it broke. In the pass-the-keyboard flow all three positions live in one process on one machine, so this is privacy from the other people and from the record, not from whoever operates that machine. For separate processes per owner, the repository's examples/run_env.py runs each party as its own HTTP server.",
+    a: "The record never holds a red line or a preference, only verdicts. What leaves a person's side is, per option, acceptable or not, a score between 0 and 1, and the word ok or red-line. The rule is not named, but SECURITY.md is plain about the rest: scores are unmasked, the soft cardinal score is public, leaking preference ordering and the feasible region. With a few flat options the pattern of a person's vetoes and scores lets the others guess the rule behind it. In the pass-the-keyboard flow all three positions live in one process on one machine, so this is privacy from the other people and from the record, not from whoever operates that machine. For separate processes per owner, the repository's examples/run_env.py runs each party as its own HTTP server.",
   },
   {
     q: "What do we do when the result is a deadlock?",
@@ -109,7 +109,7 @@ const jsonLd = JSON.stringify({
 
 <Layout
   title="A fair group decision when everyone has private limits"
-  description="Pick a date, split a bill, choose a flat or share out work when each person has a limit they would rather not share. A red line removes an option for everyone, the max-min rule lifts the least-happy person, and a receipt anyone can re-check. Walked through on a real case file."
+  description="Pick a date, split a bill, choose a flat or share out work when each person has a limit they would rather not share. A red line removes an option for everyone, the max-min rule lifts the least-happy person, and anyone can re-check the arithmetic in the receipt. Walked through on a ready-made case file."
   path="/fair-group-decision-private-limits/"
 >
   <script type="application/ld+json" is:inline set:html={jsonLd} />
@@ -143,7 +143,7 @@ const jsonLd = JSON.stringify({
           Each person states their red lines and preferences alone at the keyboard, the
           engine drops every option that crosses anyone's red line, picks the option whose
           least-happy person is happiest, and writes a receipt that each person can check
-          against their own rules and that anyone can re-check for honesty.
+          against their own rules and whose arithmetic anyone can re-check.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
           The run on this page was made with version 0.2.0: the
@@ -276,17 +276,19 @@ const jsonLd = JSON.stringify({
       <section class={`${wrap} mt-14`}>
         <h2 class={sectionLabel}>2. Each person states limits and preferences alone</h2>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
-          The flow clears the screen and calls one person at a time. A red line is typed as
+          The flow prints blank lines and calls one person at a time. A red line is typed as
           <code class={code}>attribute operator value</code>; a preference as
           <code class={code}>attribute value weight</code>. A person's score for an option is
           the weight of the preferences it matches divided by the weight of all their
-          preferences, so it sits between 0 and 1. Nothing typed here is shown to the next
-          person or written into the record.
+          preferences, so it sits between 0 and 1. Nothing typed here is written into the
+          record, and the flow does not show it to the next person; the terminal's scrollback
+          can, so clear it or use a fresh terminal between people. The engine takes each rule
+          as given: it cannot tell a real limit from a tactical one.
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           The three positions below were typed for this page by one person at one keyboard, so
-          they can be shown. No real group has used this run. In a real run each person sees
-          only their own.
+          they can be shown. No real group has used Parley this way yet. In a real run each
+          person sees only their own.
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="The three positions as typed in manual mode, scrollable code"><code>{`Ana
   red line >  cost_each <= 250
@@ -348,8 +350,10 @@ next-week    (weeks_away 1, cost_each 320, days_off_needed 2, weather_risk low, 
           Three options are out: <code class={code}>oct-fourth</code> crosses one of Cara's
           lines, <code class={code}>dec-first</code> and <code class={code}>next-week</code>
           cross lines of Ana's and Bob's. The record says <code class={code}>red-line</code>
-          and nothing more; it does not say that Cara's line was about who misses out or that
-          Ana's was about money.
+          and does not name the rule. It does show who vetoed what, and the scores next to
+          the vetoes: with five flat options, someone reading that Cara rejected the only
+          option on which she misses out can guess her rule, and SECURITY.md says so (scores
+          are unmasked, leaking preference ordering and the feasible region).
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Two options survive. <code class={code}>nov-second</code> has the higher total
@@ -430,9 +434,10 @@ Receipt written to receipt-deadlock.json`}</code></pre>
           The deadlock receipt carries <code class={code}>"status": "deadlock"</code>,
           <code class={code}>"decision": null</code>, every verdict, and no acceptances. The
           verifier passes it, because a deadlock over a record in which no option is
-          acceptable to everyone is the honest result. Which person's line blocked which
-          option is not in the file. The way forward is a new option list, not a different
-          rule.
+          acceptable to everyone is the honest result. The receipt records, per option and
+          per person, whether that person's red lines allowed it, so everyone can see who
+          blocked what. It does not say which rule did it. The way forward is a new option
+          list, not a different rule.
         </p>
       </section>
 
@@ -444,8 +449,8 @@ Receipt written to receipt-deadlock.json`}</code></pre>
           roster, every acceptance and the full masked record. The verifier in the repository
           rebuilds the hash, recomputes the winner from the recorded verdicts and checks that
           every acceptance is bound to exactly this hash and this decision. Its output on the
-          first run, with the trailing explanation of what it checked cut for length (the
-          script prints it every time):
+          first run. The script ends every run with a list of what it checked and what it
+          does not prove; that list is cut here to two of its lines:
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the pick-a-date receipt, scrollable code"><code>{`$ python scripts/verify-receipt.py receipt.json
 Parley receipt check: Which weekend do we actually go?
@@ -465,12 +470,20 @@ Acceptances
   Cara             accepted  bound to this record      signature unsigned   OK
   unanimous         yes (receipt says yes; tamper-evidence only: unsigned)   OK
 
-Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}</code></pre>
+Result: VERIFIED. Every claim in this receipt re-derives from its own record.
+
+What this does NOT prove
+  ...
+  - that the roster is the right one: the participants list is itself coordinator-written.
+  ...
+  - that nobody's red line was crossed: no private sheet is in the receipt or read here.
+  ...`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Someone who was not in the room can run this and learn that the announced weekend
           really is the max-min pick over the recorded verdicts and that all three acceptances
-          are bound to this exact record. What each check proves and what it does not is the
-          subject of the{" "}
+          are bound to this exact record, but not that Ana, Bob and Cara gave them: every field
+          of an unsigned acceptance is public, so that tier authenticates nobody. What each
+          check proves and what it does not is the subject of the{" "}
           <a href="/verify-ai-agent-decision/" class={link}>verification guide</a>.
         </p>
       </section>
@@ -487,11 +500,27 @@ Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}<
               yes or no, never why.
             </li>
             <li>
-              <strong class="text-ink">The scores are public.</strong> Each verdict carries
-              the person's soft score for that option, so the record shows that Cara scored
-              <code class={code}>oct-third</code> at 0.75 and <code class={code}>nov-second</code>
-              at 0.25. That reveals which option she liked more. It does not reveal her
-              preferences themselves (<a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>).
+              <strong class="text-ink">The scores and the vetoes are public.</strong>{" "}
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>{" "}
+              states it as a known gap: "Scores are unmasked. The soft cardinal score is
+              public, leaking preference ordering / feasible region". The record shows that
+              Cara scored <code class={code}>oct-third</code> at 0.75 and
+              <code class={code}>nov-second</code> at 0.25, and that she alone rejected
+              <code class={code}>oct-fourth</code>. The rule is not named, but with a few flat
+              options the pattern of vetoes and scores lets the others guess it.
+            </li>
+            <li>
+              <strong class="text-ink">Self-reported.</strong> The engine enforces what each
+              person types. It cannot tell a real limit from a tactical one, and a person who
+              overstates a red line to steer the outcome is not caught. Strategic misreporting
+              is out of scope (SECURITY.md lists collusion and strategic-misreport resistance
+              as a research track).
+            </li>
+            <li>
+              <strong class="text-ink">The terminal keeps scrollback.</strong> Between people
+              the flow prints forty blank lines; it does not clear the screen. Scrolling up can
+              still show the previous person's input. Use a fresh terminal per person, or clear
+              the scrollback before handing the keyboard on.
             </li>
             <li>
               <strong class="text-ink">One keyboard means one process.</strong> In the
@@ -543,12 +572,12 @@ Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}<
           Put your own argument in a file and run it.
         </h2>
         <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
-          The demo runs the same engine in the browser with no signup. The repository is
+          The demo replays pre-computed runs of the same engine, no signup. The repository is
           Apache-2.0; copy one of the four case files, change the numbers to your own, and
           run <code class={code}>examples/real_decision.py</code> with the people in the room.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-6">
-          <a href={DEMO_URL} class={btnPrimary}>Try it live</a>
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
           <a href={CASES_URL} target="_blank" rel="noopener" class={btnGhost}>
             Open the case files
             <span
