@@ -67,7 +67,7 @@ const jsonLd = JSON.stringify({
       applicationCategory: "DeveloperApplication",
       operatingSystem: "Any",
       description:
-        "Provable consensus for AI agents of rival owners: deterministic red lines, max-min consensus over masked verdicts, and a verifiable non-betrayal transcript. No cryptocurrency or blockchain; self-hosted, open source.",
+        "One decision among AI agents of different owners: red lines enforced in code, max-min consensus over masked verdicts, and a transcript each owner checks on their own machine. No cryptocurrency or blockchain; self-hosted, open source.",
       license: "https://github.com/5uper0/parley/blob/main/LICENSE",
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       codeRepository: "https://github.com/5uper0/parley",
@@ -86,8 +86,8 @@ const jsonLd = JSON.stringify({
 ---
 
 <Layout
-  title="Parley: consensus AI agents can't rig (no crypto)"
-  description="Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open source. Red lines enforced in code, not LLM discretion."
+  title="Parley: AI assistants agree, limits stay private"
+  description="A way for several people's AI assistants to agree on one option without anyone revealing their private limits. Red lines enforced in code, each owner checks the result on their own machine. Open source, no crypto, self-hosted."
 >
   <script type="application/ld+json" is:inline set:html={jsonLd} />
 
@@ -110,20 +110,21 @@ const jsonLd = JSON.stringify({
             <p
               class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase"
             >
-              Provable, not hoped
+              Group decisions, private limits
               <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"
               ></span>
             </p>
             <h1
               class="font-display text-[clamp(2.5rem,7vw,4.4rem)] leading-[1.04] tracking-[-0.028em]"
             >
-              <span class="block text-ink">Zero betrayals,</span>
-              <span class="block text-indigo">provably.</span>
+              <span class="block text-ink">AI assistants agree,</span>
+              <span class="block text-indigo">limits stay private.</span>
             </h1>
             <p class="mt-6 max-w-[52ch] text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.55] text-muted">
-              Personal AI agents negotiate for owners with conflicting, private
-              interests. Parley makes it provable that none of them was
-              betrayed, without any owner exposing a single private preference.
+              Each person tells only their own assistant what they will not
+              accept. The assistants pick an option that crosses nobody's limit,
+              and nobody has to say what their limit was. Afterwards, each
+              person can check on their own computer that it held.
             </p>
             <div class="mt-8 flex flex-wrap items-center gap-6">
               <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
@@ -208,10 +209,10 @@ const jsonLd = JSON.stringify({
               </svg>
             </div>
             <p class="px-6 pt-3 pb-4 text-[12.5px] leading-[1.5] text-muted">
-              Five delegates, five private sheets. Option A below, three of the five
-              verdicts shown. One shared decision,
-              <b class="font-semibold text-ink">verified</b>, none of the
-              sheets revealed.
+              Five people, five private lists of limits. For option A, three of
+              the five answers are shown. One shared decision,
+              <b class="font-semibold text-ink">checked by every owner</b>, no
+              list revealed.
             </p>
             <div
               class="flex flex-col gap-3.5 border-t border-hairline p-5 font-mono text-[13px] leading-[1.5]"
@@ -284,11 +285,119 @@ const jsonLd = JSON.stringify({
             <div
               class="border-t border-hairline bg-bg px-5 py-3 font-mono text-[11.5px] leading-[1.6] text-muted"
             >
-              cara's reason stays private. only the verdict "red-line" ever
+              ana's reason stays private. only the verdict "red-line" ever
               leaves her agent.
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <!-- Plain words: the layperson block. Keep it jargon-free; the technical sections follow. -->
+    <section id="plain-words" class="py-14 lg:py-20" aria-labelledby="plain-head">
+      <div class={wrap}>
+        <h2
+          id="plain-head"
+          class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted uppercase"
+        >
+          In plain words
+        </h2>
+        <p
+          class="mt-7 max-w-[52ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
+        >
+          Parley is a way for several people's AI assistants to agree on one
+          option, without anyone having to reveal their private limits.
+        </p>
+
+        <div class="mt-10 grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-8">
+          <article class={`${propBase} border-b-indigo border-l-indigo p-7 md:p-8`}>
+            <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
+              For example
+            </h3>
+            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Three friends are picking the dates for a weekend trip and
+              splitting the cost. Each has a limit they would rather not say out
+              loud. Ana cannot spend more than 200. Bob cannot leave before
+              Friday evening. Cara will not share a room.
+            </p>
+            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Each one tells only their own assistant. The assistants go through
+              the options together. Any option that crosses one friend's limit
+              is out, no matter how much the other two like it.
+            </p>
+            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Among the options left, the winner is the one that leaves the
+              least happy friend as well off as possible. The others see that an
+              assistant said no to an option, never why.
+            </p>
+          </article>
+
+          <article class={`${propBase} border-b-verify border-l-verify p-7 md:p-8`}>
+            <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
+              How it goes
+            </h3>
+            <ol class="mt-4 grid gap-5">
+              <li class="grid grid-cols-[2rem_1fr] gap-3">
+                <span
+                  class="font-display text-[1.6rem] leading-none text-indigo-text"
+                  aria-hidden="true">1</span
+                >
+                <div>
+                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
+                    Tell your own assistant your limits, in private.
+                  </p>
+                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
+                    A limit is a rule your assistant applies to each option. The
+                    list stays with your assistant and is not handed to the
+                    group.
+                  </p>
+                </div>
+              </li>
+              <li class="grid grid-cols-[2rem_1fr] gap-3">
+                <span
+                  class="font-display text-[1.6rem] leading-none text-indigo-text"
+                  aria-hidden="true">2</span
+                >
+                <div>
+                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
+                    For each option, the assistants say only ok or no, plus a
+                    score.
+                  </p>
+                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
+                    An assistant never says which limit was behind a no. The
+                    score is visible to the others, so it can hint at what you
+                    prefer.
+                  </p>
+                </div>
+              </li>
+              <li class="grid grid-cols-[2rem_1fr] gap-3">
+                <span
+                  class="font-display text-[1.6rem] leading-none text-indigo-text"
+                  aria-hidden="true">3</span
+                >
+                <div>
+                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
+                    Afterwards, check on your own computer that your limit held.
+                  </p>
+                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
+                    You replay your own list against the final choice. Nobody
+                    else needs to see the list.
+                  </p>
+                </div>
+              </li>
+            </ol>
+          </article>
+        </div>
+
+        <p class="mt-8 max-w-[76ch] text-[14.5px] leading-[1.65] text-muted">
+          <b class="font-semibold text-ink">Where this stands:</b> Parley is
+          early, version 0.2, alpha. It is open source under Apache-2.0. The
+          demo on this site replays runs computed in advance with the same
+          engine. It does not yet protect against people who misreport their
+          own scores or team up against the rest.
+        </p>
       </div>
     </section>
 
@@ -315,11 +424,11 @@ const jsonLd = JSON.stringify({
             class="max-w-[44ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
           >
             Parley solves a different gap: delegates of different, conflicting,
-            private owners reaching a decision
+            private owners reaching a decision{" "}
             <span
               class="bg-[linear-gradient(to_top,var(--redline)_0_2px,transparent_2px)] pb-0.5"
-              >none of them can rig</span
-            >, and proving it.
+              >that crosses no owner's red line</span
+            >, and each owner can check it.
           </p>
         </div>
       </div>
@@ -437,7 +546,7 @@ const jsonLd = JSON.stringify({
             id="proof-head"
             class="max-w-[26ch] font-display text-[clamp(1.7rem,3.4vw,2.4rem)] leading-[1.12] tracking-[-0.026em] text-ink"
           >
-            AI that can't lie, and you can check.
+            A real run, and you can check it.
           </h2>
           <p class="max-w-[62ch] text-base leading-[1.6] text-muted">
             The tape below is a real run. Five agents with conflicting private
@@ -530,7 +639,7 @@ const jsonLd = JSON.stringify({
                 0
               </div>
               <div class="mt-1 max-w-[18ch] text-[12.5px] text-muted">
-                red lines crossed, provably
+                red lines crossed, on each owner's replay
               </div>
             </div>
           </div>
