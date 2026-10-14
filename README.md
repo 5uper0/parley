@@ -83,7 +83,17 @@ Three tools appear: `parley_decide` (options + each party's red lines and prefer
 `status`, `decision`, `transcript` and `transcript_sha256` out), `parley_verify_receipt`
 (recompute the hash over a transcript, and recompute the max-min decision from its recorded
 verdicts) and `parley_check_party` (replay one party's red lines against a decision). The input
-is the same JSON as the recipes in [`examples/demo/`](examples/demo/). Example prompt:
+is the same JSON as the recipes in [`examples/demo/`](examples/demo/), passed under one `spec` key. If you
+call the tools yourself instead of through a host, the three calls look like this (`arguments` of `tools/call`):
+
+```json
+{"name": "parley_decide", "arguments": {"spec": {"title": "...", "options": [...], "parties": [...]}}}
+{"name": "parley_verify_receipt", "arguments": {"transcript": {...}, "sha256": "<transcript_sha256 from parley_decide>"}}
+{"name": "parley_check_party", "arguments": {"party": {"owner": "Bob", "hard": [...], "utility": [...]}, "decision": {...}}}
+```
+
+The result of `parley_decide` is not a receipt file for `scripts/verify-receipt.py`; check it with
+`parley_verify_receipt`. Example prompt:
 
 > Three of us are picking a venue: rooftop (900), garden (600), diner (300). Bob will not go over
 > 700; Ana prefers the rooftop, Cara the garden, Bob the cheapest. Use parley_decide, then verify
