@@ -82,7 +82,10 @@ the package: `{"command": "python", "args": ["-m", "parley.mcp"]}`.
 Three tools appear: `parley_decide` (options + each party's red lines and preferences in,
 `status`, `decision`, `transcript` and `transcript_sha256` out), `parley_verify_receipt`
 (recompute the hash over a transcript, and recompute the max-min decision from its recorded
-verdicts) and `parley_check_party` (replay one party's red lines against a decision). The input
+verdicts) and `parley_check_party` (replay one party's red lines against a decision). To check what `parley_decide` returned,
+pass its `transcript` and `transcript_sha256` to `parley_verify_receipt`: `scripts/verify-receipt.py`
+reads the receipt file `examples/real_decision.py` writes, not the `parley_decide` result, and rejects it.
+The input
 is the same JSON as the recipes in [`examples/demo/`](examples/demo/), passed under one `spec` key. If you
 call the tools yourself instead of through a host, the three calls look like this (`arguments` of `tools/call`):
 
