@@ -1,14 +1,22 @@
 version: 2
+# cooldown: wait 7 days after a release before proposing it. Security updates ignore the
+# cooldown, so a fix for a known vulnerability still arrives at once.
 updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
