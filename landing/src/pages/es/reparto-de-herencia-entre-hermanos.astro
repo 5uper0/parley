@@ -441,10 +441,10 @@ verify_non_betrayal (cada hoja contra la decisión, en su lado):
         <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
           La demo reproduce ejecuciones ya calculadas de este mismo motor, sin registro. Si
           tiene un reparto real entre manos, una herencia, un piso en común o una sociedad
-          que se separa, escríbanos y lo preparamos con sus opciones y sus números.
+          que se separa, escríbanos sin nombres ni documentos y vemos si su caso encaja.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-6">
-          <a href={DEMO_URL} class={btnPrimary}>Probar la demo</a>
+          <a href={DEMO_URL} data-demo="herencia" class={btnPrimary}>Probar la demo</a>
           <a href={MAILTO} data-real-case="herencia" class={btnGhost}>
             Quiero probarlo con mi caso real
             <span
@@ -465,8 +465,10 @@ verify_non_betrayal (cada hoja contra la decisión, en su lado):
 
   <script is:inline>
     document.addEventListener("click", function (e) {
-      var a = e.target && e.target.closest ? e.target.closest("[data-real-case]") : null;
-      if (a && typeof gtag === "function") gtag("event", "real_case_click");
+      var t = e.target && e.target.closest ? e.target : null;
+      if (!t || typeof gtag !== "function") return;
+      if (t.closest("[data-real-case]")) gtag("event", "real_case_click");
+      else if (t.closest("[data-demo]")) gtag("event", "demo_click");
     });
   </script>
 </Layout>
