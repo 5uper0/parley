@@ -41,3 +41,8 @@ few enough that three people can hold all of them in their heads while stating a
 At least one option should be blocked by somebody's red line, and the winner should not be anyone's
 first choice. If everyone's favourite wins, the group did not actually disagree and the run proves
 nothing. Change the constraints until someone has to give something up.
+
+`herencia-hermanos.json` is a different shape: a full spec (options plus the four private sheets) behind the
+Spanish guide on parleyprotocol.com. It does not work with `--manual`, because its preferences are numeric
+(lower/higher with a range). Run it with
+`python3 -c "from parley.spec import DecisionSpec; r = DecisionSpec.load('examples/cases/herencia-hermanos.json').run(); print(r.status, r.decision['id'], r.transcript.hash())"`.

@@ -1,0 +1,135 @@
+{
+  "title": "Reparto de la casa de los padres entre tres hermanos",
+  "options": [
+    {
+      "id": "vender",
+      "quien_vive": "nadie",
+      "efectivo_por_hermano": 100000,
+      "meses_hasta_cobrar": 9,
+      "meses_para_mudarse": 9,
+      "tasacion_independiente": true,
+      "condominio_se_disuelve": true
+    },
+    {
+      "id": "ana-compra",
+      "quien_vive": "Ana",
+      "efectivo_por_hermano": 100000,
+      "meses_hasta_cobrar": 6,
+      "meses_para_mudarse": 6,
+      "tasacion_independiente": true,
+      "condominio_se_disuelve": true
+    },
+    {
+      "id": "ana-compra-rebaja",
+      "quien_vive": "Ana",
+      "efectivo_por_hermano": 75000,
+      "meses_hasta_cobrar": 3,
+      "meses_para_mudarse": 3,
+      "tasacion_independiente": false,
+      "condominio_se_disuelve": true
+    },
+    {
+      "id": "clara-alquila",
+      "quien_vive": "Clara",
+      "efectivo_por_hermano": 0,
+      "meses_hasta_cobrar": 0,
+      "meses_para_mudarse": 60,
+      "tasacion_independiente": true,
+      "condominio_se_disuelve": false
+    },
+    {
+      "id": "clara-gratis",
+      "quien_vive": "Clara",
+      "efectivo_por_hermano": 0,
+      "meses_hasta_cobrar": 0,
+      "meses_para_mudarse": 60,
+      "tasacion_independiente": false,
+      "condominio_se_disuelve": false
+    }
+  ],
+  "parties": [
+    {
+      "owner": "Ana",
+      "hard": [
+        {
+          "attr": "condominio_se_disuelve",
+          "op": "==",
+          "value": true
+        }
+      ],
+      "utility": [
+        {
+          "attr": "quien_vive",
+          "prefer": "Ana",
+          "weight": 2
+        },
+        {
+          "attr": "efectivo_por_hermano",
+          "direction": "lower",
+          "lo": 0,
+          "hi": 100000,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "owner": "Bruno",
+      "hard": [
+        {
+          "attr": "efectivo_por_hermano",
+          "op": ">=",
+          "value": 90000
+        }
+      ],
+      "utility": [
+        {
+          "attr": "meses_hasta_cobrar",
+          "direction": "lower",
+          "lo": 0,
+          "hi": 12,
+          "weight": 1
+        },
+        {
+          "attr": "efectivo_por_hermano",
+          "direction": "higher",
+          "lo": 0,
+          "hi": 100000,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "owner": "Clara",
+      "hard": [
+        {
+          "attr": "meses_para_mudarse",
+          "op": ">=",
+          "value": 6
+        }
+      ],
+      "utility": [
+        {
+          "attr": "quien_vive",
+          "prefer": "Clara",
+          "weight": 2
+        },
+        {
+          "attr": "tasacion_independiente",
+          "prefer": true,
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "owner": "Regla neutral",
+      "hard": [
+        {
+          "attr": "tasacion_independiente",
+          "op": "==",
+          "value": true
+        }
+      ],
+      "utility": []
+    }
+  ]
+}
