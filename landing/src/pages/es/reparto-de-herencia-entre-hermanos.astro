@@ -1,0 +1,472 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const FLOW_URL = "https://github.com/5uper0/parley/blob/main/examples/real_decision.py";
+const CONSENSUS_URL = "https://github.com/5uper0/parley/blob/main/parley/consensus.py";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+const BOE_URL = "https://www.boe.es/buscar/act.php?id=BOE-A-2025-76";
+const MAILTO = "mailto:hello@parleyprotocol.com?subject=Caso%20real%20-%20herencia";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const rules = [
+  ["Un límite es un veto", "Una línea roja es una regla sobre un dato de la opción, por ejemplo efectivo_por_hermano >= 90000. Una opción que cruza la línea roja de cualquiera queda fuera, piensen lo que piensen los demás. Nunca se compensa con una preferencia. La declara cada persona: el motor aplica lo que se escribe y no distingue un límite real de uno táctico."],
+  ["Se eleva al menos contento", "Entre las opciones que nadie ha vetado, las preferencias de cada persona dan una puntuación de 0 a 1. Gana la opción cuya puntuación más baja es la más alta. En caso de empate, gana la de mayor suma. No es una votación ni una suma."],
+  ["Sin opción no hay decisión", "Si todas las opciones cruzan la línea roja de alguien, el resultado es un bloqueo, y así queda escrito en el registro. El motor nunca elige la opción menos mala por encima del límite de alguien."],
+];
+
+const options = [
+  ["vender", "nadie", "100.000", "9", "9", "sí", "sí"],
+  ["ana-compra", "Ana", "100.000", "6", "6", "sí", "sí"],
+  ["ana-compra-rebaja", "Ana", "75.000", "3", "3", "no", "sí"],
+  ["clara-alquila", "Clara", "0", "0", "60", "sí", "no"],
+  ["clara-gratis", "Clara", "0", "0", "60", "no", "no"],
+];
+
+const faqs = [
+  {
+    q: "¿Qué tenemos que preparar para probarlo con mis hermanos?",
+    a: "Tres cosas. Una lista de opciones con números que todos vean igual, en un archivo JSON como el de esta página. Un ordenador con Python 3.10 o superior y una copia del repositorio, que es de código abierto. Y un rato en el que cada hermano pueda escribir sus límites y preferencias sin que los demás miren la pantalla. El guion examples/real_decision.py pasa el teclado de persona en persona, ejecuta el motor y escribe el recibo. Con la opción --manual no hace falta ningún modelo de lenguaje ni conexión.",
+  },
+  {
+    q: "¿Qué ve cada hermano de los demás?",
+    a: "Por cada opción y cada persona, el registro guarda tres cosas: si la acepta o no, una puntuación entre 0 y 1, y la palabra ok o red-line. No guarda la regla que hay detrás. Pero las puntuaciones y los vetos son visibles para todos los que lean el registro. Con cinco opciones, si Clara es la única que acepta las dos opciones en las que ella se queda en la casa, los demás pueden adivinar su regla. SECURITY.md lo reconoce como una limitación conocida.",
+  },
+  {
+    q: "¿Qué pasa si ninguna opción pasa los límites de todos?",
+    a: "El resultado es un bloqueo: el registro guarda todos los veredictos y el bloqueo, y la decisión queda vacía. El motor no elige una opción por encima del límite de nadie para evitar el bloqueo. La salida es cambiar la lista de opciones: añadir una, cambiar los números, o que alguien afloje una regla que puso, y volver a ejecutar.",
+  },
+  {
+    q: "¿Tiene esto que ver con la ley que obliga a negociar antes de ir a juicio?",
+    a: "La Ley Orgánica 1/2025, publicada en el BOE el 3 de enero de 2025 y en vigor desde el 3 de abril de 2025, establece en su artículo 5 que en el orden civil, con carácter general, acudir antes a un medio adecuado de solución de controversias es requisito para que se admita la demanda. Su artículo 3 la aplica a asuntos civiles y mercantiles y excluye las materias laboral, penal y concursal; el artículo 5 añade excepciones como la tutela de derechos fundamentales, la filiación o el juicio cambiario. Esta página no afirma que un registro de Parley sirva para cumplir ese requisito. Si se aplica a su caso y cómo acreditarlo es una pregunta para un abogado.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/#article",
+      headline: "Reparto de una herencia entre hermanos cuando cada uno tiene un límite que no dice",
+      description:
+        "Cómo tres hermanos eligen qué hacer con la casa de los padres cuando cada uno tiene un límite que prefiere no explicar: una línea roja descarta una opción para todos, la regla max-min eleva al menos contento, sin opción válida hay bloqueo, y un registro que cualquiera puede volver a comprobar. Caso ilustrativo ejecutado con el motor de Parley.",
+      url: "https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/",
+      inLanguage: "es",
+      datePublished: "2026-10-16",
+      dateModified: "2026-10-16",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/#faq",
+      inLanguage: "es",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  lang="es"
+  title="Reparto de una herencia entre hermanos cuando cada uno tiene un límite que no dice"
+  description="Tres hermanos y la casa de los padres: vender, que uno la compre, que uno siga viviendo en ella. Cada uno declara sus límites por separado, el motor descarta toda opción que cruce el límite de alguien y elige la que deja mejor al menos contento. Caso ilustrativo calculado con el motor de Parley, con su registro y su hash."
+  path="/es/reparto-de-herencia-entre-hermanos/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Saltar al contenido
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <!-- El problema -->
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guía
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Repartir la casa de los padres entre hermanos, cuando cada uno tiene un límite que no quiere decir en voz alta.
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Tres hermanos heredan una casa. Una quiere quedársela. Otro necesita el dinero
+          pronto. La tercera vive en ella desde hace años. Cada uno tiene una condición que no
+          negocia, y ninguno quiere ser el primero en decirla, porque decirla es perder fuerza.
+          La conversación se atasca ahí. Lo mismo pasa entre copropietarios de un piso o
+          entre socios que se separan. Esta página muestra cómo Parley, una herramienta de
+          código abierto, toma una lista de opciones que todos ven, los límites y
+          preferencias que cada uno declara por separado, y devuelve la opción que no cruza
+          el límite de nadie y deja mejor al que peor queda, con un registro que cualquiera
+          puede volver a comprobar.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          El caso de abajo es ilustrativo. No es una familia real y nadie ha usado Parley
+          todavía para una herencia real. Los números salieron del motor de Parley tal
+          cual, sin retoques, ejecutado sobre el código del{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>repositorio</a>.
+          La misma guía en inglés, con otro caso:{" "}
+          <a href="/fair-group-decision-private-limits/" class={link} hreflang="en">a fair group decision when everyone has private limits</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <!-- Paso 1: opciones -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>1. Las opciones, a la vista de todos</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          La lista de opciones es lo único que todos tienen que ver igual, así que se escribe
+          en un archivo que los tres miran juntos. La casa vale 300.000 € según una tasación
+          independiente; a cada hermano le corresponde un tercio. Cinco opciones sobre la mesa,
+          cada una descrita con los mismos datos:
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="Las cinco opciones del caso, tabla desplazable"
+        >
+          <table class="w-full min-w-[720px] border-collapse text-left">
+            <caption class="sr-only">Las cinco opciones del caso con sus datos</caption>
+            <thead>
+              <tr class="border-b border-hairline">
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">id</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">quien_vive</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">efectivo_por_hermano €</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">meses_hasta_cobrar</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">meses_para_mudarse</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">tasacion_independiente</th>
+                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">condominio_se_disuelve</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                options.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[12px] text-indigo-text">{r[0]}</th>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[1]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[2]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[3]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[4]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[5]}</td>
+                    <td class="px-5 py-3.5 align-top font-mono text-[12.5px] text-muted">{r[6]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
+          <li><code class={code}>vender</code>: se vende en el mercado y se reparte a tercios. Cobran los tres en unos nueve meses.</li>
+          <li><code class={code}>ana-compra</code>: Ana se queda la casa y paga a los otros dos su tercio según la tasación.</li>
+          <li><code class={code}>ana-compra-rebaja</code>: Ana se queda la casa a "precio de familia", un 25 % por debajo, sin tasación, y Clara se muda en tres meses.</li>
+          <li><code class={code}>clara-alquila</code>: Clara sigue en la casa pagando a sus hermanos un alquiler fijado por tasación. Nadie cobra su tercio; la copropiedad se mantiene.</li>
+          <li><code class={code}>clara-gratis</code>: Clara sigue en la casa sin pagar nada y la copropiedad se mantiene.</li>
+        </ul>
+      </section>
+
+      <!-- Paso 2: posiciones -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>2. Cada uno declara sus límites por separado</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Cada persona tiene una hoja privada con dos partes. Las líneas rojas son reglas que
+          una opción tiene que cumplir. Las preferencias tienen un peso, y la puntuación de
+          una opción es la media ponderada de las preferencias que cumple, entre 0 y 1. La
+          hoja no sale de su dueño: el motor solo recibe la respuesta a cada opción.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Hay un cuarto participante, <code class={code}>Regla neutral</code>. No es una
+          persona: es una regla que los tres acordaron antes de empezar, "todo precio sale de
+          una tasación independiente", escrita como una línea roja más. No tiene
+          preferencias, así que puntúa todas las opciones con 0,5. Las cuatro hojas de este
+          caso se escribieron para esta página y por eso se pueden mostrar. En un uso real
+          cada uno ve solo la suya.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Las cuatro hojas del caso, código desplazable"><code>{`Ana (quiere quedarse la casa)
+  línea roja >   condominio_se_disuelve == true
+  prefiere >     quien_vive Ana                       peso 2
+  prefiere >     efectivo_por_hermano más bajo        peso 1   (0 a 100000)
+
+Bruno (necesita el dinero)
+  línea roja >   efectivo_por_hermano >= 90000
+  prefiere >     meses_hasta_cobrar más bajo          peso 1   (0 a 12)
+  prefiere >     efectivo_por_hermano más alto        peso 1   (0 a 100000)
+
+Clara (vive en la casa)
+  línea roja >   meses_para_mudarse >= 6
+  prefiere >     quien_vive Clara                     peso 2
+  prefiere >     tasacion_independiente true          peso 1
+
+Regla neutral
+  línea roja >   tasacion_independiente == true
+  (sin preferencias: puntúa 0,5 siempre)`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Ana no acepta seguir siendo copropietaria sin fecha. Bruno no acepta menos de
+          90.000 €. Clara no acepta tener que mudarse en menos de seis meses. Nada de esto
+          se lo dicen entre ellos. Todo lo demás son preferencias, y una preferencia solo
+          ordena las opciones que han pasado las líneas rojas de todos.
+        </p>
+      </section>
+
+      <!-- Paso 3: el registro y la decisión -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>3. Lo que guarda el registro, y qué gana</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          El motor pregunta a cada hoja por cada opción y guarda solo la respuesta: si la
+          acepta (<code class={code}>acceptable</code>), la puntuación
+          (<code class={code}>score</code>) y la palabra <code class={code}>ok</code> o
+          <code class={code}>red-line</code> (<code class={code}>reason</code>). Estas son
+          las cinco entradas del registro de esta ejecución, con las puntuaciones a cuatro
+          decimales tal como las guarda el motor: 0,3333 es un tercio y 0,6667 son dos
+          tercios.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Las cinco entradas del registro con el veredicto de cada participante, código desplazable"><code>{`vender
+  Ana            acceptable=true   reason="ok"        score=0.0000
+  Bruno          acceptable=true   reason="ok"        score=0.6250
+  Clara          acceptable=true   reason="ok"        score=0.3333
+  Regla neutral  acceptable=true   reason="ok"        score=0.5000
+
+ana-compra
+  Ana            acceptable=true   reason="ok"        score=0.6667
+  Bruno          acceptable=true   reason="ok"        score=0.7500
+  Clara          acceptable=true   reason="ok"        score=0.3333
+  Regla neutral  acceptable=true   reason="ok"        score=0.5000
+
+ana-compra-rebaja
+  Ana            acceptable=true   reason="ok"        score=0.7500
+  Bruno          acceptable=false  reason="red-line"  score=0.7500
+  Clara          acceptable=false  reason="red-line"  score=0.0000
+  Regla neutral  acceptable=false  reason="red-line"  score=0.5000
+
+clara-alquila
+  Ana            acceptable=false  reason="red-line"  score=0.3333
+  Bruno          acceptable=false  reason="red-line"  score=0.5000
+  Clara          acceptable=true   reason="ok"        score=1.0000
+  Regla neutral  acceptable=true   reason="ok"        score=0.5000
+
+clara-gratis
+  Ana            acceptable=false  reason="red-line"  score=0.3333
+  Bruno          acceptable=false  reason="red-line"  score=0.5000
+  Clara          acceptable=true   reason="ok"        score=0.6667
+  Regla neutral  acceptable=false  reason="red-line"  score=0.5000`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Tres opciones quedan fuera. <code class={code}>ana-compra-rebaja</code>, la
+          tentadora, cruza líneas de Bruno, de Clara y de la regla neutral.
+          <code class={code}>clara-alquila</code> cruza líneas de Ana y de Bruno.
+          <code class={code}>clara-gratis</code> cruza líneas de Ana, de Bruno y de la regla.
+          El registro dice <code class={code}>red-line</code> y no dice cuál. Sí muestra
+          quién vetó qué, y las puntuaciones al lado.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Quedan dos. En <code class={code}>vender</code> la puntuación más baja es la de
+          Ana, 0. En <code class={code}>ana-compra</code> la más baja es la de Clara, 0,3333.
+          La opción que deja mejor al menos contento es
+          <code class={code}>ana-compra</code>, y esa es la decisión. Sumando puntuaciones,
+          <code class={code}>clara-alquila</code> habría ganado con 2,3333 frente a 2,25;
+          no gana porque cruza dos líneas rojas, y una línea roja se mira antes que
+          cualquier suma.
+        </p>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          El resultado y el hash del registro, tal como los devolvió el motor:
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Resultado y hash del registro, código desplazable"><code>{`status:   agreed
+decision: {"id": "ana-compra", "quien_vive": "Ana", "efectivo_por_hermano": 100000,
+           "meses_hasta_cobrar": 6, "meses_para_mudarse": 6,
+           "tasacion_independiente": true, "condominio_se_disuelve": true}
+hash:     4645b2af861230708adf05fff11624972e5a6952e4f4367313c12d446ced6364
+
+verify_outcome (recalculado desde los veredictos del registro):  True
+verify_non_betrayal (cada hoja contra la decisión, en su lado):
+  Ana True   Bruno True   Clara True   Regla neutral True`}</code></pre>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          El hash es un SHA-256 sobre el registro en JSON canónico. Si alguien cambia
+          después un veredicto o la decisión, el hash deja de coincidir para cualquiera que
+          guardó el original. <code class={code}>verify_outcome</code> vuelve a calcular la
+          ganadora solo con los veredictos del registro, sin ninguna hoja.
+          <code class={code}>verify_non_betrayal</code> lo ejecuta cada persona en su lado,
+          con su propia hoja, y responde si la decisión respeta sus líneas rojas, sin enseñar
+          la hoja a nadie.
+        </p>
+      </section>
+
+      <!-- Las tres reglas -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Qué significa justo aquí</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Tres reglas, cada una escrita en{" "}
+          <a href={CONSENSUS_URL} target="_blank" rel="noopener" class={link}>parley/consensus.py</a>{" "}
+          y no dejada al criterio de nadie:
+        </p>
+        <div
+          class="mt-5 overflow-x-auto rounded-[14px] border border-hairline bg-surface"
+          tabindex="0"
+          aria-label="Las tres reglas de la selección, tabla desplazable"
+        >
+          <table class="w-full min-w-[560px] border-collapse text-left">
+            <caption class="sr-only">Las tres reglas que el motor aplica a una decisión de grupo</caption>
+            <tbody>
+              {
+                rules.map((r) => (
+                  <tr class="border-b border-hairline last:border-0">
+                    <th scope="row" class="px-5 py-3.5 align-top font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase">
+                      {r[0]}
+                    </th>
+                    <td class="px-5 py-3.5 align-top text-[14px]/[22px] text-ink">{r[1]}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Límites honestos -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Lo que esto no hace</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">Los límites los declara cada uno.</strong> El motor
+              aplica lo que cada persona escribe. No distingue un límite real de uno táctico,
+              y quien exagera una línea roja para empujar el resultado no es detectado.
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>{" "}
+              lo deja como línea de investigación abierta.
+            </li>
+            <li>
+              <strong class="text-ink">Las puntuaciones quedan a la vista.</strong> El
+              registro no guarda ninguna regla, pero sí la puntuación de cada persona para
+              cada opción y quién vetó qué. Con pocas opciones, ese patrón permite adivinar
+              la regla que hay detrás. Lo que queda fuera del registro son las reglas, no el
+              orden de las preferencias.
+            </li>
+            <li>
+              <strong class="text-ink">No es asesoramiento legal.</strong> Parley no sustituye
+              a un notario, a un abogado ni a un contador-partidor. No calcula valoraciones,
+              impuestos ni cuotas: elige entre las opciones que ustedes escriben, con los
+              números que ustedes ponen. Lo que deja es un registro de qué opciones había,
+              qué veredicto dio cada uno y qué aceptó cada uno.
+            </li>
+            <li>
+              <strong class="text-ink">El recibo no lleva firma por defecto.</strong> El hash
+              hace visible un cambio posterior a quien guardó el hash original; no dice quién
+              aceptó. La lista de participantes la escribe el mismo proceso que escribe el
+              registro.
+            </li>
+            <li>
+              <strong class="text-ink">Un teclado es un proceso.</strong> En el flujo de
+              pasar el teclado, las cuatro hojas viven en el mismo programa en la misma
+              máquina. La privacidad es frente a los demás hermanos y frente al registro, no
+              frente a quien maneja esa máquina.
+            </li>
+            <li>
+              <strong class="text-ink">Software en fase alfa.</strong> Versión 0.2, código
+              abierto bajo Apache-2.0. La demo de este sitio está en inglés y reproduce
+              ejecuciones ya calculadas del mismo motor; no ejecuta nada en el navegador.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Preguntas -->
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Preguntas</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+        <p class="mt-4 text-[13px] text-subtle">
+          Texto de la Ley Orgánica 1/2025 en el{" "}
+          <a href={BOE_URL} target="_blank" rel="noopener" class={link}>BOE</a>. El guion del
+          flujo con personas reales:{" "}
+          <a href={FLOW_URL} target="_blank" rel="noopener" class={link}>examples/real_decision.py</a>.
+        </p>
+      </section>
+
+      <!-- Llamada -->
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Pruébelo con su propio caso.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          La demo reproduce ejecuciones ya calculadas de este mismo motor, sin registro. Si
+          tiene un reparto real entre manos, una herencia, un piso en común o una sociedad
+          que se separa, escríbanos y lo preparamos con sus opciones y sus números.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Probar la demo</a>
+          <a href={MAILTO} data-real-case="herencia" class={btnGhost}>
+            Quiero probarlo con mi caso real
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link} hreflang="en">Volver a la página principal (en inglés)</a> &middot;{" "}
+          <a href="/fair-group-decision-private-limits/" class={link} hreflang="en">La guía en inglés, con otro caso</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+
+  <script is:inline>
+    document.addEventListener("click", function (e) {
+      var a = e.target && e.target.closest ? e.target.closest("[data-real-case]") : null;
+      if (a && typeof gtag === "function") gtag("event", "real_case_click");
+    });
+  </script>
+</Layout>

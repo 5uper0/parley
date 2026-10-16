@@ -8,6 +8,7 @@ interface Props {
   description?: string;
   path?: string;
   noindex?: boolean;
+  lang?: string;
 }
 
 const {
@@ -15,13 +16,14 @@ const {
   description = "Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open-source. Red lines enforced in code.",
   path = "/",
   noindex = false,
+  lang = "en",
 } = Astro.props;
 const url = `https://parleyprotocol.com${path}`;
 const ga4 = process.env.PARLEY_GA4_ID || "";
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang={lang} data-theme="dark">
   <head>
     <script is:inline>
       try {
