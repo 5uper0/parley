@@ -8,18 +8,22 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 PAGES_DIR = ROOT / "landing" / "src" / "pages"
-ES_PAGES = sorted((PAGES_DIR / "es").glob("*.astro")) + sorted((PAGES_DIR / "uk").glob("*.astro"))
+ES_PAGES = (
+    sorted((PAGES_DIR / "es").glob("*.astro"))
+    + sorted((PAGES_DIR / "uk").glob("*.astro"))
+    + sorted(PAGES_DIR.glob("spain-*.astro"))
+)
 
 ALLOWED_ARTICLES = {"400", "404", "5.1", "5.2", "5.3"}
 ALLOWED_LAWS = {"1/2025"}
 
 _NUM = r"\d+(?:\.\d+)?"
 _ARTICLE_LIST = re.compile(
-    r"(?<!\w)(?:art[íi]culos?|arts?\.?|стат\w*|ст\.?|арт\w*\.?)\s*(?:№\s*)?"
-    rf"({_NUM}(?:\s*(?:,|y|e|o|і|та|и|–|-|al|a|до)\s*{_NUM})*)",
+    r"(?<!\w)(?:art[íi]culos?|articles?|arts?\.?|стат\w*|ст\.?|арт\w*\.?)\s*(?:№\s*)?"
+    rf"({_NUM}(?:\s*(?:,|y|e|o|і|та|и|and|or|to|–|-|al|a|до)\s*{_NUM})*)",
     re.IGNORECASE,
 )
-_RANGE_SEP = re.compile(r"\s*(?:–|-|al|a|до)\s*", re.IGNORECASE)
+_RANGE_SEP = re.compile(r"\s*(?:–|-|al|a|to|до)\s*", re.IGNORECASE)
 _LAW = re.compile(rf"(?<![\d/])\d{{1,3}}/\d{{4}}\b")
 
 
@@ -59,6 +63,11 @@ def test_extractor_reads_compact_declined_and_range_forms():
     assert cited_articles("статтями 400 і 404, статей 1062") == {"400", "404", "1062"}
     assert cited_articles("artículos 400 al 404") == {"400", "401", "402", "403", "404"}
     assert cited_articles("статті 400–402") == {"400", "401", "402"}
+
+
+def test_extractor_reads_english_forms():
+    assert cited_articles("article 400 and article 1062, articles 5.2 and 5.3") == {"400", "1062", "5.2", "5.3"}
+    assert cited_articles("articles 400 to 402") == {"400", "401", "402"}
 
 
 def test_law_extractor_ignores_dates():

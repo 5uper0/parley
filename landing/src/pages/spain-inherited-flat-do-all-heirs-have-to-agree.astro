@@ -1,0 +1,224 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const GUIDE_URL = "/es/reparto-de-herencia-entre-hermanos/";
+const ES_ANSWER_URL = "/es/unanimidad-vender-piso-heredado/";
+const UK_ANSWER_URL = "/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/";
+const BOE_URL = "https://www.boe.es/buscar/act.php?id=BOE-A-2025-76";
+const MAILTO = "mailto:hello@parleyprotocol.com?subject=Real%20case%20-%20inheritance";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+const card = "rounded-[14px] border border-hairline bg-surface";
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const faqs = [
+  {
+    q: "Can one sibling force the others to sell?",
+    a: "Article 400 of the Spanish Civil Code says no co-owner is obliged to stay in the co-ownership and anyone can ask for the common thing to be divided at any time. If the flat cannot be divided, article 404 then applies: it is awarded to one of the co-owners who compensates the rest, if they agree, and otherwise it is sold and the price is divided. How this works in practice and how long it takes is a question for a lawyer.",
+  },
+  {
+    q: "What if one of the heirs lives in the flat?",
+    a: "How that affects your case is a question for a lawyer. This page does not answer it.",
+  },
+  {
+    q: "Do we have to try to settle before going to court?",
+    a: "Organic Law 1/2025, published in the BOE on 3 January 2025 and in force since 3 April 2025, requires in article 5.1, as a general rule, an attempt at an adequate means of dispute resolution before a civil claim can be filed. Articles 5.2 and 5.3 list exceptions. Whether this applies to your case and how to evidence the attempt is a question for a lawyer.",
+  },
+  {
+    q: "Does Parley satisfy that requirement?",
+    a: "This page does not claim that a Parley record satisfies article 5.1 of Organic Law 1/2025. Parley is an open-source tool that helps choose among options you write down and leaves a record that can be recomputed. Nobody has used it on a real inheritance yet.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/#article",
+      headline: "Do all heirs have to agree to sell an inherited flat in Spain?",
+      description:
+        "What articles 400 and 404 of the Spanish Civil Code say about leaving a co-owned inherited flat, and what Organic Law 1/2025 requires before suing. General information, not legal advice.",
+      url: "https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/",
+      inLanguage: "en",
+      datePublished: "2026-10-19",
+      dateModified: "2026-10-19",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/#faq",
+      inLanguage: "en",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+<Layout
+  lang="en"
+  title="Do all heirs have to agree to sell an inherited flat in Spain?"
+  description="Three siblings inherit a flat in Spain: one wants to sell, one refuses. What articles 400 and 404 of the Spanish Civil Code say and what Organic Law 1/2025 requires before suing. General information, not legal advice."
+  path="/spain-inherited-flat-do-all-heirs-have-to-agree/"
+  alternates={[
+    { lang: "en", path: "/spain-inherited-flat-do-all-heirs-have-to-agree/" },
+    { lang: "es", path: "/es/unanimidad-vender-piso-heredado/" },
+    { lang: "uk", path: "/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/" },
+  ]}
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Guide
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Do all heirs have to agree to sell an inherited flat in Spain?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Three siblings inherit a flat in Spain. One wants to sell, one refuses and the third
+          is stuck in the middle. The question that comes up first is whether everyone has to
+          agree. This page summarises what two articles of the Spanish Civil Code and a 2025 law
+          say about it. It is general information, not legal advice: for your own case, talk to a
+          lawyer in Spain.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The short answer</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <p class="max-w-[62ch] text-[15px]/[25px] text-ink">
+            Under article 400 of the Spanish Civil Code, no co-owner is obliged to stay in the
+            co-ownership, and anyone can ask for the common thing to be divided at any time.
+            Selling by agreement is a different matter. If there is no agreement, what the law
+            provides for a flat is article 404, below. This page covers only these articles; how
+            they apply to an estate that has not yet been divided is a question for a lawyer.
+          </p>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What happens if the flat cannot be divided</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          A flat cannot be cut into three. Article 404 covers this case: if the thing is
+          essentially indivisible and the co-owners do not agree to award it to one of them, who
+          compensates the others, it is sold and the price is divided.
+        </p>
+        <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
+          <li><strong class="text-ink">One keeps the flat.</strong> If they agree, it is awarded to one who compensates the rest.</li>
+          <li><strong class="text-ink">The flat is sold.</strong> If there is no agreement on the above, it is sold and the price is divided.</li>
+        </ul>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Before going to court</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Organic Law 1/2025, in force since 3 April 2025, requires in article 5.1, as a general
+          rule, an attempt at an adequate means of dispute resolution before a civil claim can be
+          filed. Articles 5.2 and 5.3 list exceptions. What counts as a sufficient attempt in your
+          case is for a lawyer to say, not this page. Text in the{" "}
+          <a href={BOE_URL} target="_blank" rel="noopener" class={link}>BOE</a> (in Spanish).
+        </p>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What you can do before it gets there</h2>
+        <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
+          <li><strong class="text-ink">Put the price in writing.</strong> An independent valuation removes one argument.</li>
+          <li><strong class="text-ink">Write down the options.</strong> Sell, one buys out the others, one keeps living in the flat: each with its numbers, visible to everyone.</li>
+          <li><strong class="text-ink">Leave a trail.</strong> An email with the proposals and the replies records what was discussed.</li>
+        </ul>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          If each sibling has a limit they would rather not say out loud, there is a way to
+          choose without anyone revealing it, with a record that anyone holding the file can
+          recompute. It is explained with an illustrative case, in Spanish, in{" "}
+          <a href={GUIDE_URL} class={link} hreflang="es" lang="es">Repartir la casa de los padres entre hermanos</a>.
+          The same answer in other languages:{" "}
+          <a href={ES_ANSWER_URL} class={link} hreflang="es" lang="es">Español</a>,{" "}
+          <a href={UK_ANSWER_URL} class={link} hreflang="uk" lang="uk">Українська</a>.
+        </p>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Try it on your own case.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo replays runs already computed by the Parley engine, with no sign-up. If you
+          have a real split on your hands, write to us without names or documents and we will
+          see whether your case fits.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} data-demo="herencia" class={btnPrimary}>Try the demo</a>
+          <a href={MAILTO} data-real-case="herencia" class={btnGhost}>
+            I want to try it on my real case
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the home page</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+
+  <script is:inline>
+    document.addEventListener("click", function (e) {
+      var t = e.target && e.target.closest ? e.target : null;
+      if (!t || typeof gtag !== "function") return;
+      if (t.closest("[data-real-case]")) gtag("event", "real_case_click");
+      else if (t.closest("[data-demo]")) gtag("event", "demo_click");
+    });
+  </script>
+</Layout>
