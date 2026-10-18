@@ -1,4 +1,4 @@
-"""The Spanish pages may cite only the legal provisions that were checked against the BOE.
+"""The Spanish and Ukrainian pages about Spanish law may cite only the legal provisions that were checked against the BOE.
 
 A prose rule ("only cite verified law") did not stop overclaims on earlier pages; this makes the
 list mechanical. Adding a new provision means verifying it first, then extending ALLOWED_*.
@@ -7,13 +7,14 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ES_PAGES = sorted((ROOT / "landing" / "src" / "pages" / "es").glob("*.astro"))
+PAGES_DIR = ROOT / "landing" / "src" / "pages"
+ES_PAGES = sorted((PAGES_DIR / "es").glob("*.astro")) + sorted((PAGES_DIR / "uk").glob("*.astro"))
 
 ALLOWED_ARTICLES = {"400", "404", "5.1", "5.2", "5.3"}
 ALLOWED_LAWS = {"1/2025"}
 
 _ARTICLE_LIST = re.compile(
-    r"\b(?:art[íi]culos?|arts?\.)\s+(\d+(?:\.\d+)?(?:\s*(?:,|y|e|o)\s*\d+(?:\.\d+)?)*)",
+    r"(?<!\w)(?:art[íi]culos?|arts?\.|стат(?:тя|ті|тю|тею)|ст\.)\s+(\d+(?:\.\d+)?(?:\s*(?:,|y|e|o|і|та)\s*\d+(?:\.\d+)?)*)",
     re.IGNORECASE,
 )
 _LAW = re.compile(r"\b\d{1,3}/\d{4}\b")
@@ -40,8 +41,14 @@ def test_extractor_reads_article_lists():
     assert cited_articles("Los artículos 5.2 y 5.3 enumeran excepciones") == {"5.2", "5.3"}
 
 
+def test_extractor_reads_ukrainian_citations():
+    text = "Згідно зі статтею 400 і статтею 1062, статті 5.2 і 5.3, закон 5/2012."
+    assert cited_articles(text) == {"400", "1062", "5.2", "5.3"}
+    assert cited_laws(text) == {"5/2012"}
+
+
 def test_spanish_pages_exist():
-    assert ES_PAGES, "no Spanish pages found under landing/src/pages/es"
+    assert ES_PAGES, "no Spanish or Ukrainian pages found under landing/src/pages"
 
 
 def test_spanish_pages_cite_only_verified_provisions():

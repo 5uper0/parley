@@ -1,0 +1,216 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const GUIDE_URL = "/es/reparto-de-herencia-entre-hermanos/";
+const ES_ANSWER_URL = "/es/unanimidad-vender-piso-heredado/";
+const BOE_URL = "https://www.boe.es/buscar/act.php?id=BOE-A-2025-76";
+const MAILTO = "mailto:hello@parleyprotocol.com?subject=Real%20case%20-%20inheritance";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+const card = "rounded-[14px] border border-hairline bg-surface";
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const faqs = [
+  {
+    q: "Чи може один із братів чи сестер змусити решту продавати?",
+    a: "Стаття 400 Цивільного кодексу Іспанії каже, що жоден співвласник не зобов'язаний залишатися у спільній власності, і кожен може вимагати поділу спільної речі. Що відбувається далі, якщо квартиру не можна поділити, визначає стаття 404: її присуджують одному зі співвласників, який відшкодовує решті, або продають, а гроші ділять. Як це відбувається на практиці і скільки триває, треба питати в юриста.",
+  },
+  {
+    q: "А якщо один зі спадкоємців живе у квартирі?",
+    a: "Як це впливає на ваш випадок, треба питати в юриста. Ця сторінка на це питання не відповідає.",
+  },
+  {
+    q: "Чи треба спробувати домовитися, перш ніж іти до суду?",
+    a: "Органічний закон 1/2025, опублікований у BOE 3 січня 2025 року і чинний з 3 квітня 2025 року, у статті 5.1 вимагає, як правило, спершу спробувати відповідний позасудовий спосіб вирішення спору, щоб подати цивільний позов. Статті 5.2 і 5.3 перелічують винятки. Чи застосовується це до вашого випадку і як підтвердити спробу, треба питати в юриста.",
+  },
+  {
+    q: "Чи підходить Parley, щоб виконати цю вимогу?",
+    a: "Ця сторінка не стверджує, що запис Parley виконує вимогу статті 5.1 органічного закону 1/2025. Parley є інструментом з відкритим кодом, який допомагає обрати між варіантами, які ви самі записуєте, і залишає запис, який можна перерахувати. Для реальної спадщини ним поки ніхто не користувався.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Article",
+      "@id": "https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/#article",
+      headline: "Чи потрібна згода всіх спадкоємців, щоб продати успадковану квартиру в Іспанії?",
+      description:
+        "Що кажуть статті 400 і 404 Цивільного кодексу Іспанії про вихід зі спільної власності на успадковану квартиру і що вимагає органічний закон 1/2025 перед позовом. Загальна інформація, не юридична консультація.",
+      url: "https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/",
+      inLanguage: "uk",
+      datePublished: "2026-10-18",
+      dateModified: "2026-10-18",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/#faq",
+      inLanguage: "uk",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+<Layout
+  lang="uk"
+  title="Чи потрібна згода всіх спадкоємців, щоб продати успадковану квартиру в Іспанії?"
+  description="Троє братів і сестер успадкували квартиру в Іспанії: один хоче продати, інший відмовляється. Що кажуть статті 400 і 404 Цивільного кодексу Іспанії і що вимагає органічний закон 1/2025 перед позовом. Загальна інформація, не юридична консультація."
+  path="/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Перейти до змісту
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <p class="mb-6 flex items-center gap-2.5 font-mono text-xs tracking-[1.4px] whitespace-nowrap text-muted uppercase">
+          Гайд
+          <span class="h-px min-w-6 flex-1 bg-hairline" aria-hidden="true"></span>
+        </p>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Чи потрібна згода всіх спадкоємців, щоб продати успадковану квартиру в Іспанії?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Троє братів і сестер успадкували квартиру в Іспанії. Один хоче продати, інший
+          відмовляється, третій десь посередині. Найчастіше питають, чи потрібна одностайність.
+          Ця сторінка коротко переказує, що про це кажуть дві статті Цивільного кодексу Іспанії
+          та закон 2025 року. Це загальна інформація, а не юридична консультація: щодо вашого
+          випадку звертайтеся до юриста в Іспанії.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Коротка відповідь</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <p class="max-w-[62ch] text-[15px]/[25px] text-ink">
+            Згідно зі статтею 400 Цивільного кодексу Іспанії, жоден співвласник не зобов'язаний
+            залишатися у спільній власності, і кожен може вимагати поділу спільної речі в будь-який
+            момент. Продаж за спільною згодою — це інше. Якщо згоди немає, для квартири закон
+            передбачає статтю 404, нижче. Ця сторінка стосується лише цих статей; як вони
+            застосовуються до спадщини, яку ще не поділили, треба питати в юриста.
+          </p>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Що, якщо квартиру не можна поділити</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Квартиру не розріжеш на трьох. Стаття 404 передбачає цей випадок: якщо річ по суті
+          неподільна і співвласники не погодилися присудити її одному з них, який відшкодує
+          решті, її продають, а виручку ділять.
+        </p>
+        <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
+          <li><strong class="text-ink">Один залишає квартиру собі.</strong> Якщо вони домовилися, її присуджують тому, хто відшкодовує решті.</li>
+          <li><strong class="text-ink">Квартиру продають.</strong> Якщо про попереднє немає згоди, її продають, а виручку ділять.</li>
+        </ul>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Перед судом</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Органічний закон 1/2025, чинний з 3 квітня 2025 року, у статті 5.1 вимагає, як правило,
+          спершу спробувати відповідний позасудовий спосіб вирішення спору, щоб подати цивільний
+          позов. Статті 5.2 і 5.3 перелічують винятки. Що вважається достатньою спробою у вашому
+          випадку, вирішує юрист, а не ця сторінка. Текст у{" "}
+          <a href={BOE_URL} target="_blank" rel="noopener" class={link}>BOE</a>.
+        </p>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Що можна зробити до цього</h2>
+        <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
+          <li><strong class="text-ink">Записати ціну.</strong> Незалежна оцінка знімає одну суперечку.</li>
+          <li><strong class="text-ink">Записати варіанти.</strong> Продати, щоб хтось викупив частки решти, щоб хтось далі жив у квартирі: кожен зі своїми цифрами, на виду в усіх.</li>
+          <li><strong class="text-ink">Залишити слід.</strong> Лист із пропозиціями і відповідями фіксує, про що домовлялися.</li>
+        </ul>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Якщо в кожного з вас є межа, яку не хочеться озвучувати, є спосіб обрати варіант так,
+          щоб ніхто її не розкривав, а запис міг перерахувати кожен, у кого є файл. Це пояснено
+          на ілюстративному прикладі іспанською:{" "}
+          <a href={GUIDE_URL} class={link} hreflang="es">Repartir la casa de los padres entre hermanos</a>.
+          Та сама відповідь іспанською:{" "}
+          <a href={ES_ANSWER_URL} class={link} hreflang="es">¿Hace falta unanimidad entre los herederos?</a>
+        </p>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Питання</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Спробуйте на власному випадку.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          Демо відтворює вже пораховані запуски рушія Parley, без реєстрації. Якщо у вас є
+          реальний поділ, напишіть нам без імен і документів, і ми подивимося, чи він підходить.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} data-demo="herencia" class={btnPrimary}>Спробувати демо</a>
+          <a href={MAILTO} data-real-case="herencia" class={btnGhost}>
+            Хочу спробувати на своєму випадку
+            <span
+              class="inline-block transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[3px]"
+              aria-hidden="true">&rarr;</span
+            >
+          </a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link} hreflang="en">Головна сторінка (англійською)</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+
+  <script is:inline>
+    document.addEventListener("click", function (e) {
+      var t = e.target && e.target.closest ? e.target : null;
+      if (!t || typeof gtag !== "function") return;
+      if (t.closest("[data-real-case]")) gtag("event", "real_case_click");
+      else if (t.closest("[data-demo]")) gtag("event", "demo_click");
+    });
+  </script>
+</Layout>
