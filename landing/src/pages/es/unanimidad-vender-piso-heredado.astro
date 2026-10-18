@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: "¿Y si uno de los herederos vive en el piso?",
-    a: "Los artículos 400 y 404 no distinguen entre el copropietario que vive en el piso y el que no. Lo que cuesta, en tiempo y dinero, vivir ahí o salir de ahí, y si hay que compensar algo, no lo contestan estos dos artículos. Eso se consulta con un abogado.",
+    a: "Cómo afecta a su caso que uno de los herederos viva en el piso es una pregunta para un abogado; esta página no la resuelve.",
   },
   {
     q: "¿Hay que intentar un acuerdo antes de demandar?",
@@ -71,7 +71,7 @@ const jsonLd = JSON.stringify({
 <Layout
   lang="es"
   title="¿Hace falta unanimidad entre los herederos para vender un piso heredado?"
-  description="Dos hermanos quieren vender el piso heredado y uno se niega. Qué dicen los artículos 400 y 404 del Código Civil y qué exige la LO 1/2025 antes de demandar. Información general, no asesoramiento legal."
+  description="Tres hermanos heredan un piso: uno quiere vender y otro se niega. Qué dicen los artículos 400 y 404 del Código Civil y qué exige la LO 1/2025 antes de demandar. Información general, no asesoramiento legal."
   path="/es/unanimidad-vender-piso-heredado/"
 >
   <script type="application/ld+json" is:inline set:html={jsonLd} />
@@ -99,7 +99,7 @@ const jsonLd = JSON.stringify({
         </h1>
         <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
           Tres hermanos heredan un piso. Uno quiere vender, otro se niega y el tercero está en
-          medio. La pregunta que más se repite es si hace falta unanimidad. Esta página resume lo que
+          medio. La pregunta es si hace falta unanimidad. Esta página resume lo que
           dicen sobre eso dos artículos del Código Civil y una ley de 2025. Es información general,
           no asesoramiento legal: para su caso concreto, consulte a un abogado.
         </p>
@@ -110,9 +110,12 @@ const jsonLd = JSON.stringify({
         <h2 class={sectionLabel}>La respuesta corta</h2>
         <div class={`${card} mt-5 px-5 py-[18px]`}>
           <p class="max-w-[62ch] text-[15px]/[25px] text-ink">
-            Para salir de la copropiedad, el Código Civil no exige que los demás estén de acuerdo.
-            Según el artículo 400, ningún copropietario está obligado a permanecer en la
-            comunidad, y cualquiera puede pedir la división de la cosa común en cualquier momento.
+            Según el artículo 400 del Código Civil, ningún copropietario está obligado a
+            permanecer en la comunidad, y cualquiera puede pedir la división de la cosa común en
+            cualquier momento. Vender de común acuerdo es otra cosa. Si no hay acuerdo, lo que
+            prevé la ley para un piso es el artículo 404, abajo. Esta página trata solo de estos
+            artículos; cómo se aplican a una herencia que aún no se ha repartido es una pregunta
+            para un abogado.
           </p>
         </div>
       </section>
@@ -135,7 +138,7 @@ const jsonLd = JSON.stringify({
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           La Ley Orgánica 1/2025, en vigor desde el 3 de abril de 2025, exige en su artículo 5.1,
           con carácter general, intentar antes un medio adecuado de solución de controversias
-          (por ejemplo una mediación o una negociación entre abogados) para poder presentar una
+          para poder presentar una
           demanda civil. Los artículos 5.2 y 5.3 enumeran excepciones. Qué cuenta como intento
           suficiente en su caso lo decide un abogado, no esta página. Texto en el{" "}
           <a href={BOE_URL} target="_blank" rel="noopener" class={link}>BOE</a>.
@@ -147,11 +150,11 @@ const jsonLd = JSON.stringify({
         <ul class="mt-4 flex max-w-[62ch] flex-col gap-2 text-[15px]/[25px] text-muted">
           <li><strong class="text-ink">Poner el precio por escrito.</strong> Una tasación independiente quita una discusión.</li>
           <li><strong class="text-ink">Escribir las opciones.</strong> Vender, que uno compre la parte de los demás, que uno siga viviendo en el piso: cada una con sus números, a la vista de todos.</li>
-          <li><strong class="text-ink">Dejar constancia del intento.</strong> Un correo con las propuestas y las respuestas ya es un registro.</li>
+          <li><strong class="text-ink">Dejar constancia.</strong> Un correo con las propuestas y las respuestas deja constancia de lo hablado.</li>
         </ul>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Si cada hermano tiene un límite que no quiere decir en voz alta, hay una forma de
-          elegir sin que nadie lo revele y con un registro que cualquiera puede recalcular.
+          elegir sin que nadie lo revele y con un registro que puede recalcular quien tenga el archivo.
           Está explicada con un caso ilustrativo en{" "}
           <a href={GUIDE_URL} class={link}>Repartir la casa de los padres entre hermanos</a>.
         </p>
