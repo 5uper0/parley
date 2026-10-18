@@ -46,6 +46,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://parleyprotocol.com/es/unanimidad-vender-piso-heredado/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://parleyprotocol.com/privacy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.2</priority>
