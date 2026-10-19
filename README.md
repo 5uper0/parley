@@ -14,7 +14,7 @@ masked verdicts, and a verifiable non-betrayal transcript.
 ![core](https://img.shields.io/badge/core-zero--dependency-informational.svg)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[Try it live](https://parleyprotocol.com/demo/)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [Español: herencia entre hermanos](https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/)
+**[Try it live](https://parleyprotocol.com/demo/)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [Español: herencia entre hermanos](https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/) · [Español: ¿unanimidad para vender?](https://parleyprotocol.com/es/unanimidad-vender-piso-heredado/) · [English: do all heirs have to agree to sell a flat in Spain?](https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/) · [Ukrainian](https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/)
 
 <br>
 
