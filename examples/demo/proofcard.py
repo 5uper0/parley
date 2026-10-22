@@ -56,23 +56,24 @@ def _blocked_and_decision(data):
 def card_html(data: dict) -> str:
     """The card fragment (a single <div class="card">), reusable in a page or gallery."""
     blocked, decision = _blocked_and_decision(data)
-    parties = " · ".join(p["owner"] for p in data["parties"])
+    e = html.escape
+    parties = " · ".join(e(p["owner"]) for p in data["parties"])
     short_hash = data["hash"][:12] + "…"
-    dec_label = decision.get("label", decision.get("id")) if decision else "HONEST DEADLOCK"
+    dec_label = e(str(decision.get("label", decision.get("id")))) if decision else "HONEST DEADLOCK"
     block_html = ""
     if blocked:
         rev = blocked.get("revenue")
         rev_txt = f" (revenue {rev})" if rev is not None else ""
         block_html = (
             f'<div class="row block"><span class="mark">✕</span><div>'
-            f'<b>One agent pushed "{blocked.get("label", blocked.get("id"))}"{rev_txt}</b><br>'
+            f'<b>One agent pushed "{e(str(blocked.get("label", blocked.get("id"))))}"{rev_txt}</b><br>'
             f'<span class="sub">BLOCKED by a red line — rejected in code, not negotiated away.</span></div></div>')
     verified = all(data["non_betrayal"].values())
     ok_txt = "✓ verified · tamper-evident · every red line held" if verified else "unverified"
     return f"""<div class="card">
   <div class="top"><span class="logo">parley<span class="d">.</span></span><span class="hook">AI that can't lie — and you can check</span></div>
   <hr class="rule">
-  <div class="scn">{data["title"]}</div>
+  <div class="scn">{e(data["title"])}</div>
   <div class="parties">{len(data["parties"])} rival parties: {parties} — each with private red lines</div>
   {block_html}
   <div class="row ok"><span class="mark">✓</span><div>
@@ -127,6 +128,48 @@ def build_card(data: dict, path: str = None) -> str:
     return (f'<!doctype html><html lang="en"><head>\n{_head_meta(data, path)}\n{_FONTS}'
             f'<style>{STYLE}\nbody{{background:#e7e9f0;padding:28px;display:flex;justify-content:center}}</style>'
             f'</head><body>{card_html(data)}</body></html>')
+
+
+def replay_html(data: dict, path: str, recipe: str) -> str:
+    """The stable, no-signup replay page: the card, the per-option verdicts, the full hash and the
+    command to reproduce it. Same engine output as the card; nothing is typed in by hand."""
+    rows = []
+    for e in data["entries"]:
+        opt = e["option"]
+        label = html.escape(str(opt.get("label", opt.get("id"))))
+        cells = "".join(
+            f'<td class="{"y" if v["acceptable"] else "n"}">'
+            f'{"acceptable, score " + str(v["score"]) if v["acceptable"] else "red line"}</td>'
+            for v in e["verdicts"])
+        rows.append(f"<tr><th>{label}</th>{cells}</tr>")
+    heads = "".join(f'<th>{html.escape(p["owner"])}</th>' for p in data["parties"])
+    style = (STYLE + "\nbody{background:#e7e9f0;padding:28px;font-family:var(--sans);color:var(--n900)}"
+             ".wrap{max-width:680px;margin:0 auto}.wrap h2{font-size:16px;margin:26px 0 8px}"
+             ".wrap p,.wrap li{font-size:14px;color:var(--n600);line-height:1.5}"
+             ".wrap table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--n0)}"
+             ".wrap td,.wrap th{border:1px solid var(--n200);padding:7px 9px;text-align:left}"
+             ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
+             ".wrap pre{background:var(--n900);color:#fff;padding:12px 14px;border-radius:8px;"
+             "overflow-x:auto;font-size:12.5px}.wrap code.h{word-break:break-all;font-family:var(--mono)}")
+    return (f'<!doctype html><html lang="en"><head>\n{_head_meta(data, path)}\n{_FONTS}'
+            f'<style>{style}</style></head><body><div class="wrap">'
+            f'{card_html(data)}'
+            f'<h2>What each agent said</h2>'
+            f'<table><tr><th>Option</th>{heads}</tr>{"".join(rows)}</table>'
+            f'<p>Only these masked verdicts leave an agent. The coordinator never sees a preference sheet '
+            f'or which red line fired.</p>'
+            f'<h2>Receipt</h2><p>Full SHA-256 of the canonical transcript:</p>'
+            f'<p><code class="h">{data["hash"]}</code></p>'
+            f'<p>This receipt shows the record was not altered. It does not prove who produced a verdict '
+            f'unless signing is on.</p>'
+            f'<h2>Run it yourself</h2><pre>git clone https://github.com/5uper0/parley\n'
+            f'cd parley &amp;&amp; pip install -e .\n'
+            f'python examples/demo/proofcard.py examples/demo/{recipe} card.html</pre>'
+            f'<p>The first 12 characters of the hash on your card match the one above. The recipe is '
+            f'invented for this demo: no real person, case or data. '
+            f'<a href="https://github.com/5uper0/parley">Source</a> · '
+            f'<a href="/demo/">Interactive demo</a></p>'
+            f'</div></body></html>')
 
 
 def main():
