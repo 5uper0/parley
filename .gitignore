@@ -11,3 +11,4 @@ __pycache__/
 
 # Codex agent mirrors (local tooling; the source of truth is .claude/)
 .agents/
+dist/
