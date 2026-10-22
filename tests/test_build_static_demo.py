@@ -82,3 +82,33 @@ def test_card_escapes_recipe_text():
     data = run_recipe(os.path.join(_ROOT, "examples", "demo", "recipe_committee.json"))
     data["title"] = "<script>x</script>"
     assert "<script>" not in card_html(data)
+
+
+def test_static_build_emits_spanish_heirs_replay_page(tmp_path):
+    """Public Spanish page: invented case, the legal line, no citation outside the verified set,
+    nothing collected, no private limit text."""
+    import re
+    build = _load_build_module()
+    out = tmp_path / "static-demo"
+    build.OUT = out
+    build.main()
+    page = (out / "replay" / "herencia-hermanos" / "index.html").read_text(encoding="utf-8")
+    from examples.demo.server import run_recipe
+    from tests.test_es_legal_claims import ALLOWED_ARTICLES, ALLOWED_LAWS, cited_articles, cited_laws
+    data = run_recipe(os.path.join(_ROOT, "examples", "demo", "recipe_herencia_hermanos.json"))
+    assert '<html lang="es">' in page
+    assert data["hash"] in page
+    assert data["status"] == "agreed"
+    assert "No es asesoramiento jurídico" in page
+    assert "inventado" in page
+    text = re.sub(r"<[^>]+>", " ", page)
+    assert cited_articles(text) <= ALLOWED_ARTICLES
+    assert cited_laws(text) <= ALLOWED_LAWS
+    assert "<form" not in page and "<input" not in page
+    assert not re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", page)
+    for party in data["parties"]:
+        for redline in party["redlines"]:
+            assert redline not in page
+    recipe = open(os.path.join(_ROOT, "examples", "demo", "recipe_herencia_hermanos.json"),
+                  encoding="utf-8").read()
+    assert '"url"' not in recipe and '"source"' not in recipe
