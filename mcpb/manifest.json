@@ -4,25 +4,62 @@
   "display_name": "Parley",
   "version": "0.2.0",
   "description": "Multi-party decisions for agents: red lines rejected in code, max-min pick, SHA-256 receipt.",
-  "long_description": "Give the options and each party's red lines and soft preferences. An option that crosses any red line is rejected in code; among the options acceptable to everyone the max-min rule picks the one whose least-satisfied party is best off. No acceptable option gives an honest deadlock. The receipt is an unsigned SHA-256 over the transcript: it shows the record was not altered, not who produced a verdict. In this mode the host holds every party's spec, so there is no privacy between parties.",
-  "author": {"name": "Parley", "url": "https://parleyprotocol.com"},
-  "repository": {"type": "git", "url": "https://github.com/5uper0/parley.git"},
+  "long_description": "Give the options and each party's red lines and soft preferences. An option that crosses any red line is rejected in code; among the options acceptable to everyone the max-min rule picks the one whose least-satisfied party is best off. No acceptable option gives an honest deadlock. The receipt is an unsigned SHA-256 over the transcript: it shows the record was not altered, not who produced a verdict, and it is only meaningful if the hash is kept somewhere other than the transcript. In this mode the host holds every party's spec, so there is no privacy between parties.",
+  "author": {
+    "name": "Parley",
+    "url": "https://parleyprotocol.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/5uper0/parley.git"
+  },
   "homepage": "https://parleyprotocol.com",
   "support": "https://github.com/5uper0/parley/issues",
   "license": "Apache-2.0",
-  "keywords": ["consensus", "agents", "multi-party", "red-lines", "audit"],
+  "keywords": [
+    "consensus",
+    "agents",
+    "multi-party",
+    "red-lines",
+    "audit"
+  ],
   "server": {
     "type": "python",
     "entry_point": "server/main.py",
     "mcp_config": {
       "command": "python3",
-      "args": ["${__dirname}/server/main.py"]
+      "args": [
+        "${__dirname}/server/main.py"
+      ],
+      "platform_overrides": {
+        "win32": {
+          "command": "python"
+        }
+      }
     }
   },
   "tools": [
-    {"name": "parley_decide", "description": "Reach a decision among parties with conflicting interests; red lines are checked in code."},
-    {"name": "parley_verify_receipt", "description": "Check a transcript against its SHA-256 receipt."},
-    {"name": "parley_check_party", "description": "Replay one party's own sheet against a transcript to check none of its red lines was crossed."}
+    {
+      "name": "parley_decide",
+      "description": "Reach a decision among parties with conflicting interests; red lines are checked in code."
+    },
+    {
+      "name": "parley_verify_receipt",
+      "description": "Check a transcript against its SHA-256 receipt."
+    },
+    {
+      "name": "parley_check_party",
+      "description": "Replay one party's own sheet against a transcript to check none of its red lines was crossed."
+    }
   ],
-  "compatibility": {"platforms": ["darwin", "win32", "linux"], "runtimes": {"python": ">=3.10"}}
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
 }

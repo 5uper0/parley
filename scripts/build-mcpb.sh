@@ -10,6 +10,7 @@ mkdir "$stage/server"
 cp mcpb/server/main.py "$stage/server/"
 cp -R parley "$stage/server/parley"
 find "$stage" -name __pycache__ -type d -prune -exec rm -rf {} +
+find "$stage" -name .DS_Store -delete
 mkdir -p dist
 npx --yes @anthropic-ai/mcpb@2.1.2 validate "$stage/manifest.json"
 npx --yes @anthropic-ai/mcpb@2.1.2 pack "$stage" dist/parley.mcpb

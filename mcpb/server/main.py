@@ -6,7 +6,7 @@ import sys
 here = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(here))
 
-from parley import mcp  # noqa: E402
+from parley import mcp
 
 # The bundle is not pip-installed, so importlib.metadata cannot find the version.
 _version = json.loads((here.parent / "manifest.json").read_text(encoding="utf-8"))["version"]
