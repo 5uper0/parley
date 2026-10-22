@@ -50,3 +50,22 @@ def test_static_build_emits_manifest_with_root_absolute_paths(tmp_path):
     assert '"/icon-192.png"' in manifest
     index = (out / "index.html").read_text(encoding="utf-8")
     assert 'href="/manifest.json"' in index
+
+
+def test_static_build_emits_committee_replay_page(tmp_path):
+    """The replay page is the stable URL posts and catalog listings link: a finished synthetic
+    run with the full transcript hash, no form, no signup, and the command to rerun it."""
+    build = _load_build_module()
+    out = tmp_path / "static-demo"
+    build.OUT = out
+    build.main()
+    page = (out / "replay" / "committee" / "index.html").read_text(encoding="utf-8")
+    from examples.demo.server import run_recipe
+    data = run_recipe(os.path.join(_ROOT, "examples", "demo", "recipe_committee.json"))
+    assert data["hash"] in page
+    assert "https://parleyprotocol.com/demo/replay/committee/" in page
+    assert "recipe_committee.json" in page
+    assert "pip install parley-consensus" in page
+    assert "<form" not in page and "<input" not in page
+    import re
+    assert not re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", page)
