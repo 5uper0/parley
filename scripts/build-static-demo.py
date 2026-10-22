@@ -101,6 +101,11 @@ def main():
     (out / "replay" / "committee" / "index.html").write_text(
         replay_html(run_recipe(str(Path(HERE, "recipe_committee.json"))), replay_path, "recipe_committee.json"),
         encoding="utf-8")
+    (out / "replay" / "herencia-hermanos").mkdir(parents=True, exist_ok=True)
+    (out / "replay" / "herencia-hermanos" / "index.html").write_text(
+        replay_html(run_recipe(str(Path(HERE, "recipe_herencia_hermanos.json"))),
+                    "/demo/replay/herencia-hermanos/", "recipe_herencia_hermanos.json", "es"),
+        encoding="utf-8")
 
     for src, name in STATIC_COPIES.items():
         if src.exists():

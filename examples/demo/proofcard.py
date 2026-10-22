@@ -46,17 +46,75 @@ _FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
           'family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">')
 
 
+_ES = {
+    "hook": "Decisiones entre partes con límites privados; cada parte puede comprobar que se respetó el suyo",
+    "blocked": "BLOQUEADA por un límite privado: se rechaza en el código, no se negocia.",
+    "pushed": "Alguien propuso",
+    "parties": "partes con intereses distintos",
+    "private": "cada una con límites privados",
+    "agreed": "Elegida",
+    "agreed_sub": "criterio max-min: se mejora la situación de la parte menos favorecida. Ninguna hoja declarada fue contradicha.",
+    "ok": "✓ verificado · detecta alteraciones · ninguna hoja declarada contradicha",
+    "bad": "sin verificar",
+    "foot": "parley · decisiones entre varias partes · autoalojado · sin cripto · repítelo tú mismo",
+    "title": "Parley, tarjeta de prueba",
+    "said": "Qué dijo cada agente",
+    "option": "Opción",
+    "acceptable": "aceptable, puntuación",
+    "redline": "límite privado",
+    "masked": "Solo estos veredictos enmascarados salen de un agente. El coordinador nunca ve la hoja de preferencias ni qué límite se activó; la tabla muestra quién objetó, no por qué.",
+    "receipt": "Recibo",
+    "fullhash": "SHA-256 completo del registro canónico:",
+    "notauth": "Este recibo muestra que el registro no se ha alterado. No demuestra quién produjo cada veredicto salvo que se active la firma.",
+    "run": "Compruébalo tú mismo",
+    "match": "Los 12 primeros caracteres del hash de tu tarjeta coinciden con el de arriba. La tarjeta que genera el comando sale en inglés. La receta es inventada para esta demostración: ninguna persona, caso ni dato real.",
+    "source": "Código",
+    "demo": "Demo interactiva",
+    "legal": "Herramienta para ordenar la conversación entre coherederos. No es asesoramiento jurídico y no sustituye a un notario, mediador o abogado. El caso de esta página es inventado.",
+}
+_EN = {
+    "hook": "AI that can't lie — and you can check",
+    "blocked": "BLOCKED by a red line — rejected in code, not negotiated away.",
+    "pushed": "One agent pushed",
+    "parties": "rival parties",
+    "private": "each with private red lines",
+    "agreed": "Agreed",
+    "agreed_sub": "max-min consensus — the least-happy party lifted. No one was betrayed.",
+    "ok": "✓ verified · tamper-evident · every red line held",
+    "bad": "unverified",
+    "foot": "parley — provable-fairness for multi-party decisions · self-hosted · no crypto · replay it yourself",
+    "title": "Parley proof card",
+    "said": "What each agent said",
+    "option": "Option",
+    "acceptable": "acceptable, score",
+    "redline": "red line",
+    "masked": "Only these masked verdicts leave an agent. The coordinator never sees a preference sheet or which red line fired.",
+    "receipt": "Receipt",
+    "fullhash": "Full SHA-256 of the canonical transcript:",
+    "notauth": "This receipt shows the record was not altered. It does not prove who produced a verdict unless signing is on.",
+    "run": "Run it yourself",
+    "match": "The first 12 characters of the hash on your card match the one above. The recipe is invented for this demo: no real person, case or data.",
+    "source": "Source",
+    "demo": "Interactive demo",
+    "legal": "",
+}
+LANGS = {"en": _EN, "es": _ES}
+
+
 def _blocked_and_decision(data):
     decision = data.get("decision")
     blocked = [e for e in data["entries"] if not e["feasible"]]
-    blocked = sorted(blocked, key=lambda e: e["option"].get("revenue", 0), reverse=True)
+    tempting = (data.get("presentation") or {}).get("options") or {}
+    blocked = sorted(blocked, key=lambda e: (bool(tempting.get(e["option"].get("id"), {}).get("tempting")),
+                                             e["option"].get("revenue", 0)), reverse=True)
     return (blocked[0]["option"] if blocked else None), decision
 
 
-def card_html(data: dict) -> str:
+def card_html(data: dict, lang: str = "en") -> str:
     """The card fragment (a single <div class="card">), reusable in a page or gallery."""
     blocked, decision = _blocked_and_decision(data)
     e = html.escape
+    T = LANGS[lang]
     parties = " · ".join(e(p["owner"]) for p in data["parties"])
     short_hash = data["hash"][:12] + "…"
     dec_label = e(str(decision.get("label", decision.get("id")))) if decision else "HONEST DEADLOCK"
@@ -66,32 +124,32 @@ def card_html(data: dict) -> str:
         rev_txt = f" (revenue {rev})" if rev is not None else ""
         block_html = (
             f'<div class="row block"><span class="mark">✕</span><div>'
-            f'<b>One agent pushed "{e(str(blocked.get("label", blocked.get("id"))))}"{rev_txt}</b><br>'
-            f'<span class="sub">BLOCKED by a red line — rejected in code, not negotiated away.</span></div></div>')
+            f'<b>{T["pushed"]} "{e(str(blocked.get("label", blocked.get("id"))))}"{rev_txt}</b><br>'
+            f'<span class="sub">{T["blocked"]}</span></div></div>')
     verified = all(data["non_betrayal"].values())
-    ok_txt = "✓ verified · tamper-evident · every red line held" if verified else "unverified"
+    ok_txt = T["ok"] if verified else T["bad"]
     return f"""<div class="card">
-  <div class="top"><span class="logo">parley<span class="d">.</span></span><span class="hook">AI that can't lie — and you can check</span></div>
+  <div class="top"><span class="logo">parley<span class="d">.</span></span><span class="hook">{T["hook"]}</span></div>
   <hr class="rule">
   <div class="scn">{e(data["title"])}</div>
-  <div class="parties">{len(data["parties"])} rival parties: {parties} — each with private red lines</div>
+  <div class="parties">{len(data["parties"])} {T["parties"]}: {parties} — {T["private"]}</div>
   {block_html}
   <div class="row ok"><span class="mark">✓</span><div>
-    <b>Agreed: "{dec_label}"</b><br>
-    <span class="sub">max-min consensus — the least-happy party lifted. No one was betrayed.</span></div></div>
+    <b>{T["agreed"]}: "{dec_label}"</b><br>
+    <span class="sub">{T["agreed_sub"]}</span></div></div>
   <div class="receipt"><span><span style="color:var(--n500)">sha256</span> {short_hash}</span>
     <span class="ok">{ok_txt}</span></div>
-  <div class="foot">parley — provable-fairness for multi-party decisions · self-hosted · no crypto · replay it yourself</div>
+  <div class="foot">{T["foot"]}</div>
 </div>"""
 
 
-def _head_meta(data: dict, path) -> str:
+def _head_meta(data: dict, path, lang: str = "en") -> str:
     """Title/description/canonical/OG/Twitter, derived from the scenario data (same tag shape as
     landing/src/layouts/Layout.astro). Nothing here touches the card body."""
     _, decision = _blocked_and_decision(data)
     dec_label = decision.get("label", decision.get("id")) if decision else "HONEST DEADLOCK"
     parties = " · ".join(p["owner"] for p in data["parties"])
-    title = f'{data["title"]} · Parley proof card'
+    title = f'{data["title"]} · {LANGS[lang]["title"]}'
     situation = (data.get("presentation") or {}).get("situation")
     description = situation or (
         f'{len(data["parties"])} rival parties ({parties}) reached "{dec_label}" by max-min '
@@ -130,16 +188,17 @@ def build_card(data: dict, path: str = None) -> str:
             f'</head><body>{card_html(data)}</body></html>')
 
 
-def replay_html(data: dict, path: str, recipe: str) -> str:
+def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
     """The stable, no-signup replay page: the card, the per-option verdicts, the full hash and the
     command to reproduce it. Same engine output as the card; nothing is typed in by hand."""
+    T = LANGS[lang]
     rows = []
     for e in data["entries"]:
         opt = e["option"]
         label = html.escape(str(opt.get("label", opt.get("id"))))
         cells = "".join(
             f'<td class="{"y" if v["acceptable"] else "n"}">'
-            f'{"acceptable, score " + str(v["score"]) if v["acceptable"] else "red line"}</td>'
+            f'{T["acceptable"] + " " + (str(v["score"]).replace(".", ",") if lang == "es" else str(v["score"])) if v["acceptable"] else T["redline"]}</td>'
             for v in e["verdicts"])
         rows.append(f"<tr><th>{label}</th>{cells}</tr>")
     heads = "".join(f'<th>{html.escape(p["owner"])}</th>' for p in data["parties"])
@@ -151,24 +210,22 @@ def replay_html(data: dict, path: str, recipe: str) -> str:
              ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
              ".wrap pre{background:var(--n900);color:#fff;padding:12px 14px;border-radius:8px;"
              "overflow-x:auto;font-size:12.5px}.wrap code.h{word-break:break-all;font-family:var(--mono)}")
-    return (f'<!doctype html><html lang="en"><head>\n{_head_meta(data, path)}\n{_FONTS}'
+    legal = f'<p class="legal"><b>{html.escape(T["legal"])}</b></p>' if T["legal"] else ""
+    return (f'<!doctype html><html lang="{lang}"><head>\n{_head_meta(data, path, lang)}\n{_FONTS}'
             f'<style>{style}</style></head><body><div class="wrap">'
-            f'{card_html(data)}'
-            f'<h2>What each agent said</h2>'
-            f'<table><tr><th>Option</th>{heads}</tr>{"".join(rows)}</table>'
-            f'<p>Only these masked verdicts leave an agent. The coordinator never sees a preference sheet '
-            f'or which red line fired.</p>'
-            f'<h2>Receipt</h2><p>Full SHA-256 of the canonical transcript:</p>'
+            f'{legal}{card_html(data, lang)}'
+            f'<h2>{T["said"]}</h2>'
+            f'<table><tr><th>{T["option"]}</th>{heads}</tr>{"".join(rows)}</table>'
+            f'<p>{T["masked"]}</p>'
+            f'<h2>{T["receipt"]}</h2><p>{T["fullhash"]}</p>'
             f'<p><code class="h">{data["hash"]}</code></p>'
-            f'<p>This receipt shows the record was not altered. It does not prove who produced a verdict '
-            f'unless signing is on.</p>'
-            f'<h2>Run it yourself</h2><pre>git clone https://github.com/5uper0/parley\n'
+            f'<p>{T["notauth"]}</p>'
+            f'<h2>{T["run"]}</h2><pre>git clone https://github.com/5uper0/parley\n'
             f'cd parley &amp;&amp; pip install -e .\n'
             f'python examples/demo/proofcard.py examples/demo/{recipe} card.html</pre>'
-            f'<p>The first 12 characters of the hash on your card match the one above. The recipe is '
-            f'invented for this demo: no real person, case or data. '
-            f'<a href="https://github.com/5uper0/parley">Source</a> · '
-            f'<a href="/demo/">Interactive demo</a></p>'
+            f'<p>{T["match"]} '
+            f'<a href="https://github.com/5uper0/parley">{T["source"]}</a> · '
+            f'<a href="/demo/">{T["demo"]}</a></p>'
             f'</div></body></html>')
 
 

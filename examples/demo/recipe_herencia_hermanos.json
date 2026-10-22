@@ -1,0 +1,34 @@
+{
+  "title": "Qué hacer con el piso heredado entre tres hermanos",
+  "options": [
+    {"id": "vender",      "label": "Vender al precio de mercado y repartir en tres partes", "precio": 100, "meses": 5,  "hipoteca": false, "conserva": 0},
+    {"id": "descuento",   "label": "Vender en tres meses con un 5% menos",                  "precio": 95,  "meses": 3,  "hipoteca": false, "conserva": 0},
+    {"id": "hermano",     "label": "El hermano se queda el piso y paga a las dos hermanas en un año", "precio": 100, "meses": 12, "hipoteca": false, "conserva": 1},
+    {"id": "alquilar",    "label": "Mantenerlo en común y alquilarlo",                      "precio": 100, "meses": 24, "hipoteca": false, "conserva": 1},
+    {"id": "menor",       "label": "La hermana menor lo compra con una hipoteca",           "precio": 100, "meses": 4,  "hipoteca": true,  "conserva": 1},
+    {"id": "inversor",    "label": "Venta rápida a un inversor con un 25% menos",           "precio": 75,  "meses": 1,  "hipoteca": false, "conserva": 0}
+  ],
+  "parties": [
+    {"owner": "Hermana mayor", "hard": [{"attr": "meses", "op": "<=", "value": 6}], "utility": [{"attr": "meses", "direction": "lower", "lo": 0, "hi": 24}]},
+    {"owner": "Hermano",       "hard": [{"attr": "precio", "op": ">=", "value": 90}], "utility": [{"attr": "precio", "direction": "higher", "lo": 70, "hi": 100}]},
+    {"owner": "Hermana menor", "hard": [{"attr": "hipoteca", "op": "==", "value": false}], "utility": [{"attr": "conserva", "direction": "higher", "lo": 0, "hi": 1}, {"attr": "precio", "direction": "higher", "lo": 70, "hi": 100}]}
+  ],
+  "presentation": {
+    "situation": "Tres hermanos heredan un piso en Valencia. Ninguno quiere decir en voz alta cuánto le urge o cuánto le importa cada cosa. Este caso es inventado: no es una familia real.",
+    "parties": {
+      "Hermana mayor": {"blurb": "necesita cobrar su parte pronto", "redlines": ["cobrar en seis meses o menos"]},
+      "Hermano":       {"blurb": "no quiere malvender el piso", "redlines": ["no vender por debajo del 90% del precio de mercado"]},
+      "Hermana menor": {"blurb": "prefiere que el piso siga en la familia, pero no puede endeudarse", "redlines": ["no asumir una hipoteca"]}
+    },
+    "options": {
+      "vender":    {"plain": "Vender al precio de mercado y repartir en tres partes"},
+      "descuento": {"plain": "Vender en tres meses con un 5% menos"},
+      "hermano":   {"plain": "El hermano se queda el piso y paga a las hermanas en un año"},
+      "alquilar":  {"plain": "Mantenerlo en común y alquilarlo"},
+      "menor":     {"plain": "La hermana menor lo compra con una hipoteca"},
+      "inversor":  {"plain": "Venta rápida a un inversor con un 25% menos", "tempting": true}
+    },
+    "attrs": [{"key": "precio", "label": "precio (% del mercado)"}, {"key": "meses", "label": "meses hasta cobrar"}],
+    "outcome": "La opción que todos pueden aceptar se elige sin que nadie revele su límite. La venta rápida con un 25% menos, la más tentadora para quien tiene prisa, queda bloqueada por un límite privado antes de votar. Hay un recibo que cada hermano puede comprobar con su propia hoja."
+  }
+}
