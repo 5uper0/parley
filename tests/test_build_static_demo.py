@@ -125,3 +125,20 @@ def test_blocked_example_prefers_the_option_marked_tempting():
     assert _blocked_and_decision(data)[0]["id"] == "b"
     del data["presentation"]
     assert _blocked_and_decision(data)[0]["id"] == "a"
+
+
+def test_replay_pages_carry_analytics_only_when_an_id_is_set(tmp_path):
+    """The replay pages are the link targets of the UTM pack; without the tag their visits are unmeasured."""
+    build = _load_build_module()
+    build.OUT = tmp_path / "on"
+    build.GA4_ID = "G-TEST123"
+    build.main()
+    for slug in ("committee", "herencia-hermanos"):
+        page = (tmp_path / "on" / "replay" / slug / "index.html").read_text(encoding="utf-8")
+        assert "googletagmanager.com/gtag/js?id=G-TEST123" in page
+    build.OUT = tmp_path / "off"
+    build.GA4_ID = ""
+    build.main()
+    for slug in ("committee", "herencia-hermanos"):
+        page = (tmp_path / "off" / "replay" / slug / "index.html").read_text(encoding="utf-8")
+        assert "googletagmanager" not in page

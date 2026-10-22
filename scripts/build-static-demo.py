@@ -96,16 +96,16 @@ def main():
 
     sys.path.insert(0, str(HERE))  # proofcard.py imports its sibling `server`
     from proofcard import replay_html
-    replay_path = "/demo/replay/committee/"
-    (out / "replay" / "committee").mkdir(parents=True, exist_ok=True)
-    (out / "replay" / "committee" / "index.html").write_text(
-        replay_html(run_recipe(str(Path(HERE, "recipe_committee.json"))), replay_path, "recipe_committee.json"),
-        encoding="utf-8")
-    (out / "replay" / "herencia-hermanos").mkdir(parents=True, exist_ok=True)
-    (out / "replay" / "herencia-hermanos" / "index.html").write_text(
-        replay_html(run_recipe(str(Path(HERE, "recipe_herencia_hermanos.json"))),
-                    "/demo/replay/herencia-hermanos/", "recipe_herencia_hermanos.json", "es"),
-        encoding="utf-8")
+    replays = [
+        ("committee", "recipe_committee.json", "en"),
+        ("herencia-hermanos", "recipe_herencia_hermanos.json", "es"),
+    ]
+    for slug, recipe, lang in replays:
+        page = replay_html(run_recipe(str(Path(HERE, recipe))), f"/demo/replay/{slug}/", recipe, lang)
+        if GA4_ID:
+            page = page.replace("<head>", "<head>\n" + GA4_SNIPPET.format(id=GA4_ID), 1)
+        (out / "replay" / slug).mkdir(parents=True, exist_ok=True)
+        (out / "replay" / slug / "index.html").write_text(page, encoding="utf-8")
 
     for src, name in STATIC_COPIES.items():
         if src.exists():
