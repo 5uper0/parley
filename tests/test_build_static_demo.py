@@ -65,7 +65,20 @@ def test_static_build_emits_committee_replay_page(tmp_path):
     assert data["hash"] in page
     assert "https://parleyprotocol.com/demo/replay/committee/" in page
     assert "recipe_committee.json" in page
-    assert "pip install parley-consensus" in page
+    assert "git clone https://github.com/5uper0/parley" in page
+    assert os.path.exists(os.path.join(_ROOT, "examples", "demo", "proofcard.py"))
+    assert os.path.exists(os.path.join(_ROOT, "examples", "demo", "recipe_committee.json"))
+    for party in data["parties"]:
+        for redline in party["redlines"]:
+            assert redline not in page
     assert "<form" not in page and "<input" not in page
     import re
     assert not re.search(r"[\w.+-]+@[\w-]+\.[\w.]+", page)
+
+
+def test_card_escapes_recipe_text():
+    from examples.demo.proofcard import card_html
+    from examples.demo.server import run_recipe
+    data = run_recipe(os.path.join(_ROOT, "examples", "demo", "recipe_committee.json"))
+    data["title"] = "<script>x</script>"
+    assert "<script>" not in card_html(data)

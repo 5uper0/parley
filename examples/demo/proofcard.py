@@ -56,23 +56,24 @@ def _blocked_and_decision(data):
 def card_html(data: dict) -> str:
     """The card fragment (a single <div class="card">), reusable in a page or gallery."""
     blocked, decision = _blocked_and_decision(data)
-    parties = " · ".join(p["owner"] for p in data["parties"])
+    e = html.escape
+    parties = " · ".join(e(p["owner"]) for p in data["parties"])
     short_hash = data["hash"][:12] + "…"
-    dec_label = decision.get("label", decision.get("id")) if decision else "HONEST DEADLOCK"
+    dec_label = e(str(decision.get("label", decision.get("id")))) if decision else "HONEST DEADLOCK"
     block_html = ""
     if blocked:
         rev = blocked.get("revenue")
         rev_txt = f" (revenue {rev})" if rev is not None else ""
         block_html = (
             f'<div class="row block"><span class="mark">✕</span><div>'
-            f'<b>One agent pushed "{blocked.get("label", blocked.get("id"))}"{rev_txt}</b><br>'
+            f'<b>One agent pushed "{e(str(blocked.get("label", blocked.get("id"))))}"{rev_txt}</b><br>'
             f'<span class="sub">BLOCKED by a red line — rejected in code, not negotiated away.</span></div></div>')
     verified = all(data["non_betrayal"].values())
     ok_txt = "✓ verified · tamper-evident · every red line held" if verified else "unverified"
     return f"""<div class="card">
   <div class="top"><span class="logo">parley<span class="d">.</span></span><span class="hook">AI that can't lie — and you can check</span></div>
   <hr class="rule">
-  <div class="scn">{data["title"]}</div>
+  <div class="scn">{e(data["title"])}</div>
   <div class="parties">{len(data["parties"])} rival parties: {parties} — each with private red lines</div>
   {block_html}
   <div class="row ok"><span class="mark">✓</span><div>
@@ -161,9 +162,9 @@ def replay_html(data: dict, path: str, recipe: str) -> str:
             f'<p><code class="h">{data["hash"]}</code></p>'
             f'<p>This receipt shows the record was not altered. It does not prove who produced a verdict '
             f'unless signing is on.</p>'
-            f'<h2>Run it yourself</h2><pre>pip install parley-consensus\n'
-            f'curl -O https://raw.githubusercontent.com/5uper0/parley/main/examples/demo/{recipe}\n'
-            f'python proofcard.py {recipe} card.html</pre>'
+            f'<h2>Run it yourself</h2><pre>git clone https://github.com/5uper0/parley\n'
+            f'cd parley &amp;&amp; pip install -e .\n'
+            f'python examples/demo/proofcard.py examples/demo/{recipe} card.html</pre>'
             f'<p>The first 12 characters of the hash on your card match the one above. The recipe is '
             f'invented for this demo: no real person, case or data. '
             f'<a href="https://github.com/5uper0/parley">Source</a> · '
