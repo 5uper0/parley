@@ -112,3 +112,16 @@ def test_static_build_emits_spanish_heirs_replay_page(tmp_path):
     recipe = open(os.path.join(_ROOT, "examples", "demo", "recipe_herencia_hermanos.json"),
                   encoding="utf-8").read()
     assert '"url"' not in recipe and '"source"' not in recipe
+
+
+def test_blocked_example_prefers_the_option_marked_tempting():
+    from examples.demo.proofcard import _blocked_and_decision
+    entries = [
+        {"option": {"id": "a", "revenue": 9}, "feasible": False},
+        {"option": {"id": "b", "revenue": 1}, "feasible": False},
+    ]
+    data = {"entries": entries, "decision": None,
+            "presentation": {"options": {"b": {"tempting": True}}}}
+    assert _blocked_and_decision(data)[0]["id"] == "b"
+    del data["presentation"]
+    assert _blocked_and_decision(data)[0]["id"] == "a"

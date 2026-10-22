@@ -16,7 +16,7 @@
   "presentation": {
     "situation": "Tres hermanos heredan un piso en Valencia. Ninguno quiere decir en voz alta cuánto le urge o cuánto le importa cada cosa. Este caso es inventado: no es una familia real.",
     "parties": {
-      "Hermana mayor": {"blurb": "necesita cobrar su parte pronto", "redlines": ["cobrar en menos de seis meses"]},
+      "Hermana mayor": {"blurb": "necesita cobrar su parte pronto", "redlines": ["cobrar en seis meses o menos"]},
       "Hermano":       {"blurb": "no quiere malvender el piso", "redlines": ["no vender por debajo del 90% del precio de mercado"]},
       "Hermana menor": {"blurb": "prefiere que el piso siga en la familia, pero no puede endeudarse", "redlines": ["no asumir una hipoteca"]}
     },

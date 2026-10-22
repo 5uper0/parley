@@ -47,14 +47,14 @@ _FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
 
 
 _ES = {
-    "hook": "Decisiones entre partes con límites privados, y tú puedes comprobarlas",
+    "hook": "Decisiones entre partes con límites privados; cada parte puede comprobar que se respetó el suyo",
     "blocked": "BLOQUEADA por un límite privado: se rechaza en el código, no se negocia.",
     "pushed": "Alguien propuso",
     "parties": "partes con intereses distintos",
     "private": "cada una con límites privados",
     "agreed": "Elegida",
-    "agreed_sub": "criterio max-min: se mejora la situación de la parte menos favorecida. Ningún límite privado se cruzó.",
-    "ok": "✓ verificado · detecta alteraciones · ningún límite cruzado",
+    "agreed_sub": "criterio max-min: se mejora la situación de la parte menos favorecida. Ninguna hoja declarada fue contradicha.",
+    "ok": "✓ verificado · detecta alteraciones · ninguna hoja declarada contradicha",
     "bad": "sin verificar",
     "foot": "parley · decisiones entre varias partes · autoalojado · sin cripto · repítelo tú mismo",
     "title": "Parley, tarjeta de prueba",
@@ -62,12 +62,12 @@ _ES = {
     "option": "Opción",
     "acceptable": "aceptable, puntuación",
     "redline": "límite privado",
-    "masked": "Solo estos veredictos enmascarados salen de un agente. El coordinador nunca ve la hoja de preferencias ni qué límite se activó.",
+    "masked": "Solo estos veredictos enmascarados salen de un agente. El coordinador nunca ve la hoja de preferencias ni qué límite se activó; la tabla muestra quién objetó, no por qué.",
     "receipt": "Recibo",
     "fullhash": "SHA-256 completo del registro canónico:",
     "notauth": "Este recibo muestra que el registro no se ha alterado. No demuestra quién produjo cada veredicto salvo que se active la firma.",
     "run": "Compruébalo tú mismo",
-    "match": "Los 12 primeros caracteres del hash de tu tarjeta coinciden con el de arriba. La receta es inventada para esta demostración: ninguna persona, caso ni dato real.",
+    "match": "Los 12 primeros caracteres del hash de tu tarjeta coinciden con el de arriba. La tarjeta que genera el comando sale en inglés. La receta es inventada para esta demostración: ninguna persona, caso ni dato real.",
     "source": "Código",
     "demo": "Demo interactiva",
     "legal": "Herramienta para ordenar la conversación entre coherederos. No es asesoramiento jurídico y no sustituye a un notario, mediador o abogado. El caso de esta página es inventado.",
@@ -198,7 +198,7 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
         label = html.escape(str(opt.get("label", opt.get("id"))))
         cells = "".join(
             f'<td class="{"y" if v["acceptable"] else "n"}">'
-            f'{T["acceptable"] + " " + str(v["score"]) if v["acceptable"] else T["redline"]}</td>'
+            f'{T["acceptable"] + " " + (str(v["score"]).replace(".", ",") if lang == "es" else str(v["score"])) if v["acceptable"] else T["redline"]}</td>'
             for v in e["verdicts"])
         rows.append(f"<tr><th>{label}</th>{cells}</tr>")
     heads = "".join(f'<th>{html.escape(p["owner"])}</th>' for p in data["parties"])
