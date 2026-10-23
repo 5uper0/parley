@@ -5,8 +5,13 @@ Stdlib only. Imports the real engine, so every number is a property of `run_cons
 
     python3 examples/collusion_sprint/harness.py --seeds 20 --out metrics.csv
 
-Strategies are `Liar` verdict functions (S1 inflate, S2 blind squeeze, S3 informed squeeze,
-S4 grief). S3 reads the honest sheet, which assumes a leak and is an upper bound on damage.
+Strategies are `Liar` verdict functions: S1 push-to-target (accept everything, score 1.0 on the
+target and 0.0 elsewhere), S2 blind squeeze (veto all but a random target), S3 informed squeeze
+(like S2, target is h's least-preferred option among those h accepts; reads h's sheet, which
+assumes a leak; other peers' red lines are not consulted, so it can deadlock), S4 grief (veto all).
+
+Instances are paired across strategies: the seed key excludes the strategy. `squeeze` is
+base_h_score - atk_h_score, empty when either run deadlocks.
 """
 import argparse
 import csv
@@ -36,6 +41,8 @@ class Liar:
 
 def make_options(rng, m):
     seen = set()
+    if m > LEVELS ** len(ATTRS):
+        raise ValueError("m exceeds the option space")
     while len(seen) < m:
         seen.add(tuple(rng.randrange(LEVELS) for _ in ATTRS))
     return [dict(zip(ATTRS, t)) for t in sorted(seen)]
@@ -63,7 +70,7 @@ def _verdict(owner, ok, score):
     return Verdict(owner, acceptable=ok, score=score, reason="ok" if ok else "red-line")
 
 
-def liar_for(strategy, owner, options, target, rng):
+def liar_for(strategy, owner, target):
     key = lambda o: tuple(o[a] for a in ATTRS)
     tkey = key(target)
     if strategy == "S1":
@@ -101,19 +108,20 @@ def run_once(agents, options, honest):
 
 
 def run_cell(n, m, k, strategy, seed):
-    rng = random.Random(f"{n}-{m}-{k}-{strategy}-{seed}")
+    rng = random.Random(f"{n}-{m}-{k}-{seed}")
+    trng = random.Random(f"{n}-{m}-{k}-{strategy}-{seed}-target")
     options = make_options(rng, m)
     honest = Agent("h", make_sheet(rng, "h", rng.choice((1, 2))))
     others = [Agent(f"p{i}", make_sheet(rng, f"p{i}", rng.choice((1, 2)))) for i in range(n - 1)]
     base = run_once([honest] + others, options, honest)
-    target = pick_target(strategy, honest, options, rng)
-    coalition = [liar_for(strategy, f"p{i}", options, target, rng) for i in range(k)]
+    target = pick_target(strategy, honest, options, trng)
+    coalition = [liar_for(strategy, f"p{i}", target) for i in range(k)]
     atk = run_once([honest] + coalition + others[k:], options, honest)
     return base, atk
 
 
 FIELDS = ["n", "m", "k", "strategy", "seed", "base_status", "atk_status",
-          "base_h_score", "atk_h_score", "h_violated", "atk_verifies"]
+          "base_h_score", "atk_h_score", "squeeze", "h_violated", "atk_verifies"]
 
 
 def sweep(ns, ms, ks, strategies, seeds):
@@ -125,9 +133,11 @@ def sweep(ns, ms, ks, strategies, seeds):
                 for s in strategies:
                     for seed in range(seeds):
                         base, atk = run_cell(n, m, k, s, seed)
+                        sq = ("" if base.status != "agreed" or atk.status != "agreed"
+                              else base.h_score - atk.h_score)
                         yield {"n": n, "m": m, "k": k, "strategy": s, "seed": seed,
                                "base_status": base.status, "atk_status": atk.status,
-                               "base_h_score": base.h_score, "atk_h_score": atk.h_score,
+                               "base_h_score": base.h_score, "atk_h_score": atk.h_score, "squeeze": sq,
                                "h_violated": int(atk.h_violated), "atk_verifies": int(atk.verifies)}
 
 

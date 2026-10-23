@@ -1,4 +1,4 @@
-"""Q1 of the collusion sprint: no coalition report crosses the honest owner's red line.
+"""Q1 of the collusion sprint: the engine keeps every coalition report from crossing the honest owner's red line.
 
 Smoke-sized grid; the full grid is run by examples/collusion_sprint/harness.py.
 """
