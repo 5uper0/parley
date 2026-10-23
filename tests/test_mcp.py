@@ -149,6 +149,17 @@ def test_decide_rejects_an_unknown_rule_as_a_tool_error(recipe):
     assert "majority" in result["content"][0]["text"]
 
 
+def test_decide_names_a_missing_spec_field_instead_of_leaking_a_keyerror(recipe):
+    for bad, needle in (({k: v for k, v in recipe.items() if k != "title"}, "title"),
+                        ({k: v for k, v in recipe.items() if k != "options"}, "options"),
+                        ([], "object")):
+        replies, _ = _talk([INIT, _call("parley_decide", {"spec": bad})])
+        result = replies[-1]["result"]
+        assert result["isError"] is True
+        text = result["content"][0]["text"]
+        assert needle in text and "KeyError" not in text
+
+
 def _oversized_specs(recipe):
     """One spec per bound: a real recipe stretched past exactly one limit."""
     option, party = recipe["options"][0], recipe["parties"][0]

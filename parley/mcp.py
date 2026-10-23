@@ -237,6 +237,9 @@ def _check_size(raw: Any) -> None:
 def tool_decide(arguments: dict) -> dict:
     _require(arguments, "spec")
     _check_size(arguments["spec"])
+    if not isinstance(arguments["spec"], dict):
+        raise ValueError("spec must be an object")
+    _require(arguments["spec"], "title", "options")
     spec = DecisionSpec.from_dict(arguments["spec"])
     result = spec.run(rule=arguments.get("rule", "egalitarian"))
     return {
