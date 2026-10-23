@@ -30,7 +30,7 @@ masked verdicts, and a verifiable non-betrayal transcript.
 
 ```bash
 pip install parley-consensus              # zero-dependency core
-pip install "parley-consensus[crypto]"    # + Ed25519-signed verdicts (parley.net.identity, parley.net.bot)
+pip install "parley-consensus[crypto]"    # + Ed25519-signed verdicts
 ```
 
 The distribution is `parley-consensus` (PyPI's `parley` is an unrelated project); the import name is `parley`.
@@ -40,17 +40,29 @@ from parley.agent import Agent
 from parley.consensus import run_consensus
 from parley.preferences import HardConstraint, PreferenceSheet
 
-options = [{"venue": "rooftop", "cost": 900}, {"venue": "garden", "cost": 600}, {"venue": "diner", "cost": 300}]
-ana = PreferenceSheet("Ana", utility=lambda o: 1.0 if o["venue"] == "rooftop" else 0.4)
-bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)],  # a red line: code, not a preference
-                      utility=lambda o: 1 - o["cost"] / 1000)
-cara = PreferenceSheet("Cara", utility=lambda o: 0.9 if o["venue"] == "garden" else 0.5)
+options = [
+    {"venue": "rooftop", "cost": 900},
+    {"venue": "garden", "cost": 600},
+    {"venue": "diner", "cost": 300},
+]
+ana = PreferenceSheet(
+    "Ana", utility=lambda o: 1.0 if o["venue"] == "rooftop" else 0.4)
+# a red line: code, not a preference
+bob = PreferenceSheet(
+    "Bob",
+    hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)],
+    utility=lambda o: 1 - o["cost"] / 1000)
+cara = PreferenceSheet(
+    "Cara", utility=lambda o: 0.9 if o["venue"] == "garden" else 0.5)
 
-result = run_consensus([Agent(s.owner, s) for s in (ana, bob, cara)], options)
+agents = [Agent(s.owner, s) for s in (ana, bob, cara)]
+result = run_consensus(agents, options)
 print(result.status, result.decision)
 print("receipt sha256:", result.transcript.hash())
-for sheet in (ana, bob, cara):  # each owner replays their own private sheet, locally
-    print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))
+# each owner replays their own private sheet, locally
+for sheet in (ana, bob, cara):
+    ok = result.transcript.verify_non_betrayal(sheet, result.decision)
+    print(sheet.owner, "not betrayed:", ok)
 ```
 
 ```
@@ -90,9 +102,16 @@ is the same JSON as the recipes in [`examples/demo/`](examples/demo/), passed un
 call the tools yourself instead of through a host, the three calls look like this (`arguments` of `tools/call`):
 
 ```json
-{"name": "parley_decide", "arguments": {"spec": {"title": "...", "options": [...], "parties": [...]}}}
-{"name": "parley_verify_receipt", "arguments": {"transcript": {...}, "sha256": "<transcript_sha256 from parley_decide>"}}
-{"name": "parley_check_party", "arguments": {"party": {"owner": "Bob", "hard": [...], "utility": [...]}, "decision": {...}}}
+{"name": "parley_decide",
+ "arguments": {"spec": {"title": "...", "options": [...],
+                        "parties": [...]}}}
+{"name": "parley_verify_receipt",
+ "arguments": {"transcript": {...},
+               "sha256": "<transcript_sha256 from parley_decide>"}}
+{"name": "parley_check_party",
+ "arguments": {"party": {"owner": "Bob", "hard": [...],
+                        "utility": [...]},
+               "decision": {...}}}
 ```
 
 The result of `parley_decide` is not a receipt file for `scripts/verify-receipt.py`; check it with
@@ -169,11 +188,15 @@ non-betrayal, and reuses nothing that's already a commodity.
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/pytest -q                     # the full suite, all green
-.venv/bin/python examples/demo/server.py   # the money-shot: open http://127.0.0.1:8080 → Run
-.venv/bin/python examples/meeting.py    # three delegates pick a meeting slot
-.venv/bin/python examples/run_env.py    # bots as separate processes, consensus over HTTP
-.venv/bin/python examples/real_decision.py --options examples/demo/recipe_committee.json
-                                        # run a real decision with real people, each one ratifies
+# the money-shot: open http://127.0.0.1:8080 → Run
+.venv/bin/python examples/demo/server.py
+# three delegates pick a meeting slot
+.venv/bin/python examples/meeting.py
+# bots as separate processes, consensus over HTTP
+.venv/bin/python examples/run_env.py
+# run a real decision with real people, each one ratifies
+.venv/bin/python examples/real_decision.py \
+    --options examples/demo/recipe_committee.json
 ```
 
 ### See it in 30 seconds
@@ -190,7 +213,8 @@ landlord side is inferred, not ratified). The screenshot-native proof card is `e
 **No Python? Run the demo with Docker:**
 
 ```bash
-docker build -t parley . && docker run --rm -p 8080:8080 parley   # open http://127.0.0.1:8080
+# then open http://127.0.0.1:8080
+docker build -t parley . && docker run --rm -p 8080:8080 parley
 ```
 
 **Try it live: [parleyprotocol.com/demo](https://parleyprotocol.com/demo/)** runs the real engine
