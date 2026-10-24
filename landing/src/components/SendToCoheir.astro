@@ -5,9 +5,9 @@ interface Props {
 
 const { path } = Astro.props;
 const url = `https://parleyprotocol.com${path}?utm_source=coheir-share&utm_medium=share&utm_campaign=coheir`;
-const text = `Os paso esta página para que la miremos juntos antes de decidir lo del piso: ${url}`;
+const text = `Os paso esta página para que la miremos juntos antes de decidir lo de la herencia: ${url}`;
 const wa = `https://wa.me/?text=${encodeURIComponent(text)}`;
-const mail = `mailto:?subject=${encodeURIComponent("Para decidir juntos lo del piso")}&body=${encodeURIComponent(text)}`;
+const mail = `mailto:?subject=${encodeURIComponent("Para decidir juntos lo de la herencia")}&body=${encodeURIComponent(text)}`;
 const btn =
   "inline-flex items-center rounded-[10px] border border-hairline px-4 py-2 text-[14px] text-ink transition-colors hover:border-current";
 ---
@@ -25,7 +25,7 @@ const btn =
     <a href={mail} data-coheir="email" class={btn}>Correo</a>
     <button type="button" data-coheir-copy={url} class={btn}>Copiar enlace</button>
   </div>
-  <p class="mt-3 hidden text-[13px] text-subtle" data-coheir-done role="status">Enlace copiado.</p>
+  <p class="mt-3 min-h-[1.25rem] text-[13px] break-all text-subtle" data-coheir-done role="status"></p>
 </div>
 
 <script is:inline>
@@ -35,15 +35,23 @@ const btn =
     var copy = t.closest("[data-coheir-copy]");
     var send = t.closest("[data-coheir]");
     if (copy) {
-      var done = function () {
-        var n = document.querySelector("[data-coheir-done]");
-        if (n) n.classList.remove("hidden");
-      };
       var u = copy.getAttribute("data-coheir-copy");
+      var note = document.querySelector("[data-coheir-done]");
+      var say = function (m) {
+        if (note) note.textContent = m;
+      };
+      var ok = function () {
+        say("Enlace copiado.");
+        if (typeof gtag === "function") gtag("event", "share_click", { method: "copy" });
+      };
+      var fail = function () {
+        say("No se pudo copiar. Enlace: " + u);
+      };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(u).then(done, function () {});
+        navigator.clipboard.writeText(u).then(ok, fail);
+      } else {
+        fail();
       }
-      if (typeof gtag === "function") gtag("event", "share_click", { method: "copy" });
     } else if (send && typeof gtag === "function") {
       gtag("event", "send_to_coheir_click", { method: send.getAttribute("data-coheir") });
     }
