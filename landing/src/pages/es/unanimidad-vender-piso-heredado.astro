@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import SendToCoheir from "../../components/SendToCoheir.astro";
 
 const DEMO_URL = "/demo/";
 const GUIDE_URL = "/es/reparto-de-herencia-entre-hermanos/";
@@ -201,6 +202,7 @@ const jsonLd = JSON.stringify({
             >
           </a>
         </div>
+        <SendToCoheir path="/es/unanimidad-vender-piso-heredado/" />
         <p class="mt-6 text-[13.5px] text-subtle">
           <a href="/demo/replay/herencia-hermanos/?utm_source=es-page&utm_medium=site&utm_campaign=replay-1113" data-demo="replay" class={link}>Ver un ejemplo resuelto en español</a>
           (caso inventado: una herramienta para ordenar la conversación, no asesoramiento jurídico).
