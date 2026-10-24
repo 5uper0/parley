@@ -1,6 +1,6 @@
 """Call Parley from the OpenAI Agents SDK over MCP stdio.
 
-Needs: pip install openai-agents "parley-consensus[mcp]"
+Needs: pip install openai-agents parley-consensus
 Runs offline: it calls the tools directly, no model key. To let an agent decide
 when to call Parley, pass `mcp_servers=[server]` to `agents.Agent` instead.
 """
