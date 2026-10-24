@@ -6,7 +6,7 @@ import Footer from "../components/Footer.astro";
 
 <Layout
   title="Privacy — Parley"
-  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics, no ads, no data resale, no tracking in the self-hosted core."
+  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus cookieless Microsoft Clarity session recordings with all text masked, no ads, no data resale, no tracking in the self-hosted core."
   path="/privacy/"
 >
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
@@ -35,8 +35,8 @@ import Footer from "../components/Footer.astro";
       <div class="my-6 rounded-[14px] border border-hairline bg-surface px-5 py-[18px]">
         <p class="text-[15px]/[24px] text-muted">
           <strong class="text-ink">The hosted site at parleyprotocol.com (homepage and demo) is different</strong>{" "}
-          — it uses Google Analytics (GA4) so we can tell whether the site is reaching
-          anyone worth talking to.
+          — it uses Google Analytics (GA4) and Microsoft Clarity so we can tell whether the
+          site is reaching anyone worth talking to.
         </p>
       </div>
 
@@ -47,6 +47,14 @@ import Footer from "../components/Footer.astro";
         <li class="text-[14.5px] text-muted">
           Standard GA4 page views and browser/device metadata (the same as most
           websites).
+        </li>
+        <li class="text-[14.5px] text-muted">
+          Microsoft Clarity (free) records how pages are used: clicks, scrolls and page
+          layout. It runs with cookies switched off and with strict masking, so all
+          text on the page is hidden in the recording and nothing you type into the
+          demo is captured. Without cookies, Clarity cannot link visits together; each
+          page view is separate. Microsoft processes this data under its own privacy
+          terms. An ad-blocker or tracking-protection extension blocks it as well.
         </li>
         <li class="text-[14.5px] text-muted">
           A handful of click events scoped to this page: running a scenario, clicking
@@ -63,15 +71,15 @@ import Footer from "../components/Footer.astro";
       <ul class="list-disc space-y-1.5 pl-5">
         <li class="text-[14.5px] text-muted">No account, no email, no login — the demo doesn't ask for either.</li>
         <li class="text-[14.5px] text-muted">No advertising identifiers, no ad network, no retargeting pixels.</li>
-        <li class="text-[14.5px] text-muted">No data is sold, shared, or used for anything beyond understanding demo traffic.</li>
+        <li class="text-[14.5px] text-muted">No data is sold, or used for anything beyond understanding demo traffic. It is shared only with the two analytics processors named above.</li>
       </ul>
 
       <h2 class="mt-8 mb-3 font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase">
         Your options
       </h2>
       <p class="text-[14.5px]/[24px] text-muted">
-        Any ad-blocker or tracking-protection extension that blocks Google Analytics
-        will block this too — the demo works identically either way, nothing is gated
+        Any ad-blocker or tracking-protection extension that blocks Google Analytics or
+        Microsoft Clarity will block them too — the demo works identically either way, nothing is gated
         on analytics. For zero analytics of any kind, run the demo yourself: <code
           class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
           >docker build -t parley . && docker run --rm -p 8080:8080 parley</code
