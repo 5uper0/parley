@@ -10,6 +10,12 @@ that anyone can recompute. Private sheets need one process per owner (`examples/
 Wire format: newline-delimited JSON-RPC 2.0, one message per line, at most 1 MB per line.
 Stdout carries replies only; everything else goes to stderr, because a stray print on stdout
 corrupts the host's framing.
+
+Two protocol eras are served from one process. A request whose params carry the 2026-07-28
+per-request `_meta` (`io.modelcontextprotocol/protocolVersion` and friends) is answered
+statelessly in that revision's shapes, and `server/discover` reports what is supported.
+`initialize` selects the older handshake revisions exactly as before; those requests carry no
+such `_meta`, so the two never collide.
 """
 import json
 import logging
@@ -24,7 +30,17 @@ from .transcript import Transcript
 PROTOCOL_VERSION = "2025-06-18"
 # 2025-03-26 is left out on purpose: that revision requires JSON-RPC batching, which this
 # server does not implement (2025-06-18 removed it).
-SUPPORTED_VERSIONS = frozenset({"2025-06-18", "2024-11-05"})
+# 2025-11-25 is accepted at `initialize` because `server/discover` advertises it; the tool
+# surface it needs is the same as 2025-06-18's.
+SUPPORTED_VERSIONS = frozenset({"2025-11-25", "2025-06-18", "2024-11-05"})
+MODERN_VERSION = "2026-07-28"
+DISCOVER_VERSIONS = [MODERN_VERSION, "2025-11-25"]
+_META_VERSION = "io.modelcontextprotocol/protocolVersion"
+_META_CAPABILITIES = "io.modelcontextprotocol/clientCapabilities"
+_META_CLIENT_INFO = "io.modelcontextprotocol/clientInfo"
+_META_SERVER_INFO = "io.modelcontextprotocol/serverInfo"
+# Both results are constant for the life of the process, so a long freshness hint is honest.
+CACHE_TTL_MS = 3_600_000
 MAX_LINE_BYTES = 1024 * 1024
 
 # A spec is evaluated options × parties times and every constraint list is scanned per option.
@@ -39,6 +55,7 @@ INVALID_REQUEST = -32600
 METHOD_NOT_FOUND = -32601
 INVALID_PARAMS = -32602
 INTERNAL_ERROR = -32603
+UNSUPPORTED_PROTOCOL_VERSION = -32022
 
 log = logging.getLogger("parley.mcp")
 
@@ -284,9 +301,10 @@ TOOL_HANDLERS: Dict[str, Callable[[dict], dict]] = {
 
 
 class RpcError(Exception):
-    def __init__(self, code: int, message: str):
+    def __init__(self, code: int, message: str, data: Any = None):
         super().__init__(message)
         self.code = code
+        self.data = data
 
 
 def _version() -> str:
@@ -323,6 +341,47 @@ def _tools_call(params: Any) -> dict:
                 "content": [{"type": "text", "text": f"{type(exc).__name__}: {exc}"}]}
     text = json.dumps(payload, sort_keys=True, ensure_ascii=False)
     return {"isError": False, "content": [{"type": "text", "text": text}]}
+
+
+def _modern_meta(method: str, params: Any) -> Optional[dict]:
+    """The request's `_meta` if it opens the 2026-07-28 way, else None (legacy). A request counts
+    as modern when its `_meta` carries any per-request protocol key, so a legacy client's
+    `progressToken` alone stays legacy. `server/discover` exists only in the new era, so it is
+    always judged by the new rules."""
+    meta = params.get("_meta") if isinstance(params, dict) else None
+    if isinstance(meta, dict) and any(
+            k in meta for k in (_META_VERSION, _META_CAPABILITIES, _META_CLIENT_INFO)):
+        return meta
+    return {} if method == "server/discover" else None
+
+
+def _modern_result(result: dict) -> dict:
+    result["resultType"] = "complete"
+    result["_meta"] = {_META_SERVER_INFO: {"name": "parley", "version": _version()}}
+    return result
+
+
+def dispatch_modern(method: str, params: Any, meta: dict) -> dict:
+    """Serve one 2026-07-28 request. Nothing here reads or writes per-process state."""
+    version = meta.get(_META_VERSION)
+    if version is None:
+        raise RpcError(INVALID_PARAMS, f"_meta.{_META_VERSION} is required")
+    if not isinstance(version, str):
+        raise RpcError(INVALID_PARAMS, f"_meta.{_META_VERSION} must be a string")
+    if version != MODERN_VERSION:
+        raise RpcError(UNSUPPORTED_PROTOCOL_VERSION, "Unsupported protocol version",
+                       {"supported": list(DISCOVER_VERSIONS), "requested": version})
+    if not isinstance(meta.get(_META_CAPABILITIES), dict):
+        raise RpcError(INVALID_PARAMS, f"_meta.{_META_CAPABILITIES} is required and must be an object")
+    if method == "server/discover":
+        return _modern_result({"supportedVersions": list(DISCOVER_VERSIONS),
+                               "capabilities": {"tools": {}},
+                               "ttlMs": CACHE_TTL_MS, "cacheScope": "public"})
+    if method == "tools/list":
+        return _modern_result({"tools": TOOLS, "ttlMs": CACHE_TTL_MS, "cacheScope": "public"})
+    if method == "tools/call":
+        return _modern_result(_tools_call(params))
+    raise RpcError(METHOD_NOT_FOUND, f"method not found: {method}")
 
 
 def dispatch(method: str, params: Any) -> dict:
@@ -374,17 +433,23 @@ def handle_line(line: bytes) -> Optional[dict]:
         if not method.startswith("notifications/"):
             log.info("ignoring notification with unknown method %s", method)
         return None
+    params = message.get("params")
     try:
-        return {"jsonrpc": "2.0", "id": req_id, "result": dispatch(method, message.get("params"))}
+        meta = None if method == "initialize" else _modern_meta(method, params)
+        result = dispatch(method, params) if meta is None else dispatch_modern(method, params, meta)
+        return {"jsonrpc": "2.0", "id": req_id, "result": result}
     except RpcError as exc:
-        return _error(req_id, exc.code, str(exc))
+        return _error(req_id, exc.code, str(exc), exc.data)
     except Exception as exc:
         log.exception("internal error handling %s", method)
         return _error(req_id, INTERNAL_ERROR, f"internal error: {type(exc).__name__}")
 
 
-def _error(req_id: Any, code: int, message: str) -> dict:
-    return {"jsonrpc": "2.0", "id": req_id, "error": {"code": code, "message": message}}
+def _error(req_id: Any, code: int, message: str, data: Any = None) -> dict:
+    error = {"code": code, "message": message}
+    if data is not None:
+        error["data"] = data
+    return {"jsonrpc": "2.0", "id": req_id, "error": error}
 
 
 def _read_line(stream) -> Optional[bytes]:

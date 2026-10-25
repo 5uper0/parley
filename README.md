@@ -96,6 +96,11 @@ The base install ships a stdlib-only MCP server over stdio. Point your host at i
 If the console script is not on the host's `PATH`, launch it through the interpreter that has
 the package: `{"command": "python", "args": ["-m", "parley.mcp"]}`.
 
+The server speaks both MCP eras: hosts on the 2026-07-28 revision (no `initialize`, version and
+capabilities in each request's `_meta`, `server/discover` for discovery) are served statelessly,
+and hosts on 2025-11-25 or earlier get the usual `initialize` handshake. Same tools, same receipt
+hash on both.
+
 Three tools appear: `parley_decide` (options + each party's red lines and preferences in,
 `status`, `decision`, `transcript` and `transcript_sha256` out), `parley_verify_receipt`
 (recompute the hash over a transcript, and recompute the max-min decision from its recorded

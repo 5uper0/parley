@@ -7,6 +7,14 @@ omitted.
 
 ## [Unreleased]
 
+### Added
+- `parley-mcp` is dual-era. It serves the MCP 2026-07-28 revision statelessly (per-request
+  `_meta`, `resultType`, `ttlMs`/`cacheScope` on `tools/list`, `server/discover`, error -32022
+  `UnsupportedProtocolVersion` with the supported list) next to the existing `initialize`
+  handshake, so hosts that move to the new revision keep working. Legacy sessions are unchanged
+  byte for byte, apart from `initialize` now also accepting `2025-11-25`; tool names and
+  decisions are untouched.
+
 ### Security
 - `Agent.consider` reports a constant `score` of 0.0 on a red-lined verdict instead of the owner's
   real soft score, so a rejected option reveals only `acceptable=False` and `reason="red-line"`.
