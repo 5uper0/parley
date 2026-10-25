@@ -7,6 +7,8 @@ omitted.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-25
+
 ### Added
 - `parley-mcp` is dual-era. It serves the MCP 2026-07-28 revision statelessly (per-request
   `_meta`, `resultType`, `ttlMs`/`cacheScope` on `tools/list`, `server/discover`, error -32022

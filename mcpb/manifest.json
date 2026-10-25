@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "parley",
   "display_name": "Parley",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Multi-party decisions for agents: red lines rejected in code, max-min pick, SHA-256 receipt.",
   "long_description": "Give the options and each party's red lines and soft preferences. An option that crosses any red line is rejected in code; among the options acceptable to everyone the max-min rule picks the one whose least-satisfied party is best off. No acceptable option gives an honest deadlock. The receipt is an unsigned SHA-256 over the transcript: it shows the record was not altered, not who produced a verdict, and it is only meaningful if the hash is kept somewhere other than the transcript. In this mode the host holds every party's spec, so there is no privacy between parties.",
   "author": {

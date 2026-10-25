@@ -76,7 +76,7 @@ Bob not betrayed: True
 Cara not betrayed: True
 ```
 
-The hash above comes from the current repository code, which reports a rejected option's score as 0. Version 0.2.0 from PyPI prints `a9cb75c0...` for the same snippet; the decision and the verdicts are identical.
+The hash above is what version 0.2.1 and later print: a rejected option's score is reported as 0. Version 0.2.0 prints `a9cb75c0...` for the same snippet; the decision and the verdicts are identical.
 
 The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red line, so it is rejected
 before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
