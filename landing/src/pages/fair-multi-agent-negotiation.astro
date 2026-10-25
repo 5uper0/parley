@@ -268,6 +268,7 @@ const jsonLd = JSON.stringify({
             <div class={deviceBlock} aria-label="Example: the two local checks">
               transcript.hash()<br />
               <span class="text-verify">&rarr; 30483303e4d9&hellip;c88f516</span><br />
+              <span class="text-muted">(current repository code; PyPI 0.2.0 prints a9cb75c0&hellip;)</span><br />
               transcript.verify_non_betrayal(my_sheet, decision)<br />
               <span class="text-verify">&rarr; True</span><br />
               verify_outcome(transcript, expected_owners=roster)<br />
