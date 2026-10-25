@@ -2,11 +2,12 @@
 
 # parley.
 
-### The trust layer for the agent economy
+### Several owners, private limits, one decision nobody can rig
 
-**Provable consensus for AI agents of rival owners**, deterministic red lines, max-min consensus over
-masked verdicts, and a verifiable non-betrayal transcript.
-<br>Multilateral (N&gt;2) · non-crypto · self-hosted · Apache-2.0.
+**Give each party's agent a private red line. Parley picks the option that crosses nobody's line and lifts
+the least-happy party, and every owner can check on their own machine that their limit held.** Nobody
+shows their sheet, not even to the coordinator.
+<br>Red lines are code, not prompts · multilateral (N&gt;2) · non-crypto · self-hosted · zero-dependency Python · Apache-2.0.
 
 [![ci](https://github.com/5uper0/parley/actions/workflows/ci.yml/badge.svg)](https://github.com/5uper0/parley/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -21,6 +22,8 @@ masked verdicts, and a verifiable non-betrayal transcript.
 <img src="docs/brand/assets/parley-money-shot.gif" alt="Parley money-shot: three rival parties reach a max-min decision, a red-line-crossing shortcut is BLOCKED in code, and every party verifies a tamper-evident SHA-256 receipt" width="760">
 
 <sub>Rival parties reach a max-min decision · a shortcut that would cheat someone is **BLOCKED** by a red line · every party verifies the tamper-evident receipt.</sub>
+
+<sub>Works from an MCP host (Claude, Cursor) and from [OpenAI Agents SDK, smolagents and LangGraph](examples/frameworks/): the three recipes return the same receipt hash for the same decision.</sub>
 
 </div>
 
