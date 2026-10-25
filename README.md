@@ -2,7 +2,7 @@
 
 # parley.
 
-### Several owners, private limits, one decision nobody can rig
+### Several owners, private limits, one decision that crosses nobody's red line
 
 **Give each party's agent a private red line. Parley picks the option that crosses nobody's line and lifts
 the least-happy party, and every owner can check on their own machine that their limit held.** Nobody
@@ -142,8 +142,8 @@ commerce (an agent buys/books for you), or *cooperative* debate between agents o
 representing a **different** principal with **conflicting** and **private** interests,
 reaching a decision everyone can trust, and *prove* their agent didn't betray them.
 
-**Who it's for.** Teams and platforms where several parties must reach a decision none of them can
-rig, and prove it afterward. Built first for **regulated, multi-party workflows**: compliance &
+**Who it's for.** Teams and platforms where several parties must reach a decision that crosses none of
+their red lines, and each can prove that afterward. Built first for **regulated, multi-party workflows**: compliance &
 onboarding decisions (KYC/AML, sanctions red lines), marketplace & P2P disputes, and delegated
 governance (committees, panels).
 
