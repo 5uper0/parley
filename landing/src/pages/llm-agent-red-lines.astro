@@ -67,7 +67,7 @@ const faqs = [
   },
   {
     q: "What does the coordinator see when my red line fires?",
-    a: "A Verdict with acceptable set to False, your soft score, and the reason \"red-line\". The names of the crossed constraints are computed inside evaluate and kept in an Evaluation object that never leaves your agent. The score itself is public in the transcript; SECURITY.md lists that as a known limit.",
+    a: "A Verdict with acceptable set to False, a score of 0 (your real soft score for that option stays with you), and the reason \"red-line\". The names of the crossed constraints are computed inside evaluate and kept in an Evaluation object that never leaves your agent. The scores of options you accept are public in the transcript; SECURITY.md lists that as a known limit.",
   },
   {
     q: "Does this need an LLM at all?",
@@ -217,7 +217,8 @@ HardConstraint("budget", lambda o: o["cost"] <= 700)`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           <code class={code}>Agent.consider(option)</code> calls
           <code class={code}>evaluate</code> and returns a <code class={code}>Verdict</code>.
-          The verdict carries <code class={code}>acceptable</code>, the score, and a
+          The verdict carries <code class={code}>acceptable</code>, the score (a constant 0
+          when the option is rejected, so a veto shows no preference), and a
           <code class={code}>reason</code> that is the string <code class={code}>"ok"</code>
           when the option is feasible and <code class={code}>"red-line"</code> when it is
           not. The sheet is never handed to the coordinator, and the coordinator is untrusted
@@ -228,7 +229,7 @@ HardConstraint("budget", lambda o: o["cost"] <= 700)`}</code></pre>
     return Verdict(
         owner=self.owner,
         acceptable=ev.feasible,
-        score=ev.score,
+        score=ev.score if ev.feasible else 0.0,
         reason="ok" if ev.feasible else "red-line",
     )`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">

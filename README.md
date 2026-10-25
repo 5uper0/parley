@@ -70,11 +70,13 @@ for sheet in (ana, bob, cara):
 
 ```
 agreed {'venue': 'garden', 'cost': 600}
-receipt sha256: a9cb75c0a15b41360fb2b134e084ca3b577daaf50f5edb657c5c4da43cc2fc72
+receipt sha256: 30483303e4d94e22833161d9bb8c292c0effff88c3303d7e195e57d49c88f516
 Ana not betrayed: True
 Bob not betrayed: True
 Cara not betrayed: True
 ```
+
+The hash above comes from the current repository code, which reports a rejected option's score as 0. Version 0.2.0 from PyPI prints `a9cb75c0...` for the same snippet; the decision and the verdicts are identical.
 
 The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red line, so it is rejected
 before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
@@ -263,9 +265,10 @@ Not yet (v0.1 honest limits, do not treat as production-secure for adversarial p
   caller must run.
 - **Replay binding**, verdicts carry no session/nonce, so a signed verdict is replayable into another
   parley that reuses the same option.
-- **Range-masked scores**, the soft cardinal `score` is public in the transcript, so an untrusted
-  coordinator can infer preference *ordering* and each party's feasible region (the *reason* and the
-  private sheet stay hidden; MPC/range-masking is future work).
+- **Range-masked scores**, the soft cardinal `score` of every accepted option is public in the
+  transcript, so an untrusted coordinator can infer preference *ordering* among those options, and the
+  `acceptable` flags show each party's feasible region (a rejected option always reports score 0; the
+  *reason* and the private sheet stay hidden; MPC/range-masking is future work).
 - **TLS/mTLS**, and game-theoretic **collusion / strategic-misreport resistance** (the research track).
 
 The hosted demo at [parleyprotocol.com](https://parleyprotocol.com) uses GA4 for basic traffic

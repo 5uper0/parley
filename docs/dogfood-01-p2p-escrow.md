@@ -33,7 +33,7 @@ per-option floor (max-min):
   Refund the buyer (100/0)       feasible=True   floor=0.0
   Instant refund, skip evidence  feasible=False  (BLOCKED, Platform red line)
 non-betrayal replay:  Buyer ✓   Seller ✓   Platform ✓
-transcript sha256:    b41b05954802aa4f5d83…
+transcript sha256:    0a85a717b2e6fb2f7272…
 ```
 
 Three things happened that are **enforced in code, not by an LLM's goodwill**:

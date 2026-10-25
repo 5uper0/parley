@@ -48,8 +48,11 @@ framing* is still welcome):
   uninformed liar gained in roughly a quarter to a third of random decisions and an informed liar in more.
   Do not read the outcome as strategy-proof. Mitigations under consideration: ordinal-only scores and a
   sealed commit-reveal verdict round.
-- **Scores are unmasked.** The soft cardinal `score` is public, leaking preference ordering / feasible
-  region (range-masking via MPC is future work).
+- **Scores of accepted options are unmasked.** The soft cardinal `score` of every option a party
+  accepts is public, leaking preference ordering among those options. The `acceptable` flags still
+  leak the feasible region, and enough probing options pin a numeric red line. A rejected option
+  reports score 0, not its real score (after 0.2.0, see CHANGELOG). Range-masking via MPC is future
+  work.
 - **No TLS/mTLS**, and no game-theoretic **collusion / strategic-misreport resistance** (research track).
 
 Do not deploy v0 against genuinely adversarial principals in production. Reports that deepen the

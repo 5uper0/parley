@@ -64,7 +64,7 @@ const faqs = [
   },
   {
     q: "What stays private, and from whom?",
-    a: "The record never holds a red line or a preference, only verdicts. What leaves a person's side is, per option, acceptable or not, a score between 0 and 1, and the word ok or red-line. The rule is not named, but SECURITY.md is plain about the rest: scores are unmasked, the soft cardinal score is public, leaking preference ordering and the feasible region. With a few flat options the pattern of a person's vetoes and scores lets the others guess the rule behind it. In the pass-the-keyboard flow all three positions live in one process on one machine, so this is privacy from the other people and from the record, not from whoever operates that machine. For separate processes per owner, the repository's examples/run_env.py runs each party as its own HTTP server.",
+    a: "The record never holds a red line or a preference, only verdicts. What leaves a person's side is, per option, acceptable or not, a score between 0 and 1, and the word ok or red-line. The rule is not named, but SECURITY.md is plain about the rest: the scores of accepted options are public, leaking preference ordering, and the vetoes show the feasible region. A veto always carries score 0. With a few flat options the pattern of a person's vetoes and scores lets the others guess the rule behind it. In the pass-the-keyboard flow all three positions live in one process on one machine, so this is privacy from the other people and from the record, not from whoever operates that machine. For separate processes per owner, the repository's examples/run_env.py runs each party as its own HTTP server.",
   },
   {
     q: "What do we do when the result is a deadlock?",
@@ -146,9 +146,9 @@ const jsonLd = JSON.stringify({
           against their own rules and whose arithmetic anyone can re-check.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          The run on this page was made with version 0.2.0: the
-          <code class={code}>parley-consensus</code> wheel from PyPI, plus the v0.2.0
-          checkout of the repository for the case files under{" "}
+          The run on this page was made from a checkout of the repository after version
+          0.2.0 (it reports a rejected option's score as 0, which the
+          <code class={code}>parley-consensus</code> 0.2.0 wheel does not), which holds the case files under{" "}
           <a href={CASES_URL} target="_blank" rel="noopener" class={link}>examples/cases/</a>,
           the flow script{" "}
           <a href={FLOW_URL} target="_blank" rel="noopener" class={link}>examples/real_decision.py</a>{" "}
@@ -330,7 +330,7 @@ Cara
 oct-fourth   (weeks_away 4, cost_each 180, days_off_needed 1, weather_risk low, someone_misses c)
   Ana   acceptable=true   reason="ok"        score=0.00
   Bob   acceptable=true   reason="ok"        score=0.00
-  Cara  acceptable=false  reason="red-line"  score=0.75
+  Cara  acceptable=false  reason="red-line"  score=0.00
 
 nov-second   (weeks_away 7, cost_each 140, days_off_needed 0, weather_risk medium, someone_misses none)
   Ana   acceptable=true   reason="ok"        score=1.00
@@ -338,8 +338,8 @@ nov-second   (weeks_away 7, cost_each 140, days_off_needed 0, weather_risk mediu
   Cara  acceptable=true   reason="ok"        score=0.25
 
 dec-first    (weeks_away 12, cost_each 260, days_off_needed 2, weather_risk high, someone_misses none)
-  Ana   acceptable=false  reason="red-line"  score=0.50
-  Bob   acceptable=false  reason="red-line"  score=0.50
+  Ana   acceptable=false  reason="red-line"  score=0.00
+  Bob   acceptable=false  reason="red-line"  score=0.00
   Cara  acceptable=true   reason="ok"        score=0.00
 
 next-week    (weeks_away 1, cost_each 320, days_off_needed 2, weather_risk low, someone_misses b)
@@ -350,10 +350,11 @@ next-week    (weeks_away 1, cost_each 320, days_off_needed 2, weather_risk low, 
           Three options are out: <code class={code}>oct-fourth</code> crosses one of Cara's
           lines, <code class={code}>dec-first</code> and <code class={code}>next-week</code>
           cross lines of Ana's and Bob's. The record says <code class={code}>red-line</code>
-          and does not name the rule. It does show who vetoed what, and the scores next to
-          the vetoes: with five flat options, someone reading that Cara rejected the only
-          option on which she misses out can guess her rule, and SECURITY.md says so (scores
-          are unmasked, leaking preference ordering and the feasible region).
+          and does not name the rule. It does show who vetoed what. A veto always carries score 0, so
+          it shows no preference, but with five flat options, someone reading that Cara
+          rejected the only option on which she misses out can guess her rule, and SECURITY.md
+          says so (the scores of accepted options are unmasked, and the veto pattern leaks the
+          feasible region).
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Two options survive. <code class={code}>nov-second</code> has the higher total
@@ -378,7 +379,7 @@ next-week    (weeks_away 1, cost_each 320, days_off_needed 2, weather_risk low, 
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Ratification prompt as printed for one participant, scrollable code"><code>{`--- Ana, review the outcome privately. ---
 
 Decision: {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
-Record hash: 6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
+Record hash: dd2ba74a87d9c80b4e59090495e399d30f096c32f8e594e6722f99954fd5d46b
 
 Replayed against your own sheet: no red line of yours was crossed.
 
@@ -391,7 +392,7 @@ Do you accept this outcome? yes / no >`}</code></pre>
 ==================================================================
 Decision: {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
 
-Record hash          6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
+Record hash          dd2ba74a87d9c80b4e59090495e399d30f096c32f8e594e6722f99954fd5d46b
 Max-min honest       yes   (the announced option really is the max-min one)
 Unanimously accepted yes   (every participant accepted this exact record)
 
@@ -425,7 +426,7 @@ DEADLOCK. No option cleared every participant's red lines.
 This is an honest outcome, not a failure: forcing an agreement that crosses
 somebody's red line is exactly what this tool exists to prevent.
 
-Record hash          28685bcd5bc067ca005db387f858ee548af9857be63df377510d43fb79d2949d
+Record hash          306aca9e2e39e3cef9d2107b885a8555b9ce6b9a2790271c8abbd7b672297934
 Max-min honest       yes   (the announced option really is the max-min one)
 Unanimously accepted no   (every participant accepted this exact record)
 
@@ -457,8 +458,8 @@ Parley receipt check: Which weekend do we actually go?
   status agreed   decision {"cost_each": 210, "days_off_needed": 1, "id": "oct-third", "someone_misses": "none", "weather_risk": "low", "weeks_away": 3}
 
 Record
-  transcript hash   claimed    6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877
-                    recomputed 6b7aaf34e4b5b0cef24b1849348f19d5c89eab63f0d59aa0b3d9079d91741877   OK
+  transcript hash   claimed    dd2ba74a87d9c80b4e59090495e399d30f096c32f8e594e6722f99954fd5d46b
+                    recomputed dd2ba74a87d9c80b4e59090495e399d30f096c32f8e594e6722f99954fd5d46b   OK
   status/decision   match the finalized record   OK
   max-min honest    yes (recomputed from the recorded verdicts)   OK
   roster            Ana, Bob, Cara (record: Ana, Bob, Cara)   OK
@@ -502,8 +503,9 @@ What this does NOT prove
             <li>
               <strong class="text-ink">The scores and the vetoes are public.</strong>{" "}
               <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>{" "}
-              states it as a known gap: "Scores are unmasked. The soft cardinal score is
-              public, leaking preference ordering / feasible region". The record shows that
+              states it as a known gap: "The soft cardinal score of every option a party
+              accepts is public, leaking preference ordering among those options. The
+              acceptable flags still leak the feasible region". The record shows that
               Cara scored <code class={code}>oct-third</code> at 0.75 and
               <code class={code}>nov-second</code> at 0.25, and that she alone rejected
               <code class={code}>oct-fourth</code>. The rule is not named, but with a few flat

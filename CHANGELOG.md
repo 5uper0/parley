@@ -7,6 +7,12 @@ omitted.
 
 ## [Unreleased]
 
+### Security
+- `Agent.consider` reports a constant `score` of 0.0 on a red-lined verdict instead of the owner's
+  real soft score, so a rejected option reveals only `acceptable=False` and `reason="red-line"`.
+  Decisions are unchanged (max-min only ranks options every party accepts), but every new transcript
+  hash differs; receipts issued earlier still hash and verify.
+
 ### Fixed
 - `Transcript.hash()`, `verdict_payload` and `acceptance_payload` no longer hash or sign a tuple
   option/decision the same as an equal-valued list; a dict carrying the reserved key

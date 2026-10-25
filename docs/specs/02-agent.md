@@ -23,7 +23,8 @@ the reason is what keeps rival owners' private positions private even as they ne
 `Verdict` (frozen dataclass — the wire/transcript unit):
 - `owner: str` — which principal this verdict speaks for.
 - `acceptable: bool` — mirrors `Evaluation.feasible`; all the owner's red lines held.
-- `score: float` — the owner's soft utility in `[0, 1]` for this option.
+- `score: float` — the owner's soft utility in `[0, 1]` for this option when it is acceptable;
+  a constant `0.0` when it is not.
 - `reason: str` — masked: `"ok"` when acceptable, `"red-line"` when not. Never names the constraint.
 - `sig: Optional[str] = None` — optional Ed25519 signature over `(option, verdict)`; `None` for
   local agents. Plain string so the zero-dependency core never imports the crypto lib.
@@ -41,9 +42,12 @@ the reason is what keeps rival owners' private positions private even as they ne
 - **The sheet never escapes.** `consider` returns a `Verdict` and nothing that references the
   sheet; `Verdict` has no field for constraints or utility. The frozen dataclass has no `sheet`,
   `hard`, or `violated` attribute — verified by test.
-- **Faithful mapping.** `acceptable == ev.feasible` and `score == ev.score`; the agent does not
-  re-rank, soften, or override its owner's evaluation. It is a pure pass-through of the masked
-  fields.
+- **Faithful mapping.** `acceptable == ev.feasible`, and `score == ev.score` when feasible; the
+  agent does not re-rank, soften, or override its owner's evaluation.
+- **A red-lined score is masked too.** When `ev.feasible` is false, `score == 0.0` whatever the
+  owner's real utility. Consensus only ranks options every agent accepts, so the real score of a
+  rejected option never changes a decision; publishing it only leaked preference data (a utility
+  scaled to a budget gives the budget away).
 - **Signatures are opaque to the core.** `sig`/`pubkey_hex` are plain `Optional[str]`; the local
   `Agent` leaves them `None`. Crypto is populated only by the networked/signed bots (`net/`) so the
   core imports no crypto library.
@@ -61,9 +65,10 @@ the reason is what keeps rival owners' private positions private even as they ne
 
 ## Failure modes / edge cases
 
-- **Infeasible option** → `acceptable=False`, `reason="red-line"`, but a real `score` is still
-  reported (the score is computed regardless of feasibility; consensus ignores scores of
-  infeasible options).
+- **Infeasible option** → `acceptable=False`, `reason="red-line"`, `score=0.0`. The real score is
+  still computed in `evaluate` and stays with the owner. Transcripts written before 2026-10-25
+  carry the real score on rejected options; they still hash and verify, since nothing re-derives
+  a verdict from a sheet.
 - **Multiple red lines crossed** → still a single `"red-line"` (the count and identities are not
   observable from the verdict).
 - **Predicate/utility raises** inside `evaluate` → propagates out of `consider` (owner's own trusted
