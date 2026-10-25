@@ -90,7 +90,7 @@ const jsonLd = JSON.stringify({
       "@id": "https://parleyprotocol.com/fair-multi-agent-negotiation/#article",
       headline: "Fair multi-agent negotiation when the agents are not on the same side",
       description:
-        "How AI agents representing owners with conflicting, private interests reach a decision none of them can rig: red lines enforced as code predicates, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone.",
+        "How AI agents representing owners with conflicting, private interests reach a decision that crosses none of their red lines: red lines enforced as code predicates, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone.",
       url: "https://parleyprotocol.com/fair-multi-agent-negotiation/",
       inLanguage: "en",
       author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
@@ -117,7 +117,7 @@ const jsonLd = JSON.stringify({
 
 <Layout
   title="Fair multi-agent negotiation for rival owners — Parley"
-  description="How AI agents representing owners with conflicting, private interests reach a decision none of them can rig: red lines enforced in code, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone."
+  description="How AI agents representing owners with conflicting, private interests reach a decision that crosses none of their red lines: red lines enforced in code, max-min consensus over masked verdicts, and a SHA-256 transcript each owner verifies alone."
   path="/fair-multi-agent-negotiation/"
 >
   <script type="application/ld+json" is:inline set:html={jsonLd} />
@@ -147,8 +147,9 @@ const jsonLd = JSON.stringify({
         <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
           Most multi-agent frameworks assume every agent serves one owner and a shared
           goal. The moment several owners with conflicting, private interests each send
-          an agent, "fair" stops meaning polite and starts meaning: no party can rig the
-          outcome, and every party can check that afterwards. This page explains how
+          an agent, "fair" stops meaning polite and starts meaning: no option that crosses a party's red line can
+          win, and every party can check that afterwards. Parley does not stop a party from misreporting its
+          soft scores to tilt the pick among acceptable options (see SECURITY.md). This page explains how
           Parley enforces that in code rather than asking a model to behave.
         </p>
         <p class="mt-4 text-[13px] text-subtle">

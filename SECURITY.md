@@ -42,6 +42,12 @@ framing* is still welcome):
   tamper-evidence only. Closed by the same v0.2 roster pin.
 - **No replay binding.** Verdict payloads carry no session id or nonce, so a genuine signed verdict
   is replayable into another parley that reuses the same option.
+- **Strategic reporting of soft scores is not prevented.** Red lines are enforced in code, but the soft
+  score each party reports is self-declared. A party that misreports it can tilt the pick among options
+  that are acceptable to everyone, at the other parties' expense; in our own simulation (2026-10-25) a
+  uninformed liar gained in roughly a quarter to a third of random decisions and an informed liar in more.
+  Do not read the outcome as strategy-proof. Mitigations under consideration: ordinal-only scores and a
+  sealed commit-reveal verdict round.
 - **Scores are unmasked.** The soft cardinal `score` is public, leaking preference ordering / feasible
   region (range-masking via MPC is future work).
 - **No TLS/mTLS**, and no game-theoretic **collusion / strategic-misreport resistance** (research track).
