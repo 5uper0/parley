@@ -55,5 +55,5 @@ def test_crossing_different_red_lines_yields_indistinguishable_verdicts():
     morning = agent.consider(slot("mon", 9))
     friday = agent.consider(slot("fri", 15))
     both = agent.consider(slot("fri", 9))
-    assert morning == friday == both == Verdict("ana", False, 0.3, "red-line")
+    assert morning == friday == both == Verdict("ana", False, 0.0, "red-line")
     assert agent.consider(slot("tue", 15)) == Verdict("ana", True, 0.3, "ok")

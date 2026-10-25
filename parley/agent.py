@@ -3,6 +3,10 @@
 The only thing that ever leaves an agent is a Verdict: acceptable + a soft score +
 a *masked* reason. It never says which red line was crossed, and never exposes the
 PreferenceSheet. Non-betrayal is a code-enforced property, not an LLM's discretion.
+
+A red-lined verdict carries the constant score 0.0, not the real one. Max-min only ranks
+options every agent accepts, so the real score of a rejected option never affects a decision;
+publishing it only leaked preference data (a utility scaled to a budget gives the budget away).
 """
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -32,6 +36,6 @@ class Agent:
         return Verdict(
             owner=self.owner,
             acceptable=ev.feasible,
-            score=ev.score,
+            score=ev.score if ev.feasible else 0.0,
             reason="ok" if ev.feasible else "red-line",
         )

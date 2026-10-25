@@ -150,7 +150,7 @@ const jsonLd = JSON.stringify({
           things the check does not prove.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          Library calls and values here were checked against version 0.2.0. The verifier,{" "}
+          Library calls here were checked against version 0.2.0; hashes and verdicts come from the repository's current code, which reports a red-lined verdict's score as 0 (not yet released, see CHANGELOG). The verifier,{" "}
           <a href={VERIFIER_URL} target="_blank" rel="noopener" class={link}>
             scripts/verify-receipt.py
           </a>, and the examples are not in the PyPI wheel: they need a clone of the
@@ -224,7 +224,7 @@ const jsonLd = JSON.stringify({
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           No sheet and no constraint name is in the file. A verdict names its owner, a
           boolean, a soft score and the masked reason; it never says which red line was
-          crossed. Soft scores are public and leak preference ordering (SECURITY.md).
+          crossed. The scores of accepted options are public and leak preference ordering (SECURITY.md); a rejected option always shows score 0.
         </p>
       </section>
 
@@ -252,7 +252,7 @@ const jsonLd = JSON.stringify({
           only when every one holds. It does not read the recorded verdicts; it needs your
           sheet and the public decision, and nothing else. A <code class={code}>None</code>
           decision (a deadlock) returns <code class={code}>True</code>, since it forces nothing
-          on anyone. This is the README quickstart, run under 0.2.0:
+          on anyone. This is the README quickstart, run on the repository's current code:
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Python: the README quickstart with verify_non_betrayal, scrollable code"><code>{`from parley.agent import Agent
 from parley.consensus import run_consensus
@@ -270,7 +270,7 @@ print("receipt sha256:", result.transcript.hash())
 for sheet in (ana, bob, cara):
     print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))`}</code></pre>
         <pre class={`${deviceBlock} mt-3 whitespace-pre`} tabindex="0" aria-label="Output of the quickstart, scrollable code"><code>{`agreed {'venue': 'garden', 'cost': 600}
-receipt sha256: a9cb75c0a15b41360fb2b134e084ca3b577daaf50f5edb657c5c4da43cc2fc72
+receipt sha256: 30483303e4d94e22833161d9bb8c292c0effff88c3303d7e195e57d49c88f516
 Ana not betrayed: True
 Bob not betrayed: True
 Cara not betrayed: True`}</code></pre>
@@ -295,9 +295,8 @@ python scripts/verify-receipt.py receipt.json`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           For this page the receipt was produced in process from
           <code class={code}>examples/demo/recipe_committee.json</code>, a grant committee
-          with three reviewers, in a fresh virtual environment with only
-          <code class={code}>parley-consensus==0.2.0</code> installed, with the verifier
-          script taken from a checkout of the repository: the recipe was run, each party's
+          with three reviewers, from a checkout of the repository with the base package
+          installed: the recipe was run, each party's
           acceptance was made with <code class={code}>ratify</code>, and the nine fields were
           written exactly as <code class={code}>real_decision.py</code> writes them. The Budget reviewer's one red line is
           <code class={code}>reviewed == true</code>. The unreviewed option has the best
@@ -306,7 +305,7 @@ python scripts/verify-receipt.py receipt.json`}</code></pre>
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Two transcript entries from the committee receipt, scrollable code"><code>{`rubber-stamp   (impact 9, cost 5, novelty 8, reviewed false)
   Impact   acceptable=true   reason="ok"        score=1.00
-  Budget   acceptable=false  reason="red-line"  score=0.94
+  Budget   acceptable=false  reason="red-line"  score=0.00
   Novelty  acceptable=true   reason="ok"        score=0.89
 
 fund-biotech   (impact 5, cost 20, novelty 9, reviewed true)
@@ -324,8 +323,8 @@ Parley receipt check: Fund a grant proposal (committee vote)
   status agreed   decision {"cost": 20, "id": "fund-biotech", "impact": 5, "label": "Fund the diagnostics pilot", "novelty": 9, "reviewed": true}
 
 Record
-  transcript hash   claimed    d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc
-                    recomputed d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc   OK
+  transcript hash   claimed    bc180fabe85145de66c8c21ae2d0fd850a60832c3665ded013cf24a4b0815d81
+                    recomputed bc180fabe85145de66c8c21ae2d0fd850a60832c3665ded013cf24a4b0815d81   OK
   status/decision   match the finalized record   OK
   max-min honest    yes (recomputed from the recorded verdicts)   OK
   roster            Budget, Impact, Novelty (record: Budget, Impact, Novelty)   OK
@@ -343,8 +342,8 @@ Result: VERIFIED. Every claim in this receipt re-derives from its own record.`}<
           to the climate initiative (Impact's favourite) and the record is re-hashed honestly,
           so the hash line passes:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with a swapped winner, scrollable code"><code>{`  transcript hash   claimed    733058d64bb9085c43b870e468a5587d9a80da6fb39e776af67a5c441fc90878
-                    recomputed 733058d64bb9085c43b870e468a5587d9a80da6fb39e776af67a5c441fc90878   OK
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with a swapped winner, scrollable code"><code>{`  transcript hash   claimed    417117fff1035442cf9b9d8a0aa3b3f4dca85898da0b4ab48cef4e3d20e1521b
+                    recomputed 417117fff1035442cf9b9d8a0aa3b3f4dca85898da0b4ab48cef4e3d20e1521b   OK
   status/decision   match the finalized record   OK
   max-min honest    NO (recomputed from the recorded verdicts)   FAIL
   ...
@@ -360,20 +359,19 @@ Result: FAILED
           Second, one verdict is edited after the receipt was written (Budget's rejection of
           the unreviewed option flipped to acceptable) and the hash is left as it was:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with an edited verdict, scrollable code"><code>{`  transcript hash   claimed    d08a48ebf62b63f22d5e754cccbc7babcf42b867fc6be9fd1366c4135828b6bc
-                    recomputed 2f0eaae11316761c9c9a9fc58c6fbb78b37ca675a2465ba84fe75c36fcca3084   FAIL
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the receipt with an edited verdict, scrollable code"><code>{`  transcript hash   claimed    bc180fabe85145de66c8c21ae2d0fd850a60832c3665ded013cf24a4b0815d81
+                    recomputed 06ce27d3be5d0b09b8c683753e9fd380e66b0be75725e0cd2b00f237e344874d   FAIL
   ...
 Result: FAILED
   - transcript hash mismatch: the record was edited after the receipt was written
-  - the announced decision is not the max-min option over the recorded verdicts
   - Impact: acceptance is not bound to this record and decision
   - Budget: acceptance is not bound to this record and decision
   - Novelty: acceptance is not bound to this record and decision
   - receipt's unanimous_acceptance claim does not match the recomputation`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
-          Both tampered runs exit 1; the clean run exits 0. In the second case the edited
-          record would also make the unreviewed option the max-min winner, which is why the
-          max-min line fails too.
+          Both tampered runs exit 1; the clean run exits 0. In the second case the max-min line
+          still passes: the flipped verdict carries score 0, so the unreviewed option cannot
+          win, and the hash and the acceptances are what catch the edit.
         </p>
       </section>
 

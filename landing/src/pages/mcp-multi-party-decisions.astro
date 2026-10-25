@@ -148,7 +148,9 @@ const jsonLd = JSON.stringify({
           and the limits.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          Commands and values here were checked against version 0.2.0 from PyPI; the
+          Commands here were checked against version 0.2.0 from PyPI; the values come from
+          the repository's current code, which reports a rejected option's score as 0 (not
+          yet released). The
           server is{" "}
           <a href={MCP_SOURCE_URL} target="_blank" rel="noopener" class={link}>
             parley/mcp.py
@@ -286,12 +288,12 @@ const jsonLd = JSON.stringify({
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`status:            agreed
 decision:          {"cost": 600, "venue": "garden"}
-transcript_sha256: 8904d3475702417dfea9faa29cba1a8fb3f9fd001037d6b371717be2757385a1
+transcript_sha256: ffa80a757ba16c62f5f50d78aab9879012af98965a640437b43edd285368c257
 
 transcript.entries[0]:
   option: {"cost": 900, "venue": "rooftop"}
   Ana   acceptable=true   reason="ok"        score=1.0
-  Bob   acceptable=false  reason="red-line"  score=0.1
+  Bob   acceptable=false  reason="red-line"  score=0.0
   Cara  acceptable=true   reason="ok"        score=0.0`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget line, so
@@ -300,7 +302,7 @@ transcript.entries[0]:
           the transcript and hash straight back, and Bob's party object with the decision:
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`parley_verify_receipt(transcript, sha256, expected_owners=["Ana","Bob","Cara"])
-  {"match": true, "max_min_verified": true, "expected_sha256": "8904d3...85a1", "recomputed_sha256": "8904d3...85a1"}
+  {"match": true, "max_min_verified": true, "expected_sha256": "ffa80a...c257", "recomputed_sha256": "ffa80a...c257"}
 
 parley_check_party(party=Bob, decision={"cost": 600, "venue": "garden"})
   {"owner": "Bob", "holds": true}

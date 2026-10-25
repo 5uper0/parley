@@ -1,0 +1,111 @@
+{
+  "note": "Written by parley before 2026-10-25, when a red-lined verdict still carried the real soft score. Kept so receipts issued then still verify.",
+  "sha256": "a9cb75c0a15b41360fb2b134e084ca3b577daaf50f5edb657c5c4da43cc2fc72",
+  "transcript": {
+    "entries": [
+      {
+        "option": {
+          "cost": 900,
+          "venue": "rooftop"
+        },
+        "verdicts": [
+          {
+            "acceptable": true,
+            "owner": "Ana",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 1.0,
+            "sig": null
+          },
+          {
+            "acceptable": false,
+            "owner": "Bob",
+            "pubkey_hex": null,
+            "reason": "red-line",
+            "score": 0.09999999999999998,
+            "sig": null
+          },
+          {
+            "acceptable": true,
+            "owner": "Cara",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.5,
+            "sig": null
+          }
+        ]
+      },
+      {
+        "option": {
+          "cost": 600,
+          "venue": "garden"
+        },
+        "verdicts": [
+          {
+            "acceptable": true,
+            "owner": "Ana",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.4,
+            "sig": null
+          },
+          {
+            "acceptable": true,
+            "owner": "Bob",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.4,
+            "sig": null
+          },
+          {
+            "acceptable": true,
+            "owner": "Cara",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.9,
+            "sig": null
+          }
+        ]
+      },
+      {
+        "option": {
+          "cost": 300,
+          "venue": "diner"
+        },
+        "verdicts": [
+          {
+            "acceptable": true,
+            "owner": "Ana",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.4,
+            "sig": null
+          },
+          {
+            "acceptable": true,
+            "owner": "Bob",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.7,
+            "sig": null
+          },
+          {
+            "acceptable": true,
+            "owner": "Cara",
+            "pubkey_hex": null,
+            "reason": "ok",
+            "score": 0.5,
+            "sig": null
+          }
+        ]
+      }
+    ],
+    "result": {
+      "decision": {
+        "cost": 600,
+        "venue": "garden"
+      },
+      "status": "agreed"
+    }
+  }
+}

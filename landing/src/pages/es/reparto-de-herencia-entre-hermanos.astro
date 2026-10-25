@@ -55,7 +55,7 @@ const faqs = [
   },
   {
     q: "¿Qué ve cada hermano de los demás?",
-    a: "Por cada opción y cada persona, el registro guarda tres cosas: si la acepta o no, una puntuación entre 0 y 1, y la palabra ok o red-line (más el nombre de quien responde y, si se usa --sign, una firma). No guarda la regla que hay detrás. Pero las puntuaciones y los vetos son visibles para todos los que lean el registro. Con cinco opciones, si Clara es la única que acepta las dos opciones en las que ella se queda en la casa, los demás pueden adivinar su regla. SECURITY.md lo reconoce como una limitación conocida.",
+    a: "Por cada opción y cada persona, el registro guarda tres cosas: si la acepta o no, una puntuación entre 0 y 1, y la palabra ok o red-line (más el nombre de quien responde y, si se usa --sign, una firma). No guarda la regla que hay detrás. Pero las puntuaciones de las opciones aceptadas y los vetos son visibles para todos los que lean el registro (un veto lleva siempre la puntuación 0). Con cinco opciones, si Clara es la única que acepta las dos opciones en las que ella se queda en la casa, los demás pueden adivinar su regla. SECURITY.md lo reconoce como una limitación conocida.",
   },
   {
     q: "¿Qué pasa si ninguna opción pasa los límites de todos?",
@@ -272,35 +272,37 @@ ana-compra
 
 ana-compra-rebaja
   Ana            acceptable=true   reason="ok"        score=0.7500
-  Bruno          acceptable=false  reason="red-line"  score=0.7500
+  Bruno          acceptable=false  reason="red-line"  score=0.0000
   Clara          acceptable=false  reason="red-line"  score=0.0000
-  Regla neutral  acceptable=false  reason="red-line"  score=0.5000
+  Regla neutral  acceptable=false  reason="red-line"  score=0.0000
 
 clara-alquila
-  Ana            acceptable=false  reason="red-line"  score=0.3333
-  Bruno          acceptable=false  reason="red-line"  score=0.5000
+  Ana            acceptable=false  reason="red-line"  score=0.0000
+  Bruno          acceptable=false  reason="red-line"  score=0.0000
   Clara          acceptable=true   reason="ok"        score=1.0000
   Regla neutral  acceptable=true   reason="ok"        score=0.5000
 
 clara-gratis
-  Ana            acceptable=false  reason="red-line"  score=0.3333
-  Bruno          acceptable=false  reason="red-line"  score=0.5000
+  Ana            acceptable=false  reason="red-line"  score=0.0000
+  Bruno          acceptable=false  reason="red-line"  score=0.0000
   Clara          acceptable=true   reason="ok"        score=0.6667
-  Regla neutral  acceptable=false  reason="red-line"  score=0.5000`}</code></pre>
+  Regla neutral  acceptable=false  reason="red-line"  score=0.0000`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Tres opciones quedan fuera. <code class={code}>ana-compra-rebaja</code>, la
           tentadora, cruza líneas de Bruno, de Clara y de la regla neutral.
           <code class={code}>clara-alquila</code> cruza líneas de Ana y de Bruno.
           <code class={code}>clara-gratis</code> cruza líneas de Ana, de Bruno y de la regla.
           El registro dice <code class={code}>red-line</code> y no dice cuál. Sí muestra
-          quién vetó qué, y las puntuaciones al lado.
+          quién vetó qué. Un veto lleva siempre la puntuación 0, así que no
+          muestra cuánto le gustaba la opción a quien la vetó.
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Quedan dos. En <code class={code}>vender</code> la puntuación más baja es la de
           Ana, 0. En <code class={code}>ana-compra</code> la más baja es la de Clara, 0,3333.
           La opción que deja mejor al menos contento es
-          <code class={code}>ana-compra</code>, y esa es la decisión. Sumando puntuaciones,
-          <code class={code}>clara-alquila</code> habría ganado con 2,3333 frente a 2,25;
+          <code class={code}>ana-compra</code>, y esa es la decisión. Sumando las puntuaciones
+          reales de cada hoja, <code class={code}>clara-alquila</code> habría ganado con
+          2,3333 frente a 2,25;
           no gana porque cruza dos líneas rojas, y una línea roja se mira antes que
           cualquier suma.
         </p>
@@ -311,7 +313,7 @@ clara-gratis
 decision: {"id": "ana-compra", "quien_vive": "Ana", "efectivo_por_hermano": 100000,
            "meses_hasta_cobrar": 6, "meses_para_mudarse": 6,
            "tasacion_independiente": true, "condominio_se_disuelve": true}
-hash:     4645b2af861230708adf05fff11624972e5a6952e4f4367313c12d446ced6364
+hash:     b08998c12461a57f80f92e281f29db878acba03f70808589a8d3f98eee7bc16e
 
 verify_outcome (recalculado desde los veredictos del registro):  True
 verify_non_betrayal (cada hoja contra la decisión, en su lado):
