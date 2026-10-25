@@ -18,4 +18,8 @@ ENV PARLEY_HOST=0.0.0.0 \
     PYTHONPATH=/app
 EXPOSE 8080
 
+# The demo needs no write access and listens above 1024: run it as an unprivileged user.
+RUN adduser --system --group --no-create-home parley
+USER parley
+
 CMD ["python", "examples/demo/server.py"]
