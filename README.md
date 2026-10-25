@@ -182,6 +182,16 @@ was at stake, no red line could be traded away, and everyone can check the recei
 parts, and it's the one thing we made enforceable in code rather than left to an LLM's goodwill. The
 worked proof: [`docs/dogfood-01-p2p-escrow.md`](docs/dogfood-01-p2p-escrow.md).
 
+## Neighbours, and what they do not do
+
+Read from each project's own public description on 2026-10-25; they are different tools for different jobs, and some are complements.
+
+| Neighbour | What it does | What Parley adds |
+|---|---|---|
+| [MPAC](https://arxiv.org/abs/2604.09744) (arXiv, April 2026) | Lets agents of independent principals coordinate over shared state: declared intents, structured conflicts, human arbitration | A decision rule over private limits: red lines as code, max-min over masked verdicts, local replay. The MPAC abstract does not describe private preferences, masking or verifiable transcripts |
+| [Legal Context Protocol](https://legalcontextprotocol.org) (American Arbitration Association and partners, launched 2026-06-24) | Makes legal terms, consent and dispute resolution discoverable and verifiable when agents transact | The decision before any dispute: LCP covers terms and recourse, Parley reaches the choice among options. A complement |
+| [Acuerdio](https://acuerdio.com) (Spain) | Online mediation platform; starts with an invitation to "the other party"; certified invitation and MASC certificate priced per party (19 EUR on its site) | Three or more owners with private limits and a record each can recompute. Parley issues no MASC certificate and makes no claim to satisfy any legal requirement |
+
 ## Status: v0 (working core)
 
 Pure-stdlib, zero-dependency core. In-process transport with a clean seam where **A2A**
