@@ -470,7 +470,7 @@ def _read_line(stream) -> Optional[bytes]:
 def serve(stdin=None, stdout=None) -> None:
     stdin = stdin if stdin is not None else sys.stdin.buffer
     stdout = stdout if stdout is not None else sys.stdout.buffer
-    log.info("parley MCP server %s ready (protocol %s)", _version(), PROTOCOL_VERSION)
+    log.info("parley MCP server %s ready (protocol %s, legacy %s)", _version(), MODERN_VERSION, PROTOCOL_VERSION)
     while True:
         line = _read_line(stdin)
         if line is None:
