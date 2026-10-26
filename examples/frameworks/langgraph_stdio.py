@@ -1,7 +1,8 @@
 """Call Parley from LangGraph / LangChain over MCP stdio.
 
-Needs: pip install langgraph langchain-mcp-adapters parley-consensus
-(tested 2026-10-25: langgraph 1.2.17, langchain-mcp-adapters 0.3.2, mcp 1.30.0)
+Needs: pip install langgraph langchain-mcp-adapters "mcp<2" parley-consensus
+(tested 2026-10-26 against parley-mcp 0.2.1: langgraph 1.2.17, langchain-mcp-adapters 0.3.2, mcp 1.30.0;
+the adapter fails to import against mcp 2.x, hence the pin)
 Runs offline: the tools are LangChain tools, called directly with no model key. To let a graph
 agent decide when to call Parley, pass `tools` to `langgraph.prebuilt.create_react_agent`.
 """
