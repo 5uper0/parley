@@ -297,9 +297,9 @@ and willingness to pay, scales with **decision stakes × number of parties × ne
 neutrality / audit**. The paid layer is the *trusted neutral broker*: hosted identity/trust-registry,
 audit-grade signed transcripts, and managed self-hosting, not the algorithm. First candidate
 segments: private multi-party B2B negotiation (procurement/SOW) and auditable delegated governance
-(committees, panels). Differentiator vs **Fetch.ai / Olas** (real prior art): they do *bilateral*
-commerce on a *blockchain*; Parley does *multilateral group consensus*, provable non-betrayal,
-**no crypto**, self-hosted.
+(committees, panels). Differentiator vs **Fetch.ai / Olas** (real prior art, agent platforms built around a ledger and a
+token): their pages describe no red-line or consensus mechanism, and Olas is on-chain and token-based;
+Parley does *multilateral group consensus*, provable non-betrayal, **no crypto**, self-hosted.
 
 The demo shows three people whose agents hold private, conflicting constraints reach a
 slot everyone's red lines allow, then each owner proves non-betrayal, and a second run
