@@ -1,4 +1,6 @@
-import json, random, copy, traceback
+"""Probe: feed 19 malformed or extreme specs to parley.mcp.tool_decide and print what each does. Read-only; run from the repo root with PYTHONPATH=."""
+import copy
+import json
 from parley import mcp
 base = json.load(open("examples/demo/recipe_committee.json"))
 def run(name, spec):

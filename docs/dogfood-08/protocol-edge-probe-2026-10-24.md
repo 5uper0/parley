@@ -1,6 +1,6 @@
 # Protocol edge probe, 2026-10-24
 
-Script: `docs/dogfood-08/probe_edges.py` (run from the repo root: `.venv/bin/python docs/dogfood-08/probe_edges.py`). It feeds 19 malformed or extreme specs to `parley.mcp.tool_decide`. Trigger: finding the `mcp` 2.x break while writing framework recipes; the owner asked to keep testing the protocol in different situations.
+Script: `docs/dogfood-08/probe_edges.py` (run from the repo root: `PYTHONPATH=. python docs/dogfood-08/probe_edges.py`; `probe_signing.py` needs the `[dev]` extra for pynacl). It feeds 19 malformed or extreme specs to `parley.mcp.tool_decide`. Trigger: finding the `mcp` 2.x break while writing framework recipes; the owner asked to keep testing the protocol in different situations.
 
 ## Result
 
@@ -17,15 +17,11 @@ No crash and no wrong decision. Through the stdio server every exception comes b
 | 5 | `NaN` attribute | accepted; comparisons are false so it fails closed on red lines, utilities untested | JSON cannot carry NaN, so only Python callers reach it | reject non-finite numbers |
 | 6 | empty owner name, integer option id | accepted | cosmetic; receipt readability | optional validation |
 
-Not tested yet: signed verdicts with a wrong key, replayed transcripts across two runs, `parley_check_party` with mismatched specs, concurrent calls.
+Not covered in this first pass; all four are covered below: signed verdicts and replay (`probe_signing.py`), `parley_check_party` (`probe_check_party.py`), concurrent calls (`probe_concurrency.py`).
 
 ## Handling
 
-Findings 1 to 3 are worth a small PR with red-first tests after Exp 1 (current rule: do not build ahead of the current Exp); they are filed as BACKLOG rows, not code. The probe itself is a repo-private doc.
-
-## Scope question: can Parley limit mass hacking? (2026-10-24, Oleh)
-
-Short answer: no. Parley does not scan, patch, authenticate or monitor anything; it referees a decision among parties whose owners disagree. What it can do in this area is narrow: a verifiable record and enforced red lines for a multi-party decision such as a coordinated-disclosure timeline (`examples/demo/recipe_vuln_disclosure.json`: researcher, vendor and downstream maintainers settle on the 90-day window; "publish everything today" and "stay silent 180 days" are blocked by red lines). Limits that matter here: Parley trusts the attributes each party supplies and cannot check them against reality; a compromised agent can lie in its own spec; signatures bind a key to a verdict but there is no owner-to-key roster yet (`docs/press/PRESS-KIT.md` section 9). Context facts, secondary sources: Claude Mythos Preview exists and is restricted to Project Glasswing partners; no source was found for a claim that 70% of the internet was hacked (searched 2026-10-24).
+Findings 1 to 3 are worth a small PR with red-first tests after Exp 1 (current rule: do not build ahead of the current Exp); they are filed as BACKLOG rows, not code. Published 2026-10-27 so the result notes in this folder are reproducible.
 
 ## Receipt tamper probe, 2026-10-25 (`docs/dogfood-08/probe_receipts.py`)
 
