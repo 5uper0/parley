@@ -42,3 +42,11 @@ def test_google_adk_recipe_uses_the_mcp_toolset_without_a_model_key():
     assert "McpToolset" in src and "StdioConnectionParams" in src
     assert "run_async" in src and "get_tools" in src
     assert "Agent(" not in src and "Runner(" not in src
+
+
+def test_crewai_recipe_uses_the_mcp_adapter_without_a_model_key():
+    src = (DIR / "crewai_stdio.py").read_text()
+    py_compile.compile(str(DIR / "crewai_stdio.py"), doraise=True)
+    assert "MCPServerAdapter" in src and "StdioServerParameters" in src
+    assert ".run(" in src and "parley-mcp" in src
+    assert "Agent(" not in src and "Crew(" not in src
