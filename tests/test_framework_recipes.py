@@ -25,3 +25,11 @@ def test_recipes_call_only_real_tools_and_output_keys():
             assert tool in names and tool in src, (s.name, tool)
         for key in ("decision", "transcript", "transcript_sha256"):
             assert key in out and f'"{key}"' in src, (s.name, key)
+
+
+def test_pydantic_ai_recipe_uses_the_mcp_client_without_a_model_key():
+    src = (DIR / "pydantic_ai_stdio.py").read_text()
+    py_compile.compile(str(DIR / "pydantic_ai_stdio.py"), doraise=True)
+    assert "MCPToolset" in src and "StdioTransport" in src
+    assert "direct_call_tool" in src and "list_tools" in src
+    assert "Agent(" not in src
