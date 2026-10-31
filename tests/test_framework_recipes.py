@@ -33,3 +33,12 @@ def test_pydantic_ai_recipe_uses_the_mcp_client_without_a_model_key():
     assert "MCPToolset" in src and "StdioTransport" in src
     assert "direct_call_tool" in src and "list_tools" in src
     assert "Agent(" not in src
+
+
+def test_google_adk_recipe_uses_the_mcp_toolset_without_a_model_key():
+    path = DIR / "google_adk_stdio.py"
+    src = path.read_text()
+    py_compile.compile(str(path), doraise=True)
+    assert "McpToolset" in src and "StdioConnectionParams" in src
+    assert "run_async" in src and "get_tools" in src
+    assert "Agent(" not in src and "Runner(" not in src
