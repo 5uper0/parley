@@ -1,4 +1,7 @@
 ---
+import futuristLogo from "../assets/futurist-logo-mono.svg?raw";
+
+const year = new Date().getFullYear();
 const links = [
   {
     href: "https://github.com/5uper0/parley",
@@ -132,3 +135,50 @@ const links = [
     Open source · self-hosted · zero-dependency Python core
   </p>
 </footer>
+
+<div class="fs-credit">
+  <span>&copy; {year}</span>
+  <a
+    class="fs-credit__link"
+    href="https://futurist.systems/?utm_source=parleyprotocol.com&utm_medium=footer&utm_campaign=site-by"
+    title="Website by Futurist Systems"
+    rel="noopener"
+    set:html={futuristLogo}
+  />
+</div>
+
+<style is:global>
+  .fs-credit {
+    --fs-credit-opacity: 0.75;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6em;
+    padding: 12px 16px 24px;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--color-muted);
+  }
+  /* .75 fails 4.5:1 on the light theme's #f6f7fb; .86 clears it (4.64:1). */
+  :root[data-theme="light"] .fs-credit {
+    --fs-credit-opacity: 0.86;
+  }
+  .fs-credit__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: inherit;
+    opacity: var(--fs-credit-opacity);
+    transition: opacity 0.2s;
+  }
+  .fs-credit__link:hover,
+  .fs-credit__link:focus-visible {
+    opacity: 1;
+  }
+  .fs-credit__link svg {
+    display: block;
+    height: 16px;
+    width: auto;
+  }
+</style>
