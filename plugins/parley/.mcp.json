@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "parley": {
+      "command": "uvx",
+      "args": ["--from", "parley-consensus", "parley-mcp"]
+    }
+  }
+}

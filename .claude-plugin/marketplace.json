@@ -1,0 +1,19 @@
+{
+  "name": "parley",
+  "owner": {
+    "name": "Parley maintainers",
+    "url": "https://github.com/5uper0/parley"
+  },
+  "metadata": {
+    "description": "Parley: multi-party decisions for personal AI agents with private red lines."
+  },
+  "plugins": [
+    {
+      "name": "parley",
+      "source": "./plugins/parley",
+      "description": "MCP server for multi-party decisions: red lines rejected in code, max-min consensus over masked verdicts, SHA-256 transcript.",
+      "license": "Apache-2.0",
+      "keywords": ["mcp", "consensus", "multi-agent", "decision"]
+    }
+  ]
+}
