@@ -1,0 +1,13 @@
+{
+  "name": "parley",
+  "version": "0.2.1",
+  "description": "Parley MCP server: multi-party decisions where red lines are code predicates, verdicts are masked, the pick is max-min consensus, and the transcript is SHA-256 hashed.",
+  "author": {
+    "name": "Parley maintainers",
+    "url": "https://github.com/5uper0/parley"
+  },
+  "homepage": "https://parleyprotocol.com",
+  "repository": "https://github.com/5uper0/parley",
+  "license": "Apache-2.0",
+  "keywords": ["mcp", "consensus", "multi-agent", "decision", "transcript"]
+}
