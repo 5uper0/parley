@@ -8,7 +8,7 @@ Each script starts `parley-mcp` over stdio, lists the three tools, runs `parley_
 | LangGraph / LangChain | `langgraph_stdio.py` | langgraph 1.2.17, langchain-mcp-adapters 0.3.2, mcp 1.30.0 |
 | smolagents | `smolagents_stdio.py` | smolagents 1.26.0, mcp 1.30.0 (needs `websockets`; mcpadapt 0.1.20 does not import against mcp 2.x) |
 
-| Pydantic AI | `pydantic_ai_stdio.py` | pydantic-ai-slim 2.64.0 (`[mcp]` extra, `MCPToolset`; 1.x calls it `MCPServerStdio`), mcp 2.3.0, parley-consensus 0.2.1 |
+| Pydantic AI | `pydantic_ai_stdio.py` | pydantic-ai-slim 2.64.0 (`[mcp]` extra, `MCPToolset`; not run on 1.x), mcp 2.3.0, parley-consensus 0.2.1 |
 
 All runs produce the same transcript hash (`bc180fab...` on the current repository code; 0.2.0 records the real score of a rejected option, so its hash differs), which is the point of a deterministic referee: the result does not depend on the framework that called it.
 
