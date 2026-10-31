@@ -47,6 +47,8 @@ The distribution is `parley-consensus` (PyPI's `parley` is an unrelated project)
 
 This registers the `parley-mcp` stdio server, launched with `uvx --from parley-consensus parley-mcp`, so [uv](https://docs.astral.sh/uv/) must be installed.
 
+### Quickstart
+
 ```python
 from parley.agent import Agent
 from parley.consensus import run_consensus
