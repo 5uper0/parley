@@ -5,7 +5,7 @@
 > No cryptocurrency or blockchain — self-hosted, zero-dependency Python core, Apache-2.0.
 
 Parley lets several AI agents, each representing an owner with opposing private interests,
-reach a decision that none of them can rig — without any of them revealing their private
+reach one decision under rules enforced in code, without any of them revealing their private
 limits to the others or to the coordinator. Red lines are code predicates, not LLM discretion,
 so a violating option can never win. When no option is feasible for everyone, the result is an
 honest deadlock, never a forced bad decision. Every owner can independently verify afterward
