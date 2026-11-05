@@ -29,7 +29,7 @@ const code = async (p) => { try { await p; } catch (e) { assert.ok(e instanceof 
 test("two devices agree, record carries signatures", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
   const [a, b] = [await device("ana"), await device("ben")];
-  join(room, "ana", a.pub); join(room, "ben", b.pub);
+  join(room, "ana", a.pub, room.tokens["ana"]); join(room, "ben", b.pub, room.tokens["ben"]);
   await submit(room, "ana", await answer(room, a));
   assert.equal(room.result, null);
   await submit(room, "ben", await answer(room, b));
@@ -41,7 +41,7 @@ test("two devices agree, record carries signatures", async () => {
 test("honest deadlock when red lines leave nothing", async () => {
   const room = createRoom({ options: [{ slot: "sun" }], owners: ["ana", "ben"] });
   const [a, b] = [await device("ana"), await device("ben")];
-  join(room, "ana", a.pub); join(room, "ben", b.pub);
+  join(room, "ana", a.pub, room.tokens["ana"]); join(room, "ben", b.pub, room.tokens["ben"]);
   await submit(room, "ana", await answer(room, a));
   await submit(room, "ben", await answer(room, b));
   assert.equal(room.result.status, "deadlock");
@@ -49,7 +49,7 @@ test("honest deadlock when red lines leave nothing", async () => {
 
 test("public view never holds sheets or other people's verdicts", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
-  const a = await device("ana"); join(room, "ana", a.pub);
+  const a = await device("ana"); join(room, "ana", a.pub, room.tokens["ana"]);
   await submit(room, "ana", await answer(room, a));
   const view = JSON.stringify(publicRoom(room));
   assert.ok(!view.includes("red-line") && !view.includes("score") && !view.includes("sig"));
@@ -58,24 +58,24 @@ test("public view never holds sheets or other people's verdicts", async () => {
 test("R1: one key per owner, one owner per key, unknown owner refused", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
   const [a, b] = [await device("ana"), await device("ben")];
-  join(room, "ana", a.pub);
-  assert.equal(await code(Promise.resolve().then(() => join(room, "ana", b.pub))), "already-joined");
-  assert.equal(await code(Promise.resolve().then(() => join(room, "ben", a.pub))), "key-reused");
-  assert.equal(await code(Promise.resolve().then(() => join(room, "eve", b.pub))), "unknown-owner");
-  assert.equal(await code(Promise.resolve().then(() => join(room, "ben", "zz"))), "bad-key");
+  join(room, "ana", a.pub, room.tokens["ana"]);
+  assert.equal(await code(Promise.resolve().then(() => join(room, "ana", b.pub, room.tokens["ana"]))), "already-joined");
+  assert.equal(await code(Promise.resolve().then(() => join(room, "ben", a.pub, room.tokens["ben"]))), "key-reused");
+  assert.equal(await code(Promise.resolve().then(() => join(room, "eve", b.pub, room.tokens["eve"]))), "unknown-owner");
+  assert.equal(await code(Promise.resolve().then(() => join(room, "ben", "zz", room.tokens.ben))), "bad-key");
 });
 
 test("R2: verdict signed for another session is refused", async () => {
   const r1 = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
   const r2 = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
-  const a = await device("ana"); join(r1, "ana", a.pub); join(r2, "ana", a.pub);
+  const a = await device("ana"); join(r1, "ana", a.pub, r1.tokens["ana"]); join(r2, "ana", a.pub, r2.tokens["ana"]);
   assert.equal(await code(submit(r2, "ana", await answer(r1, a))), "bad-signature");
 });
 
 test("a tampered score, flipped acceptable or foreign key fails signature", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
   const [a, b] = [await device("ana"), await device("ben")];
-  join(room, "ana", a.pub); join(room, "ben", b.pub);
+  join(room, "ana", a.pub, room.tokens["ana"]); join(room, "ben", b.pub, room.tokens["ben"]);
   const good = await answer(room, a);
   assert.equal(await code(submit(room, "ana", good.map((v, i) => i ? v : { ...v, score: 1 }))), "bad-signature");
   assert.equal(await code(submit(room, "ana", good.map((v) => v.acceptable ? v : { ...v, score: 0.3 }))), "bad-verdicts"); // a red-line verdict must carry 0
@@ -84,7 +84,7 @@ test("a tampered score, flipped acceptable or foreign key fails signature", asyn
 
 test("malformed verdicts and double submit refused; no values in error", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
-  const a = await device("ana"); join(room, "ana", a.pub);
+  const a = await device("ana"); join(room, "ana", a.pub, room.tokens["ana"]);
   const good = await answer(room, a);
   assert.equal(await code(submit(room, "ana", good.slice(0, 1))), "bad-verdicts");
   assert.equal(await code(submit(room, "ana", good.map((v) => ({ ...v, score: 2 })))), "bad-verdicts");
@@ -105,7 +105,7 @@ import { rateAllow, BAD_LIMIT, BAD_WINDOW_MS } from "../relay/core.mjs";
 test("P2: one owner is slowed after repeated bad submissions, others and later time are not", async () => {
   const room = createRoom({ options: OPTIONS, owners: ["ana", "ben"] });
   const [a, b] = [await device("ana"), await device("ben")];
-  join(room, "ana", a.pub); join(room, "ben", b.pub);
+  join(room, "ana", a.pub, room.tokens["ana"]); join(room, "ben", b.pub, room.tokens["ben"]);
   const good = await answer(room, a);
   const bad = good.map((v) => ({ ...v, score: 1 }));
   const t0 = 1_000_000;

@@ -4237,6 +4237,162 @@
    }
   },
   {
+   "name": "nested",
+   "spec": {
+    "title": "edge: bool is not int inside containers (PR 161 parity)",
+    "options": [
+     {
+      "id": "a",
+      "x": [
+       true
+      ],
+      "m": {
+       "k": true
+      }
+     },
+     {
+      "id": "b",
+      "x": [
+       1
+      ],
+      "m": {
+       "k": 1
+      }
+     },
+     {
+      "id": "c",
+      "x": [
+       true,
+       2
+      ],
+      "m": {
+       "k": 1
+      }
+     }
+    ],
+    "parties": [
+     {
+      "owner": "P",
+      "hard": [
+       {
+        "attr": "x",
+        "op": "==",
+        "value": [
+         1
+        ]
+       }
+      ],
+      "utility": []
+     },
+     {
+      "owner": "Q",
+      "hard": [
+       {
+        "attr": "m",
+        "op": "in",
+        "value": [
+         {
+          "k": 1
+         }
+        ]
+       },
+       {
+        "attr": "x",
+        "op": "!=",
+        "value": [
+         true
+        ]
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "deadlock",
+    "decision": null,
+    "transcript_hash": "98e5617557c89862f01b74ae482939223895ed9a6e6737b2db2814bdb88e73ef",
+    "entries": [
+     {
+      "option": {
+       "id": "a",
+       "x": [
+        true
+       ],
+       "m": {
+        "k": true
+       }
+      },
+      "verdicts": [
+       {
+        "owner": "P",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Q",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "b",
+       "x": [
+        1
+       ],
+       "m": {
+        "k": 1
+       }
+      },
+      "verdicts": [
+       {
+        "owner": "P",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Q",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "c",
+       "x": [
+        true,
+        2
+       ],
+       "m": {
+        "k": 1
+       }
+      },
+      "verdicts": [
+       {
+        "owner": "P",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Q",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
    "name": "heirs",
    "spec": {
     "title": "three invented heirs, one flat (docs/dogfood-09)",

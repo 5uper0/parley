@@ -10,7 +10,7 @@ const room = createRoom({ options: [{ slot: "sat" }, { slot: "sun" }], owners: [
 const hex = (b) => Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
 for (const owner of ["ana", "ben"]) {
   const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-  join(room, owner, hex(await crypto.subtle.exportKey("raw", kp.publicKey)));
+  join(room, owner, hex(await crypto.subtle.exportKey("raw", kp.publicKey)), room.tokens[owner]);
   const vs = [];
   for (let i = 0; i < room.options.length; i++) {
     const v = verdictFor(sheets[owner], room.options[i]);

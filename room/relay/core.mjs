@@ -44,7 +44,8 @@ const isName = (s) => typeof s === "string" && s.length > 0 && s.length <= MAX_N
 export function createRoom({ options, owners }) {
   if (!Array.isArray(options) || options.length < 1 || options.length > MAX_OPTIONS) fail("bad-options");
   if (!Array.isArray(owners) || owners.length < 2 || owners.length > MAX_OWNERS
-      || !owners.every(isName) || new Set(owners).size !== owners.length) fail("bad-owners");
+      || !owners.every(isName) || new Set(owners).size !== owners.length
+      || owners.some((o) => o in {})) fail("bad-owners"); // "constructor", "__proto__" and friends would hit Object.prototype
   const optionKeys = options.map((o) => {
     if (o === null || typeof o !== "object" || Array.isArray(o)) fail("bad-options");
     try { return canonicalJson(o); } catch { return fail("bad-options"); }
@@ -53,6 +54,7 @@ export function createRoom({ options, owners }) {
   return {
     session: randomHex(16), options, owners: [...owners],
     nonces: Object.fromEntries(owners.map((o) => [o, options.map(() => randomHex(12))])), // unique per verdict
+    tokens: Object.fromEntries(owners.map((o) => [o, randomHex(16)])), // each person's link carries theirs; /join needs it
     roster: {},            // owner -> pubkey_hex, pinned at join
     verdicts: {},          // owner -> [ {acceptable, score, reason, sig} per option ]
     result: null, badStamps: {}, // owner -> timestamps of rejected submissions
@@ -79,8 +81,12 @@ export function nonceFor(room, owner) {
   return room.nonces[owner];
 }
 
-export function join(room, owner, pubkeyHex) {
+/** The tokens are shown once, in the creation response; publicRoom never carries them. */
+export function issuedTokens(room) { return { ...room.tokens }; }
+
+export function join(room, owner, pubkeyHex, token) {
   if (!room.owners.includes(owner)) fail("unknown-owner");
+  if (typeof token !== "string" || token !== room.tokens[owner]) fail("bad-token"); // knowing a name is not enough to take a seat
   if (!isHex(pubkeyHex, 64)) fail("bad-key");
   const key = pubkeyHex.toLowerCase();
   if (room.roster[owner]) fail("already-joined");           // R1: one key per owner, pinned once

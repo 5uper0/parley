@@ -1,7 +1,7 @@
 // HTTP surface over core.mjs. `store` is {get(), put(room)}: a Durable Object's storage in
 // production, a Map in tests. Errors carry a code only, never a value (R7).
 
-import { createRoom, join, submit, publicRoom, nonceFor, RelayError, BAD_CODES } from "./core.mjs";
+import { createRoom, join, submit, publicRoom, nonceFor, issuedTokens, RelayError, BAD_CODES } from "./core.mjs";
 
 const MAX_BODY = 64 * 1024;
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
@@ -24,13 +24,13 @@ export async function handle(request, path, store) {
       const b = await body(request);
       room = createRoom({ options: b.options, owners: b.owners });
       await store.put(room);
-      return json(publicRoom(room), 201);
+      return json({ ...publicRoom(room), tokens: issuedTokens(room) }, 201);
     }
     if (!room) return err("no-room", 404);
     if (path === "" && m === "GET") return json(publicRoom(room));
     if (path === "/join" && m === "POST") {
       const b = await body(request);
-      join(room, b.owner, b.pubkey_hex);
+      join(room, b.owner, b.pubkey_hex, b.token);
       await store.put(room);
       return json({ session: room.session, nonces: nonceFor(room, b.owner) });
     }

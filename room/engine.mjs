@@ -70,23 +70,34 @@ function looseEq(a, b) {
   return a === b;
 }
 
+/** parley/spec.py _strict_eq: bool stays apart from int at every depth, so [true] is not [1]. */
+function strictEq(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((v, i) => strictEq(v, b[i]));
+  const isObj = (x) => x && typeof x === "object" && !Array.isArray(x);
+  if (isObj(a) && isObj(b)) {
+    const ka = Object.keys(a), kb = Object.keys(b);
+    return ka.length === kb.length && ka.every((k) => Object.hasOwn(b, k) && strictEq(a[k], b[k]));
+  }
+  return sameKind(a, b) && looseEq(a, b);
+}
+
 const get = (option, attr) => (Object.hasOwn(option, attr) ? option[attr] : MISSING);
 
 export function checkConstraint(c, option) {
   const val = get(option, c.attr);
   if (val === MISSING) return false;
   switch (c.op) {
-    case "==": return sameKind(val, c.value) && looseEq(val, c.value);
+    case "==": return strictEq(val, c.value);
     case "!=":
-      if (looseEq(val, c.value) && !sameKind(val, c.value)) return false;
+      if (looseEq(val, c.value) && !strictEq(val, c.value)) return false;
       return !looseEq(val, c.value);
     case "<": case "<=": case ">": case ">=":
       if (!(isNum(val) && isNum(c.value))) return false;
       return c.op === "<" ? val < c.value : c.op === "<=" ? val <= c.value
         : c.op === ">" ? val > c.value : val >= c.value;
-    case "in": return c.value.some((v) => sameKind(val, v) && looseEq(val, v));
+    case "in": return c.value.some((v) => strictEq(val, v));
     case "not_in":
-      if (c.value.some((v) => looseEq(val, v) && !sameKind(val, v))) return false;
+      if (c.value.some((v) => looseEq(val, v) && !strictEq(val, v))) return false;
       return !c.value.some((v) => looseEq(val, v));
     default: throw new Error(`unknown operator: ${c.op}`);
   }

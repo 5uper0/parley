@@ -19,7 +19,7 @@ test("full flow over HTTP, errors carry codes only", async () => {
   const sheets = { ana: { owner: "ana", hard: [], utility: [] }, ben: { owner: "ben", hard: [{ attr: "slot", op: "==", value: "sat" }], utility: [] } };
   for (const owner of ["ana", "ben"]) {
     const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-    r = await handle(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)) }), "/join", s);
+    r = await handle(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: pub.tokens[owner] }), "/join", s);
     const { session, nonces } = await r.json();
     const verdicts = [];
     for (let i = 0; i < options.length; i++) {
@@ -49,9 +49,9 @@ test("bad json, oversize body, unknown path, no room", async () => {
 test("P2: bad-attempt count survives failed requests; locked answers 429", async () => {
   const s = mkStore();
   const options = [{ slot: "sat" }];
-  await handle(req("POST", { options, owners: ["ana", "ben"] }), "", s);
+  const made = await (await handle(req("POST", { options, owners: ["ana", "ben"] }), "", s)).json();
   const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-  await handle(req("POST", { owner: "ana", pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)) }), "/join", s);
+  await handle(req("POST", { owner: "ana", pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens.ana }), "/join", s);
   const junk = [{ acceptable: true, score: 0.5, reason: "ok", sig: "0".repeat(128) }];
   let last;
   for (let i = 0; i < 6; i++) last = await handle(req("POST", { owner: "ana", verdicts: junk }), "/verdicts", s);
@@ -66,10 +66,10 @@ test("P2: overlapping requests do not overwrite each other (serialHandler)", asy
                  put: async (x) => { await tick(); stored = structuredClone(x); } };
   const h = serialHandler();
   const options = [{ slot: "sat" }];
-  await h(req("POST", { options, owners: ["ana", "ben"] }), "", slow);
+  const made = await (await h(req("POST", { options, owners: ["ana", "ben"] }), "", slow)).json();
   const dev = async (owner) => {
     const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-    const j = await (await h(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)) }), "/join", slow)).json();
+    const j = await (await h(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens[owner] }), "/join", slow)).json();
     const v = verdictFor({ owner, hard: [], utility: [] }, options[0]);
     const sig = hex(await crypto.subtle.sign({ name: "Ed25519" }, kp.privateKey,
       verdictPayload({ option: options[0], owner, ...v, session: j.session, nonce: j.nonces[0] })));
@@ -84,4 +84,18 @@ test("P2: overlapping requests do not overwrite each other (serialHandler)", asy
   ]);
   assert.ok(stored.verdicts.ben, "ben's accepted verdict survived the junk requests");
   assert.equal(stored.badStamps.ana.length, 2, "both bad attempts counted");
+});
+
+test("P0: knowing a name is not enough: join needs the person's token; tokens are not in the public view", async () => {
+  const s = mkStore();
+  const made = await (await handle(req("POST", { options: [{ a: 1 }], owners: ["ann", "bob"] }), "", s)).json();
+  const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+  const pubkey_hex = hex(await crypto.subtle.exportKey("raw", kp.publicKey));
+  const wrong = await handle(req("POST", { owner: "bob", pubkey_hex, token: made.tokens.ann }), "/join", s); // ann's token, bob's seat
+  assert.equal(wrong.status, 400);
+  assert.deepEqual(await wrong.json(), { error: "bad-token" });
+  assert.equal((await handle(req("POST", { owner: "bob", pubkey_hex }), "/join", s)).status, 400);
+  const view = JSON.stringify(await (await handle(req("GET"), "", s)).json());
+  assert.ok(!view.includes(made.tokens.ann) && !view.includes(made.tokens.bob) && !view.includes("tokens"));
+  assert.equal((await handle(req("POST", { owner: "bob", pubkey_hex, token: made.tokens.bob }), "/join", s)).status, 200);
 });

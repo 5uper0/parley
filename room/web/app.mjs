@@ -1,7 +1,7 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getStatus, getResult } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getStatus, getResult, verifyResult } from "./client.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
 const $app = document.getElementById("app");
@@ -17,7 +17,7 @@ const show = (...nodes) => { $app.replaceChildren(...nodes); window.scrollTo(0, 
 const btn = (label, onclick, cls = "") => el("button", { type: "button", class: cls, onclick }, label);
 const langSwitch = () => el("p", { class: "lang" }, ...["en", "es"].map((l) =>
   el("button", { type: "button", class: l === lang ? "on" : "", onclick: () => { lang = l; route(); } }, l.toUpperCase())));
-const fail = (msg) => show(langSwitch(), el("p", { class: "err" }, msg));
+const fail = (msg, retry) => show(langSwitch(), el("p", { class: "err" }, msg), retry ? btn(t().back, retry) : "");
 const optName = (id) => t().opt[id];
 
 function home() {
@@ -30,17 +30,18 @@ function who() {
   show(langSwitch(), el("h2", {}, t().whoTitle), el("p", { class: "note" }, t().whoHint), ta,
     btn(t().makeLinks, async () => {
       const owners = ta.value.split("\n").map((s) => s.trim()).filter(Boolean);
+      if (owners.length < 2 || owners.length > 5) return fail(t().whoCount, who);
       try {
         const room = await createRoom(fetch, RELAY, { options: HEIRS_OPTIONS, owners });
-        share(room.id, owners);
+        share(room.id, owners, room.tokens);
       } catch { fail(t().err); }
     }, "primary"));
 }
 
-function share(id, owners) {
+function share(id, owners, tokens) {
   const base = location.href.split("#")[0];
   show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => {
-    const url = `${base}#/r/${id}/${encodeURIComponent(name)}`;
+    const url = `${base}#/r/${id}/${encodeURIComponent(name)}/${tokens[name]}`;
     return el("div", { class: "card" }, el("strong", {}, name), el("code", {}, url),
       btn(t().copy, () => navigator.clipboard?.writeText(url)),
       el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
@@ -49,15 +50,15 @@ function share(id, owners) {
 
 const key = (id, owner) => `parley-room-${id}-${owner}`;
 
-async function person(id, owner) {
+async function person(id, owner, token) {
   let status;
   try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
   if (!status.owners.includes(owner)) return fail(t().lost);
   show(langSwitch(), el("h1", {}, t().joinTitle(owner)), el("p", {}, t().joinLead), el("p", { class: "note" }, t().notLegal),
-    btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); questions(id, owner, status); }, "primary"));
+    btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); questions(id, owner, token, status); }, "primary"));
 }
 
-function questions(id, owner, status) {
+function questions(id, owner, token, status) {
   const a = { favourite: null, never: [], maxMonths: null, maxMonthly: null, mustKeepHome: false, noOneForcedOut: false, priorities: [] };
   const ids = HEIRS_OPTIONS.map((o) => o.id);
   const radio = (name, value, label, checked) => el("label", {}, el("input", { type: "radio", name, value, ...(checked ? { checked: "" } : {}) }), ` ${label}`);
@@ -77,7 +78,7 @@ function questions(id, owner, status) {
       return [t().q4, el("div", {}, el("p", { class: "note" }, t().q4hint), box), () => { a.priorities = [...picked]; }]; },
   ];
   const go = (i) => {
-    if (i >= steps.length) return check(id, owner, status, a);
+    if (i >= steps.length) return check(id, owner, token, status, a);
     const [title, body, collect] = steps[i]();
     show(langSwitch(), el("p", { class: "note" }, `${i + 1} / ${steps.length}`), el("h2", {}, title), body,
       i > 0 ? btn(t().back, () => go(i - 1)) : "", btn(t().next, () => { collect(); go(i + 1); }, "primary"));
@@ -85,7 +86,9 @@ function questions(id, owner, status) {
   go(0);
 }
 
-function check(id, owner, status, a) {
+function check(id, owner, token, status, a) {
+  let sheet;
+  try { sheet = sheetFromAnswers(owner, a); } catch { return fail(t().badNumber, () => questions(id, owner, token, status)); } // before joining, so a typo cannot cost a seat
   const L = t().line, names = (xs) => xs.map(optName).join(", ");
   const lines = describeAnswers(a).map((l) => ({
     never: () => L.never(names(l.options)), maxMonths: () => L.maxMonths(l.n), maxMonthly: () => L.maxMonthly(l.n),
@@ -93,27 +96,45 @@ function check(id, owner, status, a) {
     priorities: () => L.priorities(l.order.map((p) => t().pri[p]).join(", ")),
   })[l.key]());
   show(langSwitch(), el("h2", {}, t().checkTitle), el("p", { class: "note" }, t().checkLead), el("ul", {}, ...lines.map((s) => el("li", {}, s))),
-    btn(t().back, () => questions(id, owner, status)),
+    btn(t().back, () => questions(id, owner, token, status)),
     btn(t().confirm, async () => {
       show(el("p", {}, t().sending));
       try {
-        const device = await newDevice();
-        localStorage.setItem(key(id, owner), JSON.stringify(device.privateJwk));
-        const { session, nonces } = await joinRoom(fetch, RELAY, id, owner, device);
-        await submitAnswers(fetch, RELAY, id, { owner, sheet: sheetFromAnswers(owner, a), options: status.options, session, nonces, device });
+        const k = key(id, owner);
+        let saved = JSON.parse(localStorage.getItem(k) || "null");
+        let device, session, nonces;
+        if (saved) { device = await restoreDevice(saved.jwk); ({ session, nonces } = saved); } // retry after a failed send: same seat
+        else {
+          device = await newDevice();
+          ({ session, nonces } = await joinRoom(fetch, RELAY, id, owner, device, token));
+          localStorage.setItem(k, JSON.stringify({ jwk: device.privateJwk, session, nonces })); // only after the seat is taken
+        }
+        const sub = await submitAnswers(fetch, RELAY, id, { owner, sheet, options: status.options, session, nonces, device });
+        localStorage.setItem(`parley-sent-${id}-${owner}`, JSON.stringify(sub.sent));
         waiting(id, owner);
       } catch { fail(t().err); }
     }, "primary"));
 }
 
+let pollTimer = null;
+
 async function waiting(id, owner) {
+  clearTimeout(pollTimer);
   let result;
   try { result = await getResult(fetch, RELAY, id); } catch { return fail(t().err); }
-  if (result) return showResult(result);
+  if (result) return finish(id, owner, result);
   const st = await getStatus(fetch, RELAY, id).catch(() => null);
   const left = st ? st.owners.filter((o) => !st.submitted.includes(o)).join(", ") : "";
   show(langSwitch(), el("h2", {}, t().waitTitle), el("p", {}, t().waitLead(left)));
-  setTimeout(() => waiting(id, owner), 3000);
+  pollTimer = setTimeout(() => waiting(id, owner), 3000);
+}
+
+async function finish(id, owner, result) {
+  const sent = JSON.parse(localStorage.getItem(`parley-sent-${id}-${owner}`) || "null") || undefined;
+  const v = await verifyResult(result, sent);
+  if (!v.ok) return fail(t().notVerified);
+  localStorage.removeItem(key(id, owner)); // the signing key is no longer needed once the room has closed
+  showResult(result);
 }
 
 function showResult(r) {
@@ -125,8 +146,12 @@ function showResult(r) {
 }
 
 function route() {
-  const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/(.+)$/);
-  m ? person(m[1], decodeURIComponent(m[2])) : home();
+  clearTimeout(pollTimer);
+  const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})$/);
+  if (!m) return home();
+  let owner;
+  try { owner = decodeURIComponent(m[2]); } catch { return fail(t().lost); }
+  person(m[1], owner, m[3]);
 }
 window.addEventListener("hashchange", route);
 route();

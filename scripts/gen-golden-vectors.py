@@ -47,6 +47,17 @@ DEADLOCK = {
     ],
 }
 
+NESTED = {
+    "title": "edge: bool is not int inside containers (PR 161 parity)",
+    "options": [{"id": "a", "x": [True], "m": {"k": True}}, {"id": "b", "x": [1], "m": {"k": 1}},
+                {"id": "c", "x": [True, 2], "m": {"k": 1}}],
+    "parties": [
+        {"owner": "P", "hard": [{"attr": "x", "op": "==", "value": [1]}], "utility": []},
+        {"owner": "Q", "hard": [{"attr": "m", "op": "in", "value": [{"k": 1}]},
+                                 {"attr": "x", "op": "!=", "value": [True]}], "utility": []},
+    ],
+}
+
 HEIRS = {
     "title": "three invented heirs, one flat (docs/dogfood-09)",
     "options": [
@@ -73,7 +84,7 @@ HEIRS = {
 def recipe_sources() -> list:
     sources = [(os.path.basename(p), json.load(open(p, encoding="utf-8")))
                for p in sorted(glob.glob(os.path.join(ROOT, "examples", "demo", "recipe_*.json")))]
-    return sources + [("edge", EDGE), ("deadlock", DEADLOCK), ("heirs", HEIRS)]
+    return sources + [("edge", EDGE), ("deadlock", DEADLOCK), ("nested", NESTED), ("heirs", HEIRS)]
 
 
 def stored_sources() -> list:

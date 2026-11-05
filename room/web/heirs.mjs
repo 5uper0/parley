@@ -12,7 +12,7 @@ export const HEIRS_OPTIONS = [
 const OPTION_IDS = new Set(HEIRS_OPTIONS.map((o) => o.id));
 export const PRIORITIES = ["money", "speed", "home", "fairness"];
 
-const isInt = (x) => Number.isInteger(x) && x >= 0 && x <= 1200;
+const isInt = (x, max = 1200) => Number.isInteger(x) && x >= 0 && x <= max;
 
 /** answers: {favourite|null, never:[ids], maxMonths|null, maxMonthly|null, mustKeepHome, noOneForcedOut,
  *            priorities:[3 of PRIORITIES, most important first]} */
@@ -20,7 +20,7 @@ export function sheetFromAnswers(owner, a) {
   if (a.favourite != null && !OPTION_IDS.has(a.favourite)) throw new Error("bad-answer");
   if (!Array.isArray(a.never) || !a.never.every((id) => OPTION_IDS.has(id))) throw new Error("bad-answer");
   if (a.maxMonths != null && !isInt(a.maxMonths)) throw new Error("bad-answer");
-  if (a.maxMonthly != null && !isInt(a.maxMonthly)) throw new Error("bad-answer");
+  if (a.maxMonthly != null && !isInt(a.maxMonthly, 1_000_000)) throw new Error("bad-answer");
   if (!Array.isArray(a.priorities) || a.priorities.length > 3
       || !a.priorities.every((p) => PRIORITIES.includes(p)) || new Set(a.priorities).size !== a.priorities.length) {
     throw new Error("bad-answer");
