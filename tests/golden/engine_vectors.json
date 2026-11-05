@@ -1,0 +1,4468 @@
+{
+ "about": "Python engine answers, frozen. Regenerate with scripts/gen-golden-vectors.py.",
+ "cases": [
+  {
+   "name": "recipe_committee.json",
+   "spec": {
+    "title": "Fund a grant proposal (committee vote)",
+    "options": [
+     {
+      "id": "fund-literacy",
+      "label": "Fund the literacy program",
+      "impact": 6,
+      "cost": 30,
+      "novelty": 2,
+      "reviewed": true
+     },
+     {
+      "id": "fund-climate",
+      "label": "Fund the climate initiative",
+      "impact": 9,
+      "cost": 90,
+      "novelty": 5,
+      "reviewed": true
+     },
+     {
+      "id": "fund-biotech",
+      "label": "Fund the diagnostics pilot",
+      "impact": 5,
+      "cost": 20,
+      "novelty": 9,
+      "reviewed": true
+     },
+     {
+      "id": "rubber-stamp",
+      "label": "Approve without review",
+      "impact": 9,
+      "cost": 5,
+      "novelty": 8,
+      "reviewed": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Impact",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "impact",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 9
+       }
+      ]
+     },
+     {
+      "owner": "Budget",
+      "hard": [
+       {
+        "attr": "reviewed",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "cost",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 90
+       }
+      ]
+     },
+     {
+      "owner": "Novelty",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "novelty",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 9
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "fund-biotech",
+     "label": "Fund the diagnostics pilot",
+     "impact": 5,
+     "cost": 20,
+     "novelty": 9,
+     "reviewed": true
+    },
+    "transcript_hash": "bc180fabe85145de66c8c21ae2d0fd850a60832c3665ded013cf24a4b0815d81",
+    "entries": [
+     {
+      "option": {
+       "id": "fund-literacy",
+       "label": "Fund the literacy program",
+       "impact": 6,
+       "cost": 30,
+       "novelty": 2,
+       "reviewed": true
+      },
+      "verdicts": [
+       {
+        "owner": "Impact",
+        "acceptable": true,
+        "score": 0.6666666666666666,
+        "reason": "ok"
+       },
+       {
+        "owner": "Budget",
+        "acceptable": true,
+        "score": 0.6666666666666667,
+        "reason": "ok"
+       },
+       {
+        "owner": "Novelty",
+        "acceptable": true,
+        "score": 0.2222222222222222,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "fund-climate",
+       "label": "Fund the climate initiative",
+       "impact": 9,
+       "cost": 90,
+       "novelty": 5,
+       "reviewed": true
+      },
+      "verdicts": [
+       {
+        "owner": "Impact",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Budget",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Novelty",
+        "acceptable": true,
+        "score": 0.5555555555555556,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "fund-biotech",
+       "label": "Fund the diagnostics pilot",
+       "impact": 5,
+       "cost": 20,
+       "novelty": 9,
+       "reviewed": true
+      },
+      "verdicts": [
+       {
+        "owner": "Impact",
+        "acceptable": true,
+        "score": 0.5555555555555556,
+        "reason": "ok"
+       },
+       {
+        "owner": "Budget",
+        "acceptable": true,
+        "score": 0.7777777777777778,
+        "reason": "ok"
+       },
+       {
+        "owner": "Novelty",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "rubber-stamp",
+       "label": "Approve without review",
+       "impact": 9,
+       "cost": 5,
+       "novelty": 8,
+       "reviewed": false
+      },
+      "verdicts": [
+       {
+        "owner": "Impact",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Budget",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Novelty",
+        "acceptable": true,
+        "score": 0.8888888888888888,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_contract_terms.json",
+   "spec": {
+    "title": "Negotiate enterprise contract clauses",
+    "options": [
+     {
+      "id": "balanced",
+      "label": "Balanced terms",
+      "liability_cap": 5,
+      "sla": 99,
+      "data_residency_ok": true,
+      "auto_renew": false
+     },
+     {
+      "id": "customer-favored",
+      "label": "Customer-favored",
+      "liability_cap": 8,
+      "sla": 99,
+      "data_residency_ok": true,
+      "auto_renew": false
+     },
+     {
+      "id": "vendor-lockin",
+      "label": "Vendor lock-in, low SLA",
+      "liability_cap": 2,
+      "sla": 95,
+      "data_residency_ok": false,
+      "auto_renew": true
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Customer",
+      "hard": [
+       {
+        "attr": "sla",
+        "op": ">=",
+        "value": 99
+       }
+      ],
+      "utility": [
+       {
+        "attr": "liability_cap",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Vendor",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "liability_cap",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Legal",
+      "hard": [
+       {
+        "attr": "data_residency_ok",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "auto_renew",
+        "prefer": false
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "balanced",
+     "label": "Balanced terms",
+     "liability_cap": 5,
+     "sla": 99,
+     "data_residency_ok": true,
+     "auto_renew": false
+    },
+    "transcript_hash": "feb98e8914bf6dc3192e286b426a094e1245e274992ffeda8adde7c6cc66109b",
+    "entries": [
+     {
+      "option": {
+       "id": "balanced",
+       "label": "Balanced terms",
+       "liability_cap": 5,
+       "sla": 99,
+       "data_residency_ok": true,
+       "auto_renew": false
+      },
+      "verdicts": [
+       {
+        "owner": "Customer",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Legal",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "customer-favored",
+       "label": "Customer-favored",
+       "liability_cap": 8,
+       "sla": 99,
+       "data_residency_ok": true,
+       "auto_renew": false
+      },
+      "verdicts": [
+       {
+        "owner": "Customer",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 0.19999999999999996,
+        "reason": "ok"
+       },
+       {
+        "owner": "Legal",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "vendor-lockin",
+       "label": "Vendor lock-in, low SLA",
+       "liability_cap": 2,
+       "sla": 95,
+       "data_residency_ok": false,
+       "auto_renew": true
+      },
+      "verdicts": [
+       {
+        "owner": "Customer",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Legal",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_dao.json",
+   "spec": {
+    "title": "Allocate the DAO treasury",
+    "options": [
+     {
+      "id": "conservative",
+      "label": "Conservative",
+      "dev": 3,
+      "runway": 24,
+      "emission": false,
+      "marketing": 1
+     },
+     {
+      "id": "balanced",
+      "label": "Balanced",
+      "dev": 5,
+      "runway": 18,
+      "emission": false,
+      "marketing": 3
+     },
+     {
+      "id": "aggressive",
+      "label": "Aggressive (mint + burn runway)",
+      "dev": 9,
+      "runway": 9,
+      "emission": true,
+      "marketing": 8
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Builders",
+      "hard": [
+       {
+        "attr": "dev",
+        "op": ">=",
+        "value": 3
+       }
+      ],
+      "utility": [
+       {
+        "attr": "dev",
+        "weight": 1.0,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 9
+       }
+      ]
+     },
+     {
+      "owner": "Investors",
+      "hard": [
+       {
+        "attr": "emission",
+        "op": "==",
+        "value": false
+       }
+      ],
+      "utility": [
+       {
+        "attr": "runway",
+        "weight": 1.0,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 24
+       }
+      ]
+     },
+     {
+      "owner": "Community",
+      "hard": [
+       {
+        "attr": "runway",
+        "op": ">=",
+        "value": 12
+       }
+      ],
+      "utility": [
+       {
+        "attr": "runway",
+        "weight": 1.0,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 24
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "balanced",
+     "label": "Balanced",
+     "dev": 5,
+     "runway": 18,
+     "emission": false,
+     "marketing": 3
+    },
+    "transcript_hash": "765793337d203563eb29ec0a2a515bda09c044c4cdb54e8c978b231166bfbb3b",
+    "entries": [
+     {
+      "option": {
+       "id": "conservative",
+       "label": "Conservative",
+       "dev": 3,
+       "runway": 24,
+       "emission": false,
+       "marketing": 1
+      },
+      "verdicts": [
+       {
+        "owner": "Builders",
+        "acceptable": true,
+        "score": 0.3333333333333333,
+        "reason": "ok"
+       },
+       {
+        "owner": "Investors",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Community",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "balanced",
+       "label": "Balanced",
+       "dev": 5,
+       "runway": 18,
+       "emission": false,
+       "marketing": 3
+      },
+      "verdicts": [
+       {
+        "owner": "Builders",
+        "acceptable": true,
+        "score": 0.5555555555555556,
+        "reason": "ok"
+       },
+       {
+        "owner": "Investors",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       },
+       {
+        "owner": "Community",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "aggressive",
+       "label": "Aggressive (mint + burn runway)",
+       "dev": 9,
+       "runway": 9,
+       "emission": true,
+       "marketing": 8
+      },
+      "verdicts": [
+       {
+        "owner": "Builders",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Investors",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Community",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_dao_treasury.json",
+   "spec": {
+    "title": "Settle a DAO treasury fight without an insider rig (real case)",
+    "options": [
+     {
+      "id": "full",
+      "label": "Full pro-rata redemption to holders",
+      "holder_access": 100,
+      "legit": true
+     },
+     {
+      "id": "partial",
+      "label": "Partial redemption + a deployment mandate",
+      "holder_access": 50,
+      "legit": true
+     },
+     {
+      "id": "status-quo",
+      "label": "Leadership keeps deployment control",
+      "holder_access": 0,
+      "legit": true
+     },
+     {
+      "id": "insider",
+      "label": "Leadership blocks the vote with its own dominant stake",
+      "holder_access": 0,
+      "legit": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Token holders",
+      "hard": [
+       {
+        "attr": "legit",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "holder_access",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "DAO leadership",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "holder_access",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "On-chain governance",
+      "hard": [
+       {
+        "attr": "legit",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "partial",
+     "label": "Partial redemption + a deployment mandate",
+     "holder_access": 50,
+     "legit": true
+    },
+    "transcript_hash": "5fd23265bf76cd1a3daec8313ead3eec71d79fe8898e1a70a37a764cb6e2b3ac",
+    "entries": [
+     {
+      "option": {
+       "id": "full",
+       "label": "Full pro-rata redemption to holders",
+       "holder_access": 100,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "Token holders",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "DAO leadership",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "On-chain governance",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "partial",
+       "label": "Partial redemption + a deployment mandate",
+       "holder_access": 50,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "Token holders",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "DAO leadership",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "On-chain governance",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "status-quo",
+       "label": "Leadership keeps deployment control",
+       "holder_access": 0,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "Token holders",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "DAO leadership",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "On-chain governance",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "insider",
+       "label": "Leadership blocks the vote with its own dominant stake",
+       "holder_access": 0,
+       "legit": false
+      },
+      "verdicts": [
+       {
+        "owner": "Token holders",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "DAO leadership",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "On-chain governance",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_early_lease_exit.json",
+   "spec": {
+    "title": "End a fixed-term lease without double recovery",
+    "options": [
+     {
+      "id": "balanced-replacement",
+      "label": "One-month notice + replacement tenant",
+      "exit_delay_months": 1,
+      "deposit_return_pct": 85,
+      "landlord_rent_coverage_months": 1,
+      "replacement_ready": true,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+     },
+     {
+      "id": "consume-deposit",
+      "label": "Stay two months and consume the deposit",
+      "exit_delay_months": 2,
+      "deposit_return_pct": 0,
+      "landlord_rent_coverage_months": 2,
+      "replacement_ready": false,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+     },
+     {
+      "id": "penalty-and-relet",
+      "label": "Charge an exit penalty and re-let immediately",
+      "exit_delay_months": 1,
+      "deposit_return_pct": 35,
+      "landlord_rent_coverage_months": 2,
+      "replacement_ready": true,
+      "documented_costs_paid": true,
+      "insurance_credited": true,
+      "early_exit_penalty": true,
+      "double_recovery": true
+     },
+     {
+      "id": "walk-away",
+      "label": "Immediate exit with full deposit return",
+      "exit_delay_months": 0,
+      "deposit_return_pct": 100,
+      "landlord_rent_coverage_months": 0,
+      "replacement_ready": false,
+      "documented_costs_paid": false,
+      "insurance_credited": true,
+      "early_exit_penalty": false,
+      "double_recovery": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Tenant (ratified)",
+      "hard": [
+       {
+        "attr": "early_exit_penalty",
+        "op": "==",
+        "value": false
+       },
+       {
+        "attr": "double_recovery",
+        "op": "==",
+        "value": false
+       },
+       {
+        "attr": "documented_costs_paid",
+        "op": "==",
+        "value": true
+       },
+       {
+        "attr": "insurance_credited",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "deposit_return_pct",
+        "weight": 3,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       },
+       {
+        "attr": "exit_delay_months",
+        "weight": 2,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 2
+       }
+      ]
+     },
+     {
+      "owner": "Landlord (inferred)",
+      "hard": [
+       {
+        "attr": "landlord_rent_coverage_months",
+        "op": ">=",
+        "value": 1
+       },
+       {
+        "attr": "documented_costs_paid",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "landlord_rent_coverage_months",
+        "weight": 3,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 2
+       },
+       {
+        "attr": "replacement_ready",
+        "weight": 2,
+        "prefer": true
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "balanced-replacement",
+     "label": "One-month notice + replacement tenant",
+     "exit_delay_months": 1,
+     "deposit_return_pct": 85,
+     "landlord_rent_coverage_months": 1,
+     "replacement_ready": true,
+     "documented_costs_paid": true,
+     "insurance_credited": true,
+     "early_exit_penalty": false,
+     "double_recovery": false
+    },
+    "transcript_hash": "6f7123b1d1b77c66bd3f1adf8aee20237510313b7ca0ef0f4a15a47b43ef1a79",
+    "entries": [
+     {
+      "option": {
+       "id": "balanced-replacement",
+       "label": "One-month notice + replacement tenant",
+       "exit_delay_months": 1,
+       "deposit_return_pct": 85,
+       "landlord_rent_coverage_months": 1,
+       "replacement_ready": true,
+       "documented_costs_paid": true,
+       "insurance_credited": true,
+       "early_exit_penalty": false,
+       "double_recovery": false
+      },
+      "verdicts": [
+       {
+        "owner": "Tenant (ratified)",
+        "acceptable": true,
+        "score": 0.71,
+        "reason": "ok"
+       },
+       {
+        "owner": "Landlord (inferred)",
+        "acceptable": true,
+        "score": 0.7,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "consume-deposit",
+       "label": "Stay two months and consume the deposit",
+       "exit_delay_months": 2,
+       "deposit_return_pct": 0,
+       "landlord_rent_coverage_months": 2,
+       "replacement_ready": false,
+       "documented_costs_paid": true,
+       "insurance_credited": true,
+       "early_exit_penalty": false,
+       "double_recovery": false
+      },
+      "verdicts": [
+       {
+        "owner": "Tenant (ratified)",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Landlord (inferred)",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "penalty-and-relet",
+       "label": "Charge an exit penalty and re-let immediately",
+       "exit_delay_months": 1,
+       "deposit_return_pct": 35,
+       "landlord_rent_coverage_months": 2,
+       "replacement_ready": true,
+       "documented_costs_paid": true,
+       "insurance_credited": true,
+       "early_exit_penalty": true,
+       "double_recovery": true
+      },
+      "verdicts": [
+       {
+        "owner": "Tenant (ratified)",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Landlord (inferred)",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "walk-away",
+       "label": "Immediate exit with full deposit return",
+       "exit_delay_months": 0,
+       "deposit_return_pct": 100,
+       "landlord_rent_coverage_months": 0,
+       "replacement_ready": false,
+       "documented_costs_paid": false,
+       "insurance_credited": true,
+       "early_exit_penalty": false,
+       "double_recovery": false
+      },
+      "verdicts": [
+       {
+        "owner": "Tenant (ratified)",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Landlord (inferred)",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_estate.json",
+   "spec": {
+    "title": "Split an inherited estate",
+    "options": [
+     {
+      "id": "equal",
+      "label": "Equal split (50/50)",
+      "heir1": 50,
+      "heir2": 50,
+      "legal_ok": true
+     },
+     {
+      "id": "weighted",
+      "label": "Weighted (60/40)",
+      "heir1": 60,
+      "heir2": 40,
+      "legal_ok": true
+     },
+     {
+      "id": "grab",
+      "label": "Grab (90/10), title unclear",
+      "heir1": 90,
+      "heir2": 10,
+      "legal_ok": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Heir 1",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "heir1",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Heir 2",
+      "hard": [
+       {
+        "attr": "heir2",
+        "op": ">=",
+        "value": 30
+       }
+      ],
+      "utility": [
+       {
+        "attr": "heir2",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Executor",
+      "hard": [
+       {
+        "attr": "legal_ok",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "legal_ok",
+        "prefer": true
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "equal",
+     "label": "Equal split (50/50)",
+     "heir1": 50,
+     "heir2": 50,
+     "legal_ok": true
+    },
+    "transcript_hash": "1431fb1a2f2f6f7c908d5f2391962203cd9281c742a7f495295907ce8d3c489e",
+    "entries": [
+     {
+      "option": {
+       "id": "equal",
+       "label": "Equal split (50/50)",
+       "heir1": 50,
+       "heir2": 50,
+       "legal_ok": true
+      },
+      "verdicts": [
+       {
+        "owner": "Heir 1",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Heir 2",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Executor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "weighted",
+       "label": "Weighted (60/40)",
+       "heir1": 60,
+       "heir2": 40,
+       "legal_ok": true
+      },
+      "verdicts": [
+       {
+        "owner": "Heir 1",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Heir 2",
+        "acceptable": true,
+        "score": 0.4,
+        "reason": "ok"
+       },
+       {
+        "owner": "Executor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "grab",
+       "label": "Grab (90/10), title unclear",
+       "heir1": 90,
+       "heir2": 10,
+       "legal_ok": false
+      },
+      "verdicts": [
+       {
+        "owner": "Heir 1",
+        "acceptable": true,
+        "score": 0.9,
+        "reason": "ok"
+       },
+       {
+        "owner": "Heir 2",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Executor",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_estate_valuation.json",
+   "spec": {
+    "title": "Split an inherited house without a coerced waiver (real case)",
+    "options": [
+     {
+      "id": "market",
+      "label": "Buyout at market appraisal",
+      "op_share": 100,
+      "keeps_home": true,
+      "legit": true
+     },
+     {
+      "id": "assessor",
+      "label": "Buyout at county-assessor value",
+      "op_share": 65,
+      "keeps_home": true,
+      "legit": true
+     },
+     {
+      "id": "partition",
+      "label": "Forced partition sale, split proceeds",
+      "op_share": 88,
+      "keeps_home": false,
+      "legit": true
+     },
+     {
+      "id": "waiver",
+      "label": "Sign away your share (family pressure)",
+      "op_share": 5,
+      "keeps_home": true,
+      "legit": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "You (1/4 heir)",
+      "hard": [
+       {
+        "attr": "op_share",
+        "op": ">=",
+        "value": 50
+       }
+      ],
+      "utility": [
+       {
+        "attr": "op_share",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Three brothers",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "keeps_home",
+        "prefer": true
+       },
+       {
+        "attr": "op_share",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Neutral valuation",
+      "hard": [
+       {
+        "attr": "legit",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "market",
+     "label": "Buyout at market appraisal",
+     "op_share": 100,
+     "keeps_home": true,
+     "legit": true
+    },
+    "transcript_hash": "aea168f23c2dbb67a5ffce570a355de39c5581976e613b2ddf913547062ab7fc",
+    "entries": [
+     {
+      "option": {
+       "id": "market",
+       "label": "Buyout at market appraisal",
+       "op_share": 100,
+       "keeps_home": true,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "You (1/4 heir)",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Three brothers",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Neutral valuation",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "assessor",
+       "label": "Buyout at county-assessor value",
+       "op_share": 65,
+       "keeps_home": true,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "You (1/4 heir)",
+        "acceptable": true,
+        "score": 0.65,
+        "reason": "ok"
+       },
+       {
+        "owner": "Three brothers",
+        "acceptable": true,
+        "score": 0.675,
+        "reason": "ok"
+       },
+       {
+        "owner": "Neutral valuation",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "partition",
+       "label": "Forced partition sale, split proceeds",
+       "op_share": 88,
+       "keeps_home": false,
+       "legit": true
+      },
+      "verdicts": [
+       {
+        "owner": "You (1/4 heir)",
+        "acceptable": true,
+        "score": 0.88,
+        "reason": "ok"
+       },
+       {
+        "owner": "Three brothers",
+        "acceptable": true,
+        "score": 0.06,
+        "reason": "ok"
+       },
+       {
+        "owner": "Neutral valuation",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "waiver",
+       "label": "Sign away your share (family pressure)",
+       "op_share": 5,
+       "keeps_home": true,
+       "legit": false
+      },
+      "verdicts": [
+       {
+        "owner": "You (1/4 heir)",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Three brothers",
+        "acceptable": true,
+        "score": 0.975,
+        "reason": "ok"
+       },
+       {
+        "owner": "Neutral valuation",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_herencia_hermanos.json",
+   "spec": {
+    "title": "Qué hacer con el piso heredado entre tres hermanos",
+    "options": [
+     {
+      "id": "vender",
+      "label": "Vender al precio de mercado y repartir en tres partes",
+      "precio": 100,
+      "meses": 5,
+      "hipoteca": false,
+      "conserva": 0
+     },
+     {
+      "id": "descuento",
+      "label": "Vender en tres meses con un 5% menos",
+      "precio": 95,
+      "meses": 3,
+      "hipoteca": false,
+      "conserva": 0
+     },
+     {
+      "id": "hermano",
+      "label": "El hermano se queda el piso y paga a las dos hermanas en un año",
+      "precio": 100,
+      "meses": 12,
+      "hipoteca": false,
+      "conserva": 1
+     },
+     {
+      "id": "alquilar",
+      "label": "Mantenerlo en común y alquilarlo",
+      "precio": 100,
+      "meses": 24,
+      "hipoteca": false,
+      "conserva": 1
+     },
+     {
+      "id": "menor",
+      "label": "La hermana menor lo compra con una hipoteca",
+      "precio": 100,
+      "meses": 4,
+      "hipoteca": true,
+      "conserva": 1
+     },
+     {
+      "id": "inversor",
+      "label": "Venta rápida a un inversor con un 25% menos",
+      "precio": 75,
+      "meses": 1,
+      "hipoteca": false,
+      "conserva": 0
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Hermana mayor",
+      "hard": [
+       {
+        "attr": "meses",
+        "op": "<=",
+        "value": 6
+       }
+      ],
+      "utility": [
+       {
+        "attr": "meses",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 24
+       }
+      ]
+     },
+     {
+      "owner": "Hermano",
+      "hard": [
+       {
+        "attr": "precio",
+        "op": ">=",
+        "value": 90
+       }
+      ],
+      "utility": [
+       {
+        "attr": "precio",
+        "direction": "higher",
+        "lo": 70,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Hermana menor",
+      "hard": [
+       {
+        "attr": "hipoteca",
+        "op": "==",
+        "value": false
+       }
+      ],
+      "utility": [
+       {
+        "attr": "conserva",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 1
+       },
+       {
+        "attr": "precio",
+        "direction": "higher",
+        "lo": 70,
+        "hi": 100
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "vender",
+     "label": "Vender al precio de mercado y repartir en tres partes",
+     "precio": 100,
+     "meses": 5,
+     "hipoteca": false,
+     "conserva": 0
+    },
+    "transcript_hash": "202989e6904fa685472541db654276e4847c09b506a5c4c23ff1aba748a90e74",
+    "entries": [
+     {
+      "option": {
+       "id": "vender",
+       "label": "Vender al precio de mercado y repartir en tres partes",
+       "precio": 100,
+       "meses": 5,
+       "hipoteca": false,
+       "conserva": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": true,
+        "score": 0.7916666666666666,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "descuento",
+       "label": "Vender en tres meses con un 5% menos",
+       "precio": 95,
+       "meses": 3,
+       "hipoteca": false,
+       "conserva": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": true,
+        "score": 0.875,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": true,
+        "score": 0.8333333333333334,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": true,
+        "score": 0.4166666666666667,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "hermano",
+       "label": "El hermano se queda el piso y paga a las dos hermanas en un año",
+       "precio": 100,
+       "meses": 12,
+       "hipoteca": false,
+       "conserva": 1
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "alquilar",
+       "label": "Mantenerlo en común y alquilarlo",
+       "precio": 100,
+       "meses": 24,
+       "hipoteca": false,
+       "conserva": 1
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "menor",
+       "label": "La hermana menor lo compra con una hipoteca",
+       "precio": 100,
+       "meses": 4,
+       "hipoteca": true,
+       "conserva": 1
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": true,
+        "score": 0.8333333333333334,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "inversor",
+       "label": "Venta rápida a un inversor con un 25% menos",
+       "precio": 75,
+       "meses": 1,
+       "hipoteca": false,
+       "conserva": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Hermana mayor",
+        "acceptable": true,
+        "score": 0.9583333333333334,
+        "reason": "ok"
+       },
+       {
+        "owner": "Hermano",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Hermana menor",
+        "acceptable": true,
+        "score": 0.08333333333333333,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_insurance.json",
+   "spec": {
+    "title": "Apportion a claim across three carriers",
+    "options": [
+     {
+      "id": "even",
+      "label": "Even split (34/33/33)",
+      "a_share": 34,
+      "b_share": 33,
+      "c_share": 33
+     },
+     {
+      "id": "weighted",
+      "label": "Weighted (50/30/20)",
+      "a_share": 50,
+      "b_share": 30,
+      "c_share": 20
+     },
+     {
+      "id": "heavy-c",
+      "label": "Dump on C (20/20/60)",
+      "a_share": 20,
+      "b_share": 20,
+      "c_share": 60
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Carrier A",
+      "hard": [
+       {
+        "attr": "a_share",
+        "op": "<=",
+        "value": 55
+       }
+      ],
+      "utility": [
+       {
+        "attr": "a_share",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Carrier B",
+      "hard": [
+       {
+        "attr": "b_share",
+        "op": "<=",
+        "value": 40
+       }
+      ],
+      "utility": [
+       {
+        "attr": "b_share",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Carrier C",
+      "hard": [
+       {
+        "attr": "c_share",
+        "op": "<=",
+        "value": 40
+       }
+      ],
+      "utility": [
+       {
+        "attr": "c_share",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "even",
+     "label": "Even split (34/33/33)",
+     "a_share": 34,
+     "b_share": 33,
+     "c_share": 33
+    },
+    "transcript_hash": "97aab2ba1d04ad23a49bb2a504a1f36ecfbaa1489571a557374c68577430bb4e",
+    "entries": [
+     {
+      "option": {
+       "id": "even",
+       "label": "Even split (34/33/33)",
+       "a_share": 34,
+       "b_share": 33,
+       "c_share": 33
+      },
+      "verdicts": [
+       {
+        "owner": "Carrier A",
+        "acceptable": true,
+        "score": 0.6599999999999999,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier B",
+        "acceptable": true,
+        "score": 0.6699999999999999,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier C",
+        "acceptable": true,
+        "score": 0.6699999999999999,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "weighted",
+       "label": "Weighted (50/30/20)",
+       "a_share": 50,
+       "b_share": 30,
+       "c_share": 20
+      },
+      "verdicts": [
+       {
+        "owner": "Carrier A",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier B",
+        "acceptable": true,
+        "score": 0.7,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier C",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "heavy-c",
+       "label": "Dump on C (20/20/60)",
+       "a_share": 20,
+       "b_share": 20,
+       "c_share": 60
+      },
+      "verdicts": [
+       {
+        "owner": "Carrier A",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier B",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Carrier C",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_ipad_screentime.json",
+   "spec": {
+    "title": "Weekly iPad rules for an 11-year-old",
+    "options": [
+     {
+      "id": "strict",
+      "label": "Strict: 30 min on school days, off at 19:00",
+      "weekday_min": 30,
+      "weekend_min": 60,
+      "off_hour": 19,
+      "in_bedroom": false,
+      "earned_pct": 0
+     },
+     {
+      "id": "balanced",
+      "label": "Balanced: 60 min on school days, off at 20:00",
+      "weekday_min": 60,
+      "weekend_min": 120,
+      "off_hour": 20,
+      "in_bedroom": false,
+      "earned_pct": 30
+     },
+     {
+      "id": "earn-it",
+      "label": "Earn it: 45 min base, extra time for homework and chores",
+      "weekday_min": 45,
+      "weekend_min": 150,
+      "off_hour": 20,
+      "in_bedroom": false,
+      "earned_pct": 60
+     },
+     {
+      "id": "weekend-only",
+      "label": "Weekends only: none on school days",
+      "weekday_min": 0,
+      "weekend_min": 240,
+      "off_hour": 20,
+      "in_bedroom": false,
+      "earned_pct": 0
+     },
+     {
+      "id": "no-limits",
+      "label": "No limits, iPad stays in the bedroom",
+      "weekday_min": 240,
+      "weekend_min": 300,
+      "off_hour": 23,
+      "in_bedroom": true,
+      "earned_pct": 0
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Mum",
+      "hard": [
+       {
+        "attr": "off_hour",
+        "op": "<=",
+        "value": 21
+       },
+       {
+        "attr": "in_bedroom",
+        "op": "==",
+        "value": false
+       }
+      ],
+      "utility": [
+       {
+        "attr": "weekday_min",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 240
+       }
+      ]
+     },
+     {
+      "owner": "Dad",
+      "hard": [
+       {
+        "attr": "weekday_min",
+        "op": "<=",
+        "value": 120
+       }
+      ],
+      "utility": [
+       {
+        "attr": "earned_pct",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Max",
+      "hard": [
+       {
+        "attr": "weekday_min",
+        "op": ">=",
+        "value": 30
+       }
+      ],
+      "utility": [
+       {
+        "attr": "weekend_min",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 300
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "earn-it",
+     "label": "Earn it: 45 min base, extra time for homework and chores",
+     "weekday_min": 45,
+     "weekend_min": 150,
+     "off_hour": 20,
+     "in_bedroom": false,
+     "earned_pct": 60
+    },
+    "transcript_hash": "3f869dfbadfdf468ed065b54d92e341d2e7456004c76fc4f723e43d041616527",
+    "entries": [
+     {
+      "option": {
+       "id": "strict",
+       "label": "Strict: 30 min on school days, off at 19:00",
+       "weekday_min": 30,
+       "weekend_min": 60,
+       "off_hour": 19,
+       "in_bedroom": false,
+       "earned_pct": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Mum",
+        "acceptable": true,
+        "score": 0.875,
+        "reason": "ok"
+       },
+       {
+        "owner": "Dad",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Max",
+        "acceptable": true,
+        "score": 0.2,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "balanced",
+       "label": "Balanced: 60 min on school days, off at 20:00",
+       "weekday_min": 60,
+       "weekend_min": 120,
+       "off_hour": 20,
+       "in_bedroom": false,
+       "earned_pct": 30
+      },
+      "verdicts": [
+       {
+        "owner": "Mum",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       },
+       {
+        "owner": "Dad",
+        "acceptable": true,
+        "score": 0.3,
+        "reason": "ok"
+       },
+       {
+        "owner": "Max",
+        "acceptable": true,
+        "score": 0.4,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "earn-it",
+       "label": "Earn it: 45 min base, extra time for homework and chores",
+       "weekday_min": 45,
+       "weekend_min": 150,
+       "off_hour": 20,
+       "in_bedroom": false,
+       "earned_pct": 60
+      },
+      "verdicts": [
+       {
+        "owner": "Mum",
+        "acceptable": true,
+        "score": 0.8125,
+        "reason": "ok"
+       },
+       {
+        "owner": "Dad",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Max",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "weekend-only",
+       "label": "Weekends only: none on school days",
+       "weekday_min": 0,
+       "weekend_min": 240,
+       "off_hour": 20,
+       "in_bedroom": false,
+       "earned_pct": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Mum",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Dad",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Max",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "no-limits",
+       "label": "No limits, iPad stays in the bedroom",
+       "weekday_min": 240,
+       "weekend_min": 300,
+       "off_hour": 23,
+       "in_bedroom": true,
+       "earned_pct": 0
+      },
+      "verdicts": [
+       {
+        "owner": "Mum",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Dad",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Max",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_kyc.json",
+   "spec": {
+    "title": "Onboard a new counterparty",
+    "options": [
+     {
+      "id": "reject",
+      "label": "Reject",
+      "revenue": 0,
+      "risk": 0,
+      "sanctions_ok": true,
+      "edd_done": true
+     },
+     {
+      "id": "approve-basic",
+      "label": "Approve: basic tier",
+      "revenue": 3,
+      "risk": 3,
+      "sanctions_ok": true,
+      "edd_done": true
+     },
+     {
+      "id": "approve-full",
+      "label": "Approve: full tier",
+      "revenue": 8,
+      "risk": 6,
+      "sanctions_ok": true,
+      "edd_done": true
+     },
+     {
+      "id": "approve-fast",
+      "label": "Approve: fast-track",
+      "revenue": 10,
+      "risk": 9,
+      "sanctions_ok": false,
+      "edd_done": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Compliance",
+      "hard": [
+       {
+        "attr": "sanctions_ok",
+        "op": "==",
+        "value": true
+       },
+       {
+        "attr": "edd_done",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "risk",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 9
+       }
+      ]
+     },
+     {
+      "owner": "Risk",
+      "hard": [
+       {
+        "attr": "risk",
+        "op": "<=",
+        "value": 7
+       }
+      ],
+      "utility": [
+       {
+        "attr": "risk",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 7
+       }
+      ]
+     },
+     {
+      "owner": "Business",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "revenue",
+        "weight": 1.0,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "approve-basic",
+     "label": "Approve: basic tier",
+     "revenue": 3,
+     "risk": 3,
+     "sanctions_ok": true,
+     "edd_done": true
+    },
+    "transcript_hash": "d9a683e895122c8185772ae86467f3c225e66abc8eac58ba081f1877bd1b8a88",
+    "entries": [
+     {
+      "option": {
+       "id": "reject",
+       "label": "Reject",
+       "revenue": 0,
+       "risk": 0,
+       "sanctions_ok": true,
+       "edd_done": true
+      },
+      "verdicts": [
+       {
+        "owner": "Compliance",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Risk",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "approve-basic",
+       "label": "Approve: basic tier",
+       "revenue": 3,
+       "risk": 3,
+       "sanctions_ok": true,
+       "edd_done": true
+      },
+      "verdicts": [
+       {
+        "owner": "Compliance",
+        "acceptable": true,
+        "score": 0.6666666666666667,
+        "reason": "ok"
+       },
+       {
+        "owner": "Risk",
+        "acceptable": true,
+        "score": 0.5714285714285714,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.3,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "approve-full",
+       "label": "Approve: full tier",
+       "revenue": 8,
+       "risk": 6,
+       "sanctions_ok": true,
+       "edd_done": true
+      },
+      "verdicts": [
+       {
+        "owner": "Compliance",
+        "acceptable": true,
+        "score": 0.33333333333333337,
+        "reason": "ok"
+       },
+       {
+        "owner": "Risk",
+        "acceptable": true,
+        "score": 0.1428571428571429,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "approve-fast",
+       "label": "Approve: fast-track",
+       "revenue": 10,
+       "risk": 9,
+       "sanctions_ok": false,
+       "edd_done": false
+      },
+      "verdicts": [
+       {
+        "owner": "Compliance",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Risk",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_legal.json",
+   "spec": {
+    "title": "Settle a multi-party dispute",
+    "options": [
+     {
+      "id": "settle-low",
+      "label": "Settle — low",
+      "payout": 3,
+      "admission": false,
+      "within_cap": true
+     },
+     {
+      "id": "settle-mid",
+      "label": "Settle — mid",
+      "payout": 6,
+      "admission": false,
+      "within_cap": true
+     },
+     {
+      "id": "settle-high",
+      "label": "Settle — high (with admission)",
+      "payout": 12,
+      "admission": true,
+      "within_cap": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Plaintiff",
+      "hard": [
+       {
+        "attr": "payout",
+        "op": ">=",
+        "value": 2
+       }
+      ],
+      "utility": [
+       {
+        "attr": "payout",
+        "weight": 1.0,
+        "direction": "higher",
+        "lo": 0,
+        "hi": 12
+       }
+      ]
+     },
+     {
+      "owner": "Defendant",
+      "hard": [
+       {
+        "attr": "admission",
+        "op": "==",
+        "value": false
+       }
+      ],
+      "utility": [
+       {
+        "attr": "payout",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 12
+       }
+      ]
+     },
+     {
+      "owner": "Insurer",
+      "hard": [
+       {
+        "attr": "within_cap",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "payout",
+        "weight": 1.0,
+        "direction": "lower",
+        "lo": 0,
+        "hi": 12
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "settle-mid",
+     "label": "Settle — mid",
+     "payout": 6,
+     "admission": false,
+     "within_cap": true
+    },
+    "transcript_hash": "369797155db41fd6ddcde6eb25896eb260bd24e97cd04c41336b4b0ccc27191d",
+    "entries": [
+     {
+      "option": {
+       "id": "settle-low",
+       "label": "Settle — low",
+       "payout": 3,
+       "admission": false,
+       "within_cap": true
+      },
+      "verdicts": [
+       {
+        "owner": "Plaintiff",
+        "acceptable": true,
+        "score": 0.25,
+        "reason": "ok"
+       },
+       {
+        "owner": "Defendant",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       },
+       {
+        "owner": "Insurer",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "settle-mid",
+       "label": "Settle — mid",
+       "payout": 6,
+       "admission": false,
+       "within_cap": true
+      },
+      "verdicts": [
+       {
+        "owner": "Plaintiff",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Defendant",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Insurer",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "settle-high",
+       "label": "Settle — high (with admission)",
+       "payout": 12,
+       "admission": true,
+       "within_cap": false
+      },
+      "verdicts": [
+       {
+        "owner": "Plaintiff",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Defendant",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Insurer",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_ma_termsheet.json",
+   "spec": {
+    "title": "Agree an investment term sheet",
+    "options": [
+     {
+      "id": "founder-friendly",
+      "label": "Founder-friendly",
+      "valuation": 8,
+      "liq_pref": 1,
+      "board_control": false,
+      "pool": 10
+     },
+     {
+      "id": "market",
+      "label": "Market terms",
+      "valuation": 6,
+      "liq_pref": 1,
+      "board_control": false,
+      "pool": 12
+     },
+     {
+      "id": "investor-grab",
+      "label": "Investor control grab",
+      "valuation": 4,
+      "liq_pref": 3,
+      "board_control": true,
+      "pool": 20
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Founder",
+      "hard": [
+       {
+        "attr": "board_control",
+        "op": "==",
+        "value": false
+       }
+      ],
+      "utility": [
+       {
+        "attr": "valuation",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Investor",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "valuation",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Existing shareholders",
+      "hard": [
+       {
+        "attr": "liq_pref",
+        "op": "<=",
+        "value": 2
+       }
+      ],
+      "utility": [
+       {
+        "attr": "liq_pref",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 5
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "market",
+     "label": "Market terms",
+     "valuation": 6,
+     "liq_pref": 1,
+     "board_control": false,
+     "pool": 12
+    },
+    "transcript_hash": "80fbc07b34e45c6d83294d41f22b0bdc7db48499de1d8f00d3736c672c754440",
+    "entries": [
+     {
+      "option": {
+       "id": "founder-friendly",
+       "label": "Founder-friendly",
+       "valuation": 8,
+       "liq_pref": 1,
+       "board_control": false,
+       "pool": 10
+      },
+      "verdicts": [
+       {
+        "owner": "Founder",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Investor",
+        "acceptable": true,
+        "score": 0.19999999999999996,
+        "reason": "ok"
+       },
+       {
+        "owner": "Existing shareholders",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "market",
+       "label": "Market terms",
+       "valuation": 6,
+       "liq_pref": 1,
+       "board_control": false,
+       "pool": 12
+      },
+      "verdicts": [
+       {
+        "owner": "Founder",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Investor",
+        "acceptable": true,
+        "score": 0.4,
+        "reason": "ok"
+       },
+       {
+        "owner": "Existing shareholders",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "investor-grab",
+       "label": "Investor control grab",
+       "valuation": 4,
+       "liq_pref": 3,
+       "board_control": true,
+       "pool": 20
+      },
+      "verdicts": [
+       {
+        "owner": "Founder",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Investor",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Existing shareholders",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_otc_deal.json",
+   "spec": {
+    "title": "Agree terms for a large OTC crypto trade",
+    "options": [
+     {
+      "id": "fair",
+      "label": "Fair terms",
+      "discount": 5,
+      "sanctions_ok": true,
+      "escrow": true
+     },
+     {
+      "id": "buyer-favored",
+      "label": "Buyer-favored",
+      "discount": 8,
+      "sanctions_ok": true,
+      "escrow": true
+     },
+     {
+      "id": "fast-noescrow",
+      "label": "Fast, no escrow, no screen",
+      "discount": 3,
+      "sanctions_ok": false,
+      "escrow": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Buyer",
+      "hard": [
+       {
+        "attr": "escrow",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "discount",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Seller",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "discount",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Compliance",
+      "hard": [
+       {
+        "attr": "sanctions_ok",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "escrow",
+        "prefer": true
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "fair",
+     "label": "Fair terms",
+     "discount": 5,
+     "sanctions_ok": true,
+     "escrow": true
+    },
+    "transcript_hash": "e564ca65a85b4978f30aba6e5d2bdd32d7cf8eb9ae68b1228723c308f354e6b0",
+    "entries": [
+     {
+      "option": {
+       "id": "fair",
+       "label": "Fair terms",
+       "discount": 5,
+       "sanctions_ok": true,
+       "escrow": true
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Compliance",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "buyer-favored",
+       "label": "Buyer-favored",
+       "discount": 8,
+       "sanctions_ok": true,
+       "escrow": true
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.19999999999999996,
+        "reason": "ok"
+       },
+       {
+        "owner": "Compliance",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "fast-noescrow",
+       "label": "Fast, no escrow, no screen",
+       "discount": 3,
+       "sanctions_ok": false,
+       "escrow": false
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.7,
+        "reason": "ok"
+       },
+       {
+        "owner": "Compliance",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_p2p_dispute.json",
+   "spec": {
+    "title": "Resolve a P2P trade dispute (escrow)",
+    "options": [
+     {
+      "id": "to-seller",
+      "label": "Release to seller (0/100)",
+      "buyer": 0,
+      "seller": 100,
+      "evidence_ok": true
+     },
+     {
+      "id": "split",
+      "label": "Split the escrow (50/50)",
+      "buyer": 50,
+      "seller": 50,
+      "evidence_ok": true
+     },
+     {
+      "id": "to-buyer",
+      "label": "Refund the buyer (100/0)",
+      "buyer": 100,
+      "seller": 0,
+      "evidence_ok": true
+     },
+     {
+      "id": "instant",
+      "label": "Instant refund, skip evidence",
+      "buyer": 100,
+      "seller": 0,
+      "evidence_ok": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Buyer",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "buyer",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Seller",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "seller",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Platform",
+      "hard": [
+       {
+        "attr": "evidence_ok",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "split",
+     "label": "Split the escrow (50/50)",
+     "buyer": 50,
+     "seller": 50,
+     "evidence_ok": true
+    },
+    "transcript_hash": "0a85a717b2e6fb2f727200678935ace511cb94c1f1acf805a1a93d0c75042000",
+    "entries": [
+     {
+      "option": {
+       "id": "to-seller",
+       "label": "Release to seller (0/100)",
+       "buyer": 0,
+       "seller": 100,
+       "evidence_ok": true
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Platform",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "split",
+       "label": "Split the escrow (50/50)",
+       "buyer": 50,
+       "seller": 50,
+       "evidence_ok": true
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Platform",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "to-buyer",
+       "label": "Refund the buyer (100/0)",
+       "buyer": 100,
+       "seller": 0,
+       "evidence_ok": true
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Platform",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "instant",
+       "label": "Instant refund, skip evidence",
+       "buyer": 100,
+       "seller": 0,
+       "evidence_ok": false
+      },
+      "verdicts": [
+       {
+        "owner": "Buyer",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Seller",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Platform",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_partnership_buyout.json",
+   "spec": {
+    "title": "Break a 3-partner squeeze-out (real case)",
+    "options": [
+     {
+      "id": "keep-equal",
+      "label": "Status quo: everyone keeps 1/3",
+      "op_outcome": 100,
+      "fair": true,
+      "partners_control": false
+     },
+     {
+      "id": "fair-buyout",
+      "label": "Buy the third out at a fair 1/3 valuation",
+      "op_outcome": 90,
+      "fair": true,
+      "partners_control": true
+     },
+     {
+      "id": "dissolve",
+      "label": "Dissolve, liquidate, split proceeds",
+      "op_outcome": 60,
+      "fair": true,
+      "partners_control": false
+     },
+     {
+      "id": "squeeze",
+      "label": "Dilute / force the third out cheap",
+      "op_outcome": 15,
+      "fair": false,
+      "partners_control": true
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Ousted partner",
+      "hard": [
+       {
+        "attr": "op_outcome",
+        "op": ">=",
+        "value": 50
+       }
+      ],
+      "utility": [
+       {
+        "attr": "op_outcome",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Two active partners",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "partners_control",
+        "prefer": true
+       }
+      ]
+     },
+     {
+      "owner": "Partnership agreement",
+      "hard": [
+       {
+        "attr": "fair",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "fair-buyout",
+     "label": "Buy the third out at a fair 1/3 valuation",
+     "op_outcome": 90,
+     "fair": true,
+     "partners_control": true
+    },
+    "transcript_hash": "a019b233f111529052c5deb729ab43073f3c431ace79796d08ffbc28614bff13",
+    "entries": [
+     {
+      "option": {
+       "id": "keep-equal",
+       "label": "Status quo: everyone keeps 1/3",
+       "op_outcome": 100,
+       "fair": true,
+       "partners_control": false
+      },
+      "verdicts": [
+       {
+        "owner": "Ousted partner",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Two active partners",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Partnership agreement",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "fair-buyout",
+       "label": "Buy the third out at a fair 1/3 valuation",
+       "op_outcome": 90,
+       "fair": true,
+       "partners_control": true
+      },
+      "verdicts": [
+       {
+        "owner": "Ousted partner",
+        "acceptable": true,
+        "score": 0.9,
+        "reason": "ok"
+       },
+       {
+        "owner": "Two active partners",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Partnership agreement",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "dissolve",
+       "label": "Dissolve, liquidate, split proceeds",
+       "op_outcome": 60,
+       "fair": true,
+       "partners_control": false
+      },
+      "verdicts": [
+       {
+        "owner": "Ousted partner",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Two active partners",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Partnership agreement",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "squeeze",
+       "label": "Dilute / force the third out cheap",
+       "op_outcome": 15,
+       "fair": false,
+       "partners_control": true
+      },
+      "verdicts": [
+       {
+        "owner": "Ousted partner",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Two active partners",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Partnership agreement",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_procurement.json",
+   "spec": {
+    "title": "Select a vendor across departments",
+    "options": [
+     {
+      "id": "vendor-a",
+      "label": "Vendor A",
+      "cost": 6,
+      "security_cert": true,
+      "delivery": 8,
+      "data_local": true
+     },
+     {
+      "id": "vendor-b",
+      "label": "Vendor B",
+      "cost": 4,
+      "security_cert": true,
+      "delivery": 12,
+      "data_local": true
+     },
+     {
+      "id": "vendor-cheap",
+      "label": "Cheap vendor, no cert",
+      "cost": 2,
+      "security_cert": false,
+      "delivery": 4,
+      "data_local": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Security",
+      "hard": [
+       {
+        "attr": "security_cert",
+        "op": "==",
+        "value": true
+       },
+       {
+        "attr": "data_local",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "data_local",
+        "prefer": true
+       }
+      ]
+     },
+     {
+      "owner": "Finance",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "cost",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Business",
+      "hard": [],
+      "utility": [
+       {
+        "attr": "delivery",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 16
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "vendor-a",
+     "label": "Vendor A",
+     "cost": 6,
+     "security_cert": true,
+     "delivery": 8,
+     "data_local": true
+    },
+    "transcript_hash": "ae7459b88ccfa6964b79bc002af6ef2a8a7d30b7ae90cbffcdbb6922af3bb217",
+    "entries": [
+     {
+      "option": {
+       "id": "vendor-a",
+       "label": "Vendor A",
+       "cost": 6,
+       "security_cert": true,
+       "delivery": 8,
+       "data_local": true
+      },
+      "verdicts": [
+       {
+        "owner": "Security",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Finance",
+        "acceptable": true,
+        "score": 0.4,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "vendor-b",
+       "label": "Vendor B",
+       "cost": 4,
+       "security_cert": true,
+       "delivery": 12,
+       "data_local": true
+      },
+      "verdicts": [
+       {
+        "owner": "Security",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Finance",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.25,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "vendor-cheap",
+       "label": "Cheap vendor, no cert",
+       "cost": 2,
+       "security_cert": false,
+       "delivery": 4,
+       "data_local": false
+      },
+      "verdicts": [
+       {
+        "owner": "Security",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Finance",
+        "acceptable": true,
+        "score": 0.8,
+        "reason": "ok"
+       },
+       {
+        "owner": "Business",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "recipe_vuln_disclosure.json",
+   "spec": {
+    "title": "Coordinated disclosure plan for a critical vulnerability",
+    "options": [
+     {
+      "id": "immediate-full",
+      "label": "Publish full details and exploit today",
+      "days_to_public": 0,
+      "exploit_public": true,
+      "patch_ready": false,
+      "users_warned_first": false
+     },
+     {
+      "id": "30d-details",
+      "label": "Warn users now, publish details in 30 days",
+      "days_to_public": 30,
+      "exploit_public": false,
+      "patch_ready": true,
+      "users_warned_first": true
+     },
+     {
+      "id": "90d-standard",
+      "label": "Standard 90-day window, advisory with the patch",
+      "days_to_public": 90,
+      "exploit_public": false,
+      "patch_ready": true,
+      "users_warned_first": true
+     },
+     {
+      "id": "180d-quiet",
+      "label": "Wait 180 days, no warning until the patch ships",
+      "days_to_public": 180,
+      "exploit_public": false,
+      "patch_ready": true,
+      "users_warned_first": false
+     },
+     {
+      "id": "never-public",
+      "label": "Never publish, fix quietly",
+      "days_to_public": 9999,
+      "exploit_public": false,
+      "patch_ready": true,
+      "users_warned_first": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Researcher",
+      "hard": [
+       {
+        "attr": "days_to_public",
+        "op": "<=",
+        "value": 120
+       }
+      ],
+      "utility": [
+       {
+        "attr": "days_to_public",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 180
+       }
+      ]
+     },
+     {
+      "owner": "Vendor",
+      "hard": [
+       {
+        "attr": "exploit_public",
+        "op": "==",
+        "value": false
+       },
+       {
+        "attr": "patch_ready",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "days_to_public",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 180
+       }
+      ]
+     },
+     {
+      "owner": "Downstream maintainers",
+      "hard": [
+       {
+        "attr": "users_warned_first",
+        "op": "==",
+        "value": true
+       }
+      ],
+      "utility": [
+       {
+        "attr": "days_to_public",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 180
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "90d-standard",
+     "label": "Standard 90-day window, advisory with the patch",
+     "days_to_public": 90,
+     "exploit_public": false,
+     "patch_ready": true,
+     "users_warned_first": true
+    },
+    "transcript_hash": "2ddf60b23b9cbad18a2ca38e706935fbbb2dceebfc737edfdabbfc21fc363a57",
+    "entries": [
+     {
+      "option": {
+       "id": "immediate-full",
+       "label": "Publish full details and exploit today",
+       "days_to_public": 0,
+       "exploit_public": true,
+       "patch_ready": false,
+       "users_warned_first": false
+      },
+      "verdicts": [
+       {
+        "owner": "Researcher",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Downstream maintainers",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "30d-details",
+       "label": "Warn users now, publish details in 30 days",
+       "days_to_public": 30,
+       "exploit_public": false,
+       "patch_ready": true,
+       "users_warned_first": true
+      },
+      "verdicts": [
+       {
+        "owner": "Researcher",
+        "acceptable": true,
+        "score": 0.8333333333333334,
+        "reason": "ok"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 0.16666666666666666,
+        "reason": "ok"
+       },
+       {
+        "owner": "Downstream maintainers",
+        "acceptable": true,
+        "score": 0.8333333333333334,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "90d-standard",
+       "label": "Standard 90-day window, advisory with the patch",
+       "days_to_public": 90,
+       "exploit_public": false,
+       "patch_ready": true,
+       "users_warned_first": true
+      },
+      "verdicts": [
+       {
+        "owner": "Researcher",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Downstream maintainers",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "180d-quiet",
+       "label": "Wait 180 days, no warning until the patch ships",
+       "days_to_public": 180,
+       "exploit_public": false,
+       "patch_ready": true,
+       "users_warned_first": false
+      },
+      "verdicts": [
+       {
+        "owner": "Researcher",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Downstream maintainers",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "never-public",
+       "label": "Never publish, fix quietly",
+       "days_to_public": 9999,
+       "exploit_public": false,
+       "patch_ready": true,
+       "users_warned_first": false
+      },
+      "verdicts": [
+       {
+        "owner": "Researcher",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Vendor",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Downstream maintainers",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "edge",
+   "spec": {
+    "title": "edge: every operator, unicode ids, scores at 0 and 1, a deadlock-free pick",
+    "options": [
+     {
+      "id": "ñandú-ü",
+      "n": 3,
+      "price": 0.1,
+      "ok": true,
+      "kind": "a",
+      "tags": [
+       "x",
+       "y"
+      ]
+     },
+     {
+      "id": "b",
+      "n": 10,
+      "price": 2.5,
+      "ok": false,
+      "kind": "b",
+      "tags": []
+     },
+     {
+      "id": "c",
+      "n": 0,
+      "price": 1e-07,
+      "ok": true,
+      "kind": "c",
+      "tags": [
+       "z"
+      ]
+     },
+     {
+      "id": "d",
+      "n": 7,
+      "price": 100.25,
+      "ok": true,
+      "kind": "a",
+      "tags": [
+       "x"
+      ]
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Ana",
+      "hard": [
+       {
+        "attr": "ok",
+        "op": "==",
+        "value": true
+       },
+       {
+        "attr": "n",
+        "op": "<=",
+        "value": 8
+       }
+      ],
+      "utility": [
+       {
+        "attr": "kind",
+        "weight": 2.0,
+        "prefer": "a"
+       },
+       {
+        "attr": "price",
+        "direction": "lower",
+        "lo": 0,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Bo",
+      "hard": [
+       {
+        "attr": "kind",
+        "op": "!=",
+        "value": "c"
+       },
+       {
+        "attr": "n",
+        "op": ">=",
+        "value": 3
+       }
+      ],
+      "utility": [
+       {
+        "attr": "n",
+        "direction": "higher",
+        "lo": 0,
+        "hi": 10
+       }
+      ]
+     },
+     {
+      "owner": "Cy",
+      "hard": [
+       {
+        "attr": "kind",
+        "op": "in",
+        "value": [
+         "a",
+         "c"
+        ]
+       },
+       {
+        "attr": "price",
+        "op": "<",
+        "value": 101
+       },
+       {
+        "attr": "n",
+        "op": ">",
+        "value": 2
+       },
+       {
+        "attr": "id",
+        "op": "not_in",
+        "value": [
+         "b"
+        ]
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "d",
+     "n": 7,
+     "price": 100.25,
+     "ok": true,
+     "kind": "a",
+     "tags": [
+      "x"
+     ]
+    },
+    "transcript_hash": "ff85a115e3b11be74b2186ad46b4638ad385bc3b4fe75774e3ea46d56b9e0307",
+    "entries": [
+     {
+      "option": {
+       "id": "ñandú-ü",
+       "n": 3,
+       "price": 0.1,
+       "ok": true,
+       "kind": "a",
+       "tags": [
+        "x",
+        "y"
+       ]
+      },
+      "verdicts": [
+       {
+        "owner": "Ana",
+        "acceptable": true,
+        "score": 0.9996666666666667,
+        "reason": "ok"
+       },
+       {
+        "owner": "Bo",
+        "acceptable": true,
+        "score": 0.3,
+        "reason": "ok"
+       },
+       {
+        "owner": "Cy",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "b",
+       "n": 10,
+       "price": 2.5,
+       "ok": false,
+       "kind": "b",
+       "tags": []
+      },
+      "verdicts": [
+       {
+        "owner": "Ana",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Bo",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Cy",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "c",
+       "n": 0,
+       "price": 1e-07,
+       "ok": true,
+       "kind": "c",
+       "tags": [
+        "z"
+       ]
+      },
+      "verdicts": [
+       {
+        "owner": "Ana",
+        "acceptable": true,
+        "score": 0.333333333,
+        "reason": "ok"
+       },
+       {
+        "owner": "Bo",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Cy",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "d",
+       "n": 7,
+       "price": 100.25,
+       "ok": true,
+       "kind": "a",
+       "tags": [
+        "x"
+       ]
+      },
+      "verdicts": [
+       {
+        "owner": "Ana",
+        "acceptable": true,
+        "score": 0.6666666666666666,
+        "reason": "ok"
+       },
+       {
+        "owner": "Bo",
+        "acceptable": true,
+        "score": 0.7,
+        "reason": "ok"
+       },
+       {
+        "owner": "Cy",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "deadlock",
+   "spec": {
+    "title": "edge: honest deadlock",
+    "options": [
+     {
+      "id": "a",
+      "n": 1
+     },
+     {
+      "id": "b",
+      "n": 2
+     }
+    ],
+    "parties": [
+     {
+      "owner": "P",
+      "hard": [
+       {
+        "attr": "n",
+        "op": "==",
+        "value": 1
+       }
+      ],
+      "utility": []
+     },
+     {
+      "owner": "Q",
+      "hard": [
+       {
+        "attr": "n",
+        "op": "==",
+        "value": 2
+       }
+      ],
+      "utility": []
+     }
+    ]
+   },
+   "expected": {
+    "status": "deadlock",
+    "decision": null,
+    "transcript_hash": "a965be9ea032d2bb93c40fe397c5745a7f6b7231be9add74b528467a5b6a1dab",
+    "entries": [
+     {
+      "option": {
+       "id": "a",
+       "n": 1
+      },
+      "verdicts": [
+       {
+        "owner": "P",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       },
+       {
+        "owner": "Q",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "b",
+       "n": 2
+      },
+      "verdicts": [
+       {
+        "owner": "P",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Q",
+        "acceptable": true,
+        "score": 0.5,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "heirs",
+   "spec": {
+    "title": "three invented heirs, one flat (docs/dogfood-09)",
+    "options": [
+     {
+      "id": "sell-now",
+      "months_to_cash": 4,
+      "price_pct_of_market": 85,
+      "marta_stays_months": 2,
+      "monthly_cost_per_heir": 0,
+      "family_home_kept": false
+     },
+     {
+      "id": "sell-in-a-year",
+      "months_to_cash": 16,
+      "price_pct_of_market": 100,
+      "marta_stays_months": 12,
+      "monthly_cost_per_heir": 220,
+      "family_home_kept": false
+     },
+     {
+      "id": "marta-buys-out-with-loan",
+      "months_to_cash": 8,
+      "price_pct_of_market": 92,
+      "marta_stays_months": 999,
+      "monthly_cost_per_heir": 0,
+      "family_home_kept": true
+     },
+     {
+      "id": "sell-in-seven-months",
+      "months_to_cash": 7,
+      "price_pct_of_market": 95,
+      "marta_stays_months": 6,
+      "monthly_cost_per_heir": 60,
+      "family_home_kept": false
+     }
+    ],
+    "parties": [
+     {
+      "owner": "Marta",
+      "hard": [
+       {
+        "attr": "marta_stays_months",
+        "op": ">=",
+        "value": 6
+       }
+      ],
+      "utility": [
+       {
+        "attr": "family_home_kept",
+        "prefer": true
+       }
+      ]
+     },
+     {
+      "owner": "Javier",
+      "hard": [
+       {
+        "attr": "months_to_cash",
+        "op": "<=",
+        "value": 9
+       }
+      ],
+      "utility": [
+       {
+        "attr": "price_pct_of_market",
+        "direction": "higher",
+        "lo": 80,
+        "hi": 100
+       }
+      ]
+     },
+     {
+      "owner": "Elena",
+      "hard": [
+       {
+        "attr": "monthly_cost_per_heir",
+        "op": "<=",
+        "value": 100
+       }
+      ],
+      "utility": [
+       {
+        "attr": "price_pct_of_market",
+        "direction": "higher",
+        "lo": 80,
+        "hi": 100
+       }
+      ]
+     }
+    ]
+   },
+   "expected": {
+    "status": "agreed",
+    "decision": {
+     "id": "marta-buys-out-with-loan",
+     "months_to_cash": 8,
+     "price_pct_of_market": 92,
+     "marta_stays_months": 999,
+     "monthly_cost_per_heir": 0,
+     "family_home_kept": true
+    },
+    "transcript_hash": "e6f7a407a884db8b94b56c63b7abd22e52f3d7d9ca0ec3647788fb56dd5aa884",
+    "entries": [
+     {
+      "option": {
+       "id": "sell-now",
+       "months_to_cash": 4,
+       "price_pct_of_market": 85,
+       "marta_stays_months": 2,
+       "monthly_cost_per_heir": 0,
+       "family_home_kept": false
+      },
+      "verdicts": [
+       {
+        "owner": "Marta",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Javier",
+        "acceptable": true,
+        "score": 0.25,
+        "reason": "ok"
+       },
+       {
+        "owner": "Elena",
+        "acceptable": true,
+        "score": 0.25,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "sell-in-a-year",
+       "months_to_cash": 16,
+       "price_pct_of_market": 100,
+       "marta_stays_months": 12,
+       "monthly_cost_per_heir": 220,
+       "family_home_kept": false
+      },
+      "verdicts": [
+       {
+        "owner": "Marta",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Javier",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       },
+       {
+        "owner": "Elena",
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "marta-buys-out-with-loan",
+       "months_to_cash": 8,
+       "price_pct_of_market": 92,
+       "marta_stays_months": 999,
+       "monthly_cost_per_heir": 0,
+       "family_home_kept": true
+      },
+      "verdicts": [
+       {
+        "owner": "Marta",
+        "acceptable": true,
+        "score": 1.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Javier",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       },
+       {
+        "owner": "Elena",
+        "acceptable": true,
+        "score": 0.6,
+        "reason": "ok"
+       }
+      ]
+     },
+     {
+      "option": {
+       "id": "sell-in-seven-months",
+       "months_to_cash": 7,
+       "price_pct_of_market": 95,
+       "marta_stays_months": 6,
+       "monthly_cost_per_heir": 60,
+       "family_home_kept": false
+      },
+      "verdicts": [
+       {
+        "owner": "Marta",
+        "acceptable": true,
+        "score": 0.0,
+        "reason": "ok"
+       },
+       {
+        "owner": "Javier",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       },
+       {
+        "owner": "Elena",
+        "acceptable": true,
+        "score": 0.75,
+        "reason": "ok"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

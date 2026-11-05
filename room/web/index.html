@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parley Room</title>
+<style>
+  body { font: 18px/1.5 system-ui, sans-serif; margin: 0; background: #fafaf7; color: #1a1a1a; }
+  main { max-width: 34rem; margin: 0 auto; padding: 1rem; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.3rem; }
+  button, .button { display: block; width: 100%; margin: .6rem 0; padding: .9rem; font: inherit; border: 2px solid #1a1a1a; border-radius: .5rem; background: #fff; color: inherit; text-align: center; text-decoration: none; box-sizing: border-box; }
+  button.primary { background: #1a1a1a; color: #fff; } button.on { background: #e6efe6; }
+  .lang { text-align: right; } .lang button { display: inline-block; width: auto; padding: .2rem .6rem; margin: 0 0 0 .3rem; }
+  textarea, input[type=number] { width: 100%; font: inherit; padding: .6rem; box-sizing: border-box; display: block; margin: .3rem 0 .8rem; }
+  label { display: block; margin: .6rem 0; } .note { color: #555; font-size: .9rem; } .err { color: #a00; }
+  .card { border: 1px solid #ccc; border-radius: .5rem; padding: .8rem; margin: .8rem 0; background: #fff; }
+  code { word-break: break-all; display: block; font-size: .8rem; margin: .4rem 0; } .big { font-size: 1.5rem; font-weight: 600; }
+  @media print { button, .lang { display: none; } }
+</style>
+</head>
+<body><main id="app"></main>
+<script type="module" src="./app.mjs"></script></body>
+</html>
