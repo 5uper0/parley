@@ -13,3 +13,4 @@ Status: engine and relay built, relay not deployed. The phone page is the next r
 Deploy needs a secret first: `wrangler secret put LIMIT_SECRET` (any long random string; it keys the per-client room limit so addresses cannot be recovered from object names).
 
 Limits stated plainly: each person's link carries a secret token, so knowing a name is not enough to take a seat, but whoever creates the room sees every link and could still answer for someone. A phone checks the result against what it sent (hash, signatures, roster, max-min) and refuses to show one that does not match. The record names each owner next to each yes or no, so a room of two or three people can tell who blocked an option.
+If a phone dies between taking its seat and saving its key, that seat cannot be recovered (`already-joined`); the organizer starts a new room.

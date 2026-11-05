@@ -37,8 +37,9 @@ export async function joinRoom(fetchFn, base, roomId, owner, device, token) {
   return r.data; // {session, nonces}
 }
 
-/** Apply the private sheet to every option on this device, sign, send only the masked verdicts. */
-export async function submitAnswers(fetchFn, base, roomId, { owner, sheet, options, session, nonces, device }) {
+/** Apply the private sheet to every option on this device and sign. Done once: the result is what gets
+ *  saved and resent on a retry, never signed a second time under the same nonces. */
+export async function signAnswers({ owner, sheet, options, owners, session, nonces, device }) {
   const verdicts = [];
   for (let i = 0; i < options.length; i++) {
     const v = verdictFor(sheet, options[i]);
@@ -47,9 +48,20 @@ export async function submitAnswers(fetchFn, base, roomId, { owner, sheet, optio
     const sig = toHex(await globalThis.crypto.subtle.sign({ name: "Ed25519" }, device.privateKey, payload));
     verdicts.push({ acceptable: v.acceptable, score: v.score, reason: v.reason, sig });
   }
-  const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/verdicts`, { owner, verdicts });
+  return { owner, owners, session, nonces, options, verdicts, pubkeyHex: device.pubkeyHex };
+}
+
+/** Send only the masked verdicts. */
+export async function postAnswers(fetchFn, base, roomId, sent) {
+  const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/verdicts`, { owner: sent.owner, verdicts: sent.verdicts });
   if (!r.ok) throw new Error(r.data.error);
-  return { ...r.data, sent: { owner, session, nonces, options, verdicts, pubkeyHex: device.pubkeyHex } };
+  return r.data;
+}
+
+export async function submitAnswers(fetchFn, base, roomId, args) {
+  const sent = await signAnswers({ ...args, owners: args.owners ?? [] });
+  const data = await postAnswers(fetchFn, base, roomId, sent);
+  return { ...data, sent };
 }
 
 export async function getStatus(fetchFn, base, roomId) {
@@ -77,7 +89,12 @@ export async function verifyResult(result, sent) {
   if (!Array.isArray(entries) || !entries.length) return bad("record");
   const seenNonces = new Set();
   const keyOf = {};
+  const rosterOwners = Object.keys(result.roster).sort();
+  // who was in the room is known to this phone from before it answered; a relay cannot shrink the room afterwards
+  if (sent?.owners?.length && canonicalJson([...sent.owners].sort()) !== canonicalJson(rosterOwners)) return bad("owners");
   for (const e of entries) {
+    // one verdict from every owner on every option: a missing red-line would turn a veto into an "agreement"
+    if (canonicalJson(e.verdicts.map((v) => v.owner).sort()) !== canonicalJson(rosterOwners)) return bad("incomplete");
     for (const v of e.verdicts) {
       if (v.session !== result.session || seenNonces.has(v.nonce)) return bad("session");
       seenNonces.add(v.nonce);

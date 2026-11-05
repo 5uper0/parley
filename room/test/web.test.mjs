@@ -30,7 +30,7 @@ async function runRoom(byOwner) {
     const device = await newDevice();
     const { session, nonces } = await joinRoom(f, BASE, room.id, owner, device, room.tokens[owner]);
     const sub = await submitAnswers(f, BASE, room.id, { owner, sheet: sheetFromAnswers(owner, byOwner[owner]),
-      options: room.options, session, nonces, device });
+      options: room.options, owners, session, nonces, device });
     sents[owner] = sub.sent;
   }
   return { f, room, sents, result: await getResult(f, BASE, room.id) };
@@ -106,4 +106,43 @@ test("P0: a person's phone accepts the relay's result only if it verifies agains
   // 6: my own verdict is not what I sent
   const lie = { ...sents.marta, verdicts: sents.marta.verdicts.map((v, i) => i ? v : { ...v, score: v.score === 1 ? 0 : 1 }) };
   assert.equal((await verifyResult(result, lie)).why, "mine");
+});
+
+test("P1: the phone refuses a record with a verdict or an owner left out", async () => {
+  const { result, sents } = await runRoom({
+    marta: answers({ favourite: "buyout" }),
+    javi: answers({ never: ["buyout"] }),     // javi red-lines buyout, so it can never be agreed
+  });
+  assert.equal(result.decision.id !== "buyout", true);
+  const { canonicalJson, Fl, sha256Hex } = await import("../engine.mjs");
+  const rebuild = async (mutate, roster = result.roster) => {
+    const rec = JSON.parse(result.transcript_json);
+    mutate(rec);
+    const json = canonicalJson({ ...rec, entries: rec.entries.map((e) => ({ ...e, verdicts: e.verdicts.map((v) => ({ ...v, score: new Fl(v.score) })) })) });
+    return { ...result, transcript_json: json, transcript_hash: await sha256Hex(json), roster };
+  };
+  // relay drops javi's red-line verdict on buyout, so buyout looks unanimous
+  const dropOne = await rebuild((rec) => { const e = rec.entries.find((x) => x.option.id === "buyout"); e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); rec.result = { status: "agreed", decision: e.option }; });
+  assert.equal((await verifyResult({ ...dropOne, status: "agreed", decision: dropOne.decision }, sents.marta)).ok, false);
+  const incompleteNoSent = await verifyResult(dropOne, undefined);
+  assert.equal(incompleteNoSent.why, "incomplete");
+  // relay drops javi from every entry and from the roster: marta's phone knows who was in the room
+  const dropOwner = await rebuild((rec) => { rec.entries.forEach((e) => { e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); }); },
+    { marta: result.roster.marta });
+  assert.equal((await verifyResult(dropOwner, sents.marta)).why, "owners");
+  assert.equal(sents.marta.owners.length, 2);
+});
+
+test("P1: a retry resends the exact signed set and signing happens once", async () => {
+  const { signAnswers, postAnswers } = await import("../web/client.mjs");
+  const f = relayFetch();
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["a", "b"] });
+  const device = await newDevice();
+  const { session, nonces } = await joinRoom(f, BASE, room.id, "a", device, room.tokens.a);
+  const sent = await signAnswers({ owner: "a", sheet: sheetFromAnswers("a", answers({ never: ["keep"] })), options: room.options,
+    owners: room.owners, session, nonces, device });
+  const first = JSON.stringify(sent);
+  await postAnswers(f, BASE, room.id, sent);
+  assert.equal(JSON.stringify(sent), first);                       // posting does not change the signed set
+  await assert.rejects(postAnswers(f, BASE, room.id, sent), /already-submitted/); // a duplicate resend is refused, not re-signed
 });

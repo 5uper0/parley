@@ -54,7 +54,8 @@ NESTED = {
     "parties": [
         {"owner": "P", "hard": [{"attr": "x", "op": "==", "value": [1]}], "utility": []},
         {"owner": "Q", "hard": [{"attr": "m", "op": "in", "value": [{"k": 1}]},
-                                 {"attr": "x", "op": "!=", "value": [True]}], "utility": []},
+                                 {"attr": "x", "op": "!=", "value": [True]},
+                                 {"attr": "x", "op": "not_in", "value": [[True, 2]]}], "utility": []},
     ],
 }
 

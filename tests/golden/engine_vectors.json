@@ -4302,6 +4302,16 @@
         "value": [
          true
         ]
+       },
+       {
+        "attr": "x",
+        "op": "not_in",
+        "value": [
+         [
+          true,
+          2
+         ]
+        ]
        }
       ],
       "utility": []
@@ -4311,7 +4321,7 @@
    "expected": {
     "status": "deadlock",
     "decision": null,
-    "transcript_hash": "98e5617557c89862f01b74ae482939223895ed9a6e6737b2db2814bdb88e73ef",
+    "transcript_hash": "d92f2fd0499aadcc52e004ed85710e15649ce92bb60e759d50136332c6177c24",
     "entries": [
      {
       "option": {
@@ -4383,9 +4393,9 @@
        },
        {
         "owner": "Q",
-        "acceptable": true,
-        "score": 0.5,
-        "reason": "ok"
+        "acceptable": false,
+        "score": 0.0,
+        "reason": "red-line"
        }
       ]
      }

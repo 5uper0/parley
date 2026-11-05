@@ -1,7 +1,7 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getStatus, getResult, verifyResult } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult } from "./client.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
 const $app = document.getElementById("app");
@@ -100,17 +100,22 @@ function check(id, owner, token, status, a) {
     btn(t().confirm, async () => {
       show(el("p", {}, t().sending));
       try {
-        const k = key(id, owner);
-        let saved = JSON.parse(localStorage.getItem(k) || "null");
-        let device, session, nonces;
-        if (saved) { device = await restoreDevice(saved.jwk); ({ session, nonces } = saved); } // retry after a failed send: same seat
-        else {
-          device = await newDevice();
-          ({ session, nonces } = await joinRoom(fetch, RELAY, id, owner, device, token));
-          localStorage.setItem(k, JSON.stringify({ jwk: device.privateJwk, session, nonces })); // only after the seat is taken
+        const k = key(id, owner), sk = `parley-sent-${id}-${owner}`;
+        let sent = JSON.parse(localStorage.getItem(sk) || "null");
+        if (!sent) {                                       // sign once; a retry resends exactly this set
+          const saved = JSON.parse(localStorage.getItem(k) || "null");
+          let device, session, nonces;
+          if (saved) { device = await restoreDevice(saved.jwk); ({ session, nonces } = saved); }
+          else {
+            device = await newDevice();
+            ({ session, nonces } = await joinRoom(fetch, RELAY, id, owner, device, token));
+            localStorage.setItem(k, JSON.stringify({ jwk: device.privateJwk, session, nonces })); // only after the seat is taken
+          }
+          sent = await signAnswers({ owner, sheet, options: status.options, owners: status.owners, session, nonces, device });
+          localStorage.setItem(sk, JSON.stringify(sent));  // before the send, so a failed send cannot lose it
         }
-        const sub = await submitAnswers(fetch, RELAY, id, { owner, sheet, options: status.options, session, nonces, device });
-        localStorage.setItem(`parley-sent-${id}-${owner}`, JSON.stringify(sub.sent));
+        try { await postAnswers(fetch, RELAY, id, sent); }
+        catch (e) { if (e.message !== "already-submitted") throw e; }
         waiting(id, owner);
       } catch { fail(t().err); }
     }, "primary"));
@@ -131,6 +136,7 @@ async function waiting(id, owner) {
 
 async function finish(id, owner, result) {
   const sent = JSON.parse(localStorage.getItem(`parley-sent-${id}-${owner}`) || "null") || undefined;
+  if (!sent && localStorage.getItem(key(id, owner))) return fail(t().notVerified); // this phone joined but lost what it sent
   const v = await verifyResult(result, sent);
   if (!v.ok) return fail(t().notVerified);
   localStorage.removeItem(key(id, owner)); // the signing key is no longer needed once the room has closed
