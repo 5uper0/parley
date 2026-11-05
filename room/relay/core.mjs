@@ -6,7 +6,7 @@
 import { canonicalJson, Fl, chooseFromEntries, sha256Hex } from "../engine.mjs";
 
 const HEX = /^[0-9a-f]+$/;
-const MAX_OPTIONS = 50, MAX_OWNERS = 12, MAX_NAME = 64;
+const MAX_OPTIONS = 8, MAX_OWNERS = 12, MAX_NAME = 64;
 export const BAD_LIMIT = 5, BAD_WINDOW_MS = 10 * 60 * 1000; // P2: per owner, decays; a link holder can slow one owner, never freeze the room
 export const ROOM_TTL_MS = 30 * 24 * 3600 * 1000; // answers' verdicts are deleted this long after creation
 
