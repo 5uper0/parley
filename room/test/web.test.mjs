@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult } from "../web/client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash } from "../web/client.mjs";
 
 // Fetch shim: routes /rooms[/id[/path]] to the relay handler with one in-memory store per room.
 function relayFetch() {
@@ -108,29 +108,36 @@ test("P0: a person's phone accepts the relay's result only if it verifies agains
   assert.equal((await verifyResult(result, lie)).why, "mine");
 });
 
-test("P1: the phone refuses a record with a verdict or an owner left out", async () => {
+test("P1: the phone refuses a record with a verdict or an owner left out, or with another option list", async () => {
   const { result, sents } = await runRoom({
     marta: answers({ favourite: "buyout" }),
     javi: answers({ never: ["buyout"] }),     // javi red-lines buyout, so it can never be agreed
   });
-  assert.equal(result.decision.id !== "buyout", true);
-  const { canonicalJson, Fl, sha256Hex } = await import("../engine.mjs");
+  assert.notEqual(result.decision.id, "buyout");
+  const { canonicalJson, Fl, sha256Hex, chooseFromEntries } = await import("../engine.mjs");
+  const exp = { options: HEIRS_OPTIONS, rosterHash: await rosterHash(["marta", "javi"]) };
+  // a consistent attack: the relay edits the entries AND announces what max-min gives for them, re-hashed
   const rebuild = async (mutate, roster = result.roster) => {
     const rec = JSON.parse(result.transcript_json);
     mutate(rec);
+    const pick = chooseFromEntries(rec.entries);
+    rec.result = { status: pick.status, decision: pick.decision };
     const json = canonicalJson({ ...rec, entries: rec.entries.map((e) => ({ ...e, verdicts: e.verdicts.map((v) => ({ ...v, score: new Fl(v.score) })) })) });
-    return { ...result, transcript_json: json, transcript_hash: await sha256Hex(json), roster };
+    return { ...result, status: pick.status, decision: pick.decision, transcript_json: json, transcript_hash: await sha256Hex(json), roster };
   };
-  // relay drops javi's red-line verdict on buyout, so buyout looks unanimous
-  const dropOne = await rebuild((rec) => { const e = rec.entries.find((x) => x.option.id === "buyout"); e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); rec.result = { status: "agreed", decision: e.option }; });
-  assert.equal((await verifyResult({ ...dropOne, status: "agreed", decision: dropOne.decision }, sents.marta)).ok, false);
-  const incompleteNoSent = await verifyResult(dropOne, undefined);
-  assert.equal(incompleteNoSent.why, "incomplete");
-  // relay drops javi from every entry and from the roster: marta's phone knows who was in the room
-  const dropOwner = await rebuild((rec) => { rec.entries.forEach((e) => { e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); }); },
-    { marta: result.roster.marta });
-  assert.equal((await verifyResult(dropOwner, sents.marta)).why, "owners");
-  assert.equal(sents.marta.owners.length, 2);
+  // javi's red-line verdict on buyout is dropped, so buyout looks unanimous
+  const dropOne = await rebuild((rec) => { const e = rec.entries.find((x) => x.option.id === "buyout"); e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); });
+  assert.equal(dropOne.decision.id, "buyout", "the attack really changes the announced decision");
+  assert.equal((await verifyResult(dropOne, undefined, exp)).why, "incomplete");
+  assert.equal((await verifyResult(dropOne, sents.marta, exp)).why, "incomplete");
+  // javi dropped from every entry and the roster
+  const dropOwner = await rebuild((rec) => { rec.entries.forEach((e) => { e.verdicts = e.verdicts.filter((v) => v.owner !== "javi"); }); }, { marta: result.roster.marta });
+  assert.equal((await verifyResult(dropOwner, sents.marta, exp)).why, "owners");
+  assert.equal((await verifyResult(dropOwner, undefined, exp)).why, "owners");   // link roster alone is enough, no saved record needed
+  // an option removed from the list (works with no saved record)
+  const dropOption = await rebuild((rec) => { rec.entries = rec.entries.filter((e) => e.option.id !== result.decision.id); });
+  assert.equal((await verifyResult(dropOption, undefined, exp)).why, "options");
+  assert.deepEqual(await verifyResult(result, sents.marta, exp), { ok: true });
 });
 
 test("P1: a retry resends the exact signed set and signing happens once", async () => {

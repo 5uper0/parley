@@ -1,7 +1,8 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash } from "./client.mjs";
+import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
 const $app = document.getElementById("app");
@@ -38,10 +39,11 @@ function who() {
     }, "primary"));
 }
 
-function share(id, owners, tokens) {
+async function share(id, owners, tokens) {
+  const rh = await rosterHash(owners);
   const base = location.href.split("#")[0];
   show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => {
-    const url = `${base}#/r/${id}/${encodeURIComponent(name)}/${tokens[name]}`;
+    const url = `${base}#/r/${id}/${encodeURIComponent(name)}/${tokens[name]}/${rh}`;
     return el("div", { class: "card" }, el("strong", {}, name), el("code", {}, url),
       btn(t().copy, () => navigator.clipboard?.writeText(url)),
       el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
@@ -54,8 +56,10 @@ async function person(id, owner, token) {
   let status;
   try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
   if (!status.owners.includes(owner)) return fail(t().lost);
-  show(langSwitch(), el("h1", {}, t().joinTitle(owner)), el("p", {}, t().joinLead), el("p", { class: "note" }, t().notLegal),
-    btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); questions(id, owner, token, status); }, "primary"));
+  // the room as the organizer made it: names from the link, options from this page, never the relay's word
+  if (await rosterHash(status.owners) !== linkRosterHash || canonicalJson(status.options) !== canonicalJson(HEIRS_OPTIONS)) return fail(t().badRoom);
+  show(langSwitch(), el("h1", {}, t().joinTitle(owner)), el("p", {}, t().joinLead), el("p", { class: "note" }, t().inRoom(status.owners.join(", "))), el("p", { class: "note" }, t().notLegal),
+    btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); if (localStorage.getItem(`parley-sent-${id}-${owner}`)) return resend(id, owner); questions(id, owner, token, status); }, "primary"));
 }
 
 function questions(id, owner, token, status) {
@@ -122,6 +126,17 @@ function check(id, owner, token, status, a) {
 }
 
 let pollTimer = null;
+let linkRosterHash = null;
+
+/** Answers already signed on this phone: send that exact set, never a changed one. */
+async function resend(id, owner) {
+  show(el("p", {}, t().sending));
+  try {
+    try { await postAnswers(fetch, RELAY, id, JSON.parse(localStorage.getItem(`parley-sent-${id}-${owner}`))); }
+    catch (e) { if (e.message !== "already-submitted") throw e; }
+    waiting(id, owner);
+  } catch { fail(t().err); }
+}
 
 async function waiting(id, owner) {
   clearTimeout(pollTimer);
@@ -137,7 +152,7 @@ async function waiting(id, owner) {
 async function finish(id, owner, result) {
   const sent = JSON.parse(localStorage.getItem(`parley-sent-${id}-${owner}`) || "null") || undefined;
   if (!sent && localStorage.getItem(key(id, owner))) return fail(t().notVerified); // this phone joined but lost what it sent
-  const v = await verifyResult(result, sent);
+  const v = await verifyResult(result, sent, { options: HEIRS_OPTIONS, rosterHash: linkRosterHash });
   if (!v.ok) return fail(t().notVerified);
   localStorage.removeItem(key(id, owner)); // the signing key is no longer needed once the room has closed
   showResult(result);
@@ -147,16 +162,17 @@ function showResult(r) {
   const agreed = r.status === "agreed";
   show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle),
     agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "", el("p", { class: "note" }, agreed ? t().agreedNote : t().deadNote),
-    el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 12))),
+    el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 12))),
     el("p", { class: "note" }, t().notLegal), btn(t().save, () => window.print()));
 }
 
 function route() {
   clearTimeout(pollTimer);
-  const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})$/);
+  const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
   if (!m) return home();
   let owner;
   try { owner = decodeURIComponent(m[2]); } catch { return fail(t().lost); }
+  linkRosterHash = m[4];
   person(m[1], owner, m[3]);
 }
 window.addEventListener("hashchange", route);

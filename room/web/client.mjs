@@ -78,9 +78,14 @@ export async function getResult(fetchFn, base, roomId) {
   return r.data;
 }
 
+/** The room's names, fixed by the organizer into every person's link: the relay cannot add or drop a seat unseen. */
+export async function rosterHash(owners) {
+  return (await sha256Hex(canonicalJson([...owners].sort()))).slice(0, 32);
+}
+
 /** Do not trust the relay: re-derive everything a person can check from the record itself.
  *  `sent` (optional) is what this device submitted; with it, the record must carry exactly that. */
-export async function verifyResult(result, sent) {
+export async function verifyResult(result, sent, expected) {
   const bad = (why) => ({ ok: false, why });
   let rec;
   try { rec = JSON.parse(result.transcript_json); } catch { return bad("record"); }
@@ -91,6 +96,7 @@ export async function verifyResult(result, sent) {
   const keyOf = {};
   const rosterOwners = Object.keys(result.roster).sort();
   // who was in the room is known to this phone from before it answered; a relay cannot shrink the room afterwards
+  if (expected?.rosterHash && await rosterHash(rosterOwners) !== expected.rosterHash) return bad("owners");
   if (sent?.owners?.length && canonicalJson([...sent.owners].sort()) !== canonicalJson(rosterOwners)) return bad("owners");
   for (const e of entries) {
     // one verdict from every owner on every option: a missing red-line would turn a veto into an "agreement"
@@ -104,6 +110,8 @@ export async function verifyResult(result, sent) {
       if (!(await verifyEd25519(v.pubkey_hex, payload, v.sig))) return bad("signature");
     }
   }
+  // the option list is the template this page ships, never the relay's say-so
+  if (expected?.options && canonicalJson(entries.map((e) => e.option)) !== canonicalJson(expected.options)) return bad("options");
   const redo = chooseFromEntries(entries);
   if (redo.status !== result.status || canonicalJson(redo.decision) !== canonicalJson(result.decision)) return bad("decision");
   if (rec.result.status !== redo.status || canonicalJson(rec.result.decision) !== canonicalJson(redo.decision)) return bad("decision");
