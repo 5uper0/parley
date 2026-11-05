@@ -162,7 +162,7 @@ function showResult(r) {
   const agreed = r.status === "agreed";
   show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle),
     agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "", el("p", { class: "note" }, agreed ? t().agreedNote : t().deadNote),
-    el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 32).match(/.{1,8}/g).join(" "))),
+    el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), Object.keys(r.roster).length === 2 ? el("p", { class: "note" }, t().twoNote) : "", el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 32).match(/.{1,8}/g).join(" "))),
     el("p", { class: "note" }, t().notLegal), btn(t().save, () => window.print()));
 }
 

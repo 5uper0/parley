@@ -122,3 +122,9 @@ test("P2: sliding-window limiter", () => {
   assert.equal(rateAllow(s, 2000, 3, 10_000), null);
   assert.ok(rateAllow(s, 20_000, 3, 10_000));
 });
+
+test("option cap: more than 8 options is refused", () => {
+  const nine = Array.from({ length: 9 }, (_, i) => ({ id: `o${i}` }));
+  assert.throws(() => createRoom({ options: nine, owners: ["a", "b"] }), RelayError);
+  assert.doesNotThrow(() => createRoom({ options: nine.slice(0, 8), owners: ["a", "b"] }));
+});
