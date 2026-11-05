@@ -35,11 +35,13 @@ test("Room page: no third-party script, no indexing, no referrer, CSP script-src
   const html = readFileSync(new URL("../web/index.html", import.meta.url), "utf8");
   assert.match(html, /name="referrer" content="no-referrer"/);
   assert.match(html, /name="robots" content="noindex/);
-  assert.match(html, /Content-Security-Policy[^>]*script-src 'self'/);
+  assert.match(html, /Content-Security-Policy" content="script-src 'self'; object-src 'none'; base-uri 'none'"/);
+  assert.ok(!/unsafe-/.test(html), "no unsafe-* in the page");
   const srcs = [...html.matchAll(/<script[^>]*\ssrc="([^"]+)"/g)].map((m) => m[1]);
   assert.ok(srcs.length > 0 && srcs.every((u) => u.startsWith("./")), `external script: ${srcs}`);
   for (const f of ["app.mjs", "client.mjs", "heirs.mjs", "i18n.mjs"]) {
     const js = readFileSync(new URL(`../web/${f}`, import.meta.url), "utf8");
-    assert.ok(!/https?:\/\/(?!wa\.me)/.test(js.replace(/\/\/.*$/gm, "")), `${f} mentions an external URL`);
+    const code = js.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+    assert.ok(!/https?:\/\/(?!wa\.me)/.test(code), `${f} mentions an external URL`);
   }
 });
