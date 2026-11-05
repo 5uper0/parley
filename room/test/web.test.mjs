@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash } from "../web/client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom } from "../web/client.mjs";
 
 // Fetch shim: routes /rooms[/id[/path]] to the relay handler with one in-memory store per room.
 function relayFetch() {
@@ -18,10 +18,12 @@ function relayFetch() {
   };
 }
 const BASE = "https://relay";
+let EXP;
 const answers = (over) => ({ favourite: null, never: [], maxMonths: null, maxMonthly: null, mustKeepHome: false,
                              noOneForcedOut: false, priorities: [], ...over });
 
 async function runRoom(byOwner) {
+  EXP = { options: HEIRS_OPTIONS, rosterHash: await rosterHash(Object.keys(byOwner)) };
   const f = relayFetch();
   const sents = {};
   const owners = Object.keys(byOwner);
@@ -85,27 +87,27 @@ test("P0: a person's phone accepts the relay's result only if it verifies agains
     marta: answers({ favourite: "buyout", never: ["keep"] }),
     javi: answers({ maxMonths: 12 }),
   });
-  assert.deepEqual(await verifyResult(result, sents.marta), { ok: true });
-  assert.deepEqual(await verifyResult(result, undefined), { ok: true });
+  assert.deepEqual(await verifyResult(result, sents.marta, EXP), { ok: true });
+  assert.deepEqual(await verifyResult(result, undefined, EXP), { ok: true });
 
   const rec = JSON.parse(result.transcript_json);
   // dishonest relay 1: announces a different decision
-  assert.equal((await verifyResult({ ...result, decision: { id: "keep" } }, sents.marta)).why, "decision");
+  assert.equal((await verifyResult({ ...result, decision: { id: "keep" } }, sents.marta, EXP)).why, "decision");
   // 2: edits the record (hash no longer matches)
-  assert.equal((await verifyResult({ ...result, transcript_json: result.transcript_json.replace("buyout", "keep") }, sents.marta)).why, "hash");
+  assert.equal((await verifyResult({ ...result, transcript_json: result.transcript_json.replace("buyout", "keep") }, sents.marta, EXP)).why, "hash");
   // 3: re-hashes an edited record: signature no longer covers it
   const forged = JSON.parse(JSON.stringify(rec));
   forged.entries[0].verdicts[0].score = 0.01;
   const { canonicalJson, Fl, sha256Hex } = await import("../engine.mjs");
   const json = canonicalJson({ ...forged, entries: forged.entries.map((e) => ({ ...e, verdicts: e.verdicts.map((v) => ({ ...v, score: new Fl(v.score) })) })) });
-  assert.equal((await verifyResult({ ...result, transcript_json: json, transcript_hash: await sha256Hex(json) }, sents.marta)).why, "signature");
+  assert.equal((await verifyResult({ ...result, transcript_json: json, transcript_hash: await sha256Hex(json) }, sents.marta, EXP)).why, "signature");
   // 4: swaps this person's key in the roster
-  assert.equal((await verifyResult({ ...result, roster: { ...result.roster, marta: result.roster.javi } }, sents.marta)).why, "roster");
+  assert.equal((await verifyResult({ ...result, roster: { ...result.roster, marta: result.roster.javi } }, sents.marta, EXP)).why, "roster");
   // 5: record for another session
-  assert.equal((await verifyResult({ ...result, session: "x".repeat(32) }, sents.marta)).why, "session");
+  assert.equal((await verifyResult({ ...result, session: "x".repeat(32) }, sents.marta, EXP)).why, "session");
   // 6: my own verdict is not what I sent
   const lie = { ...sents.marta, verdicts: sents.marta.verdicts.map((v, i) => i ? v : { ...v, score: v.score === 1 ? 0 : 1 }) };
-  assert.equal((await verifyResult(result, lie)).why, "mine");
+  assert.equal((await verifyResult(result, lie, EXP)).why, "mine");
 });
 
 test("P1: the phone refuses a record with a verdict or an owner left out, or with another option list", async () => {
@@ -152,4 +154,14 @@ test("P1: a retry resends the exact signed set and signing happens once", async 
   await postAnswers(f, BASE, room.id, sent);
   assert.equal(JSON.stringify(sent), first);                       // posting does not change the signed set
   await assert.rejects(postAnswers(f, BASE, room.id, sent), /already-submitted/); // a duplicate resend is refused, not re-signed
+});
+
+test("the join-screen check refuses a room whose names or options differ from the link and the page", async () => {
+  const f = relayFetch();
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["a", "b"] });
+  const status = await getStatus(f, BASE, room.id);
+  assert.equal(await checkRoom(status, await rosterHash(["a", "b"]), HEIRS_OPTIONS), true);
+  assert.equal(await checkRoom({ ...status, owners: ["a", "b", "z"] }, await rosterHash(["a", "b"]), HEIRS_OPTIONS), false);
+  assert.equal(await checkRoom({ ...status, options: status.options.slice(1) }, await rosterHash(["a", "b"]), HEIRS_OPTIONS), false);
+  await assert.rejects(verifyResult({}, undefined, undefined), /needs the page/);
 });

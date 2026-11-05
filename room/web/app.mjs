@@ -1,7 +1,7 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom } from "./client.mjs";
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
@@ -57,7 +57,7 @@ async function person(id, owner, token) {
   try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
   if (!status.owners.includes(owner)) return fail(t().lost);
   // the room as the organizer made it: names from the link, options from this page, never the relay's word
-  if (await rosterHash(status.owners) !== linkRosterHash || canonicalJson(status.options) !== canonicalJson(HEIRS_OPTIONS)) return fail(t().badRoom);
+  if (!(await checkRoom(status, linkRosterHash, HEIRS_OPTIONS))) return fail(t().badRoom);
   show(langSwitch(), el("h1", {}, t().joinTitle(owner)), el("p", {}, t().joinLead), el("p", { class: "note" }, t().inRoom(status.owners.join(", "))), el("p", { class: "note" }, t().notLegal),
     btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); if (localStorage.getItem(`parley-sent-${id}-${owner}`)) return resend(id, owner); questions(id, owner, token, status); }, "primary"));
 }
@@ -162,14 +162,14 @@ function showResult(r) {
   const agreed = r.status === "agreed";
   show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle),
     agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "", el("p", { class: "note" }, agreed ? t().agreedNote : t().deadNote),
-    el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 12))),
+    el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 32).match(/.{1,8}/g).join(" "))),
     el("p", { class: "note" }, t().notLegal), btn(t().save, () => window.print()));
 }
 
 function route() {
   clearTimeout(pollTimer);
   const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
-  if (!m) return home();
+  if (!m) return /^#\/r\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
   let owner;
   try { owner = decodeURIComponent(m[2]); } catch { return fail(t().lost); }
   linkRosterHash = m[4];

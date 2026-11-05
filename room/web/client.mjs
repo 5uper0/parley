@@ -83,9 +83,15 @@ export async function rosterHash(owners) {
   return (await sha256Hex(canonicalJson([...owners].sort()))).slice(0, 32);
 }
 
+/** Join-screen check: the room the relay describes must be the one the link and the page describe. */
+export async function checkRoom(status, linkRosterHash, pageOptions) {
+  return (await rosterHash(status.owners)) === linkRosterHash && canonicalJson(status.options) === canonicalJson(pageOptions);
+}
+
 /** Do not trust the relay: re-derive everything a person can check from the record itself.
  *  `sent` (optional) is what this device submitted; with it, the record must carry exactly that. */
 export async function verifyResult(result, sent, expected) {
+  if (!expected?.options || !expected?.rosterHash) throw new Error("verifyResult needs the page's options and the link's roster hash");
   const bad = (why) => ({ ok: false, why });
   let rec;
   try { rec = JSON.parse(result.transcript_json); } catch { return bad("record"); }
@@ -96,7 +102,7 @@ export async function verifyResult(result, sent, expected) {
   const keyOf = {};
   const rosterOwners = Object.keys(result.roster).sort();
   // who was in the room is known to this phone from before it answered; a relay cannot shrink the room afterwards
-  if (expected?.rosterHash && await rosterHash(rosterOwners) !== expected.rosterHash) return bad("owners");
+  if (await rosterHash(rosterOwners) !== expected.rosterHash) return bad("owners");
   if (sent?.owners?.length && canonicalJson([...sent.owners].sort()) !== canonicalJson(rosterOwners)) return bad("owners");
   for (const e of entries) {
     // one verdict from every owner on every option: a missing red-line would turn a veto into an "agreement"
@@ -111,7 +117,7 @@ export async function verifyResult(result, sent, expected) {
     }
   }
   // the option list is the template this page ships, never the relay's say-so
-  if (expected?.options && canonicalJson(entries.map((e) => e.option)) !== canonicalJson(expected.options)) return bad("options");
+  if (canonicalJson(entries.map((e) => e.option)) !== canonicalJson(expected.options)) return bad("options");
   const redo = chooseFromEntries(entries);
   if (redo.status !== result.status || canonicalJson(redo.decision) !== canonicalJson(result.decision)) return bad("decision");
   if (rec.result.status !== redo.status || canonicalJson(rec.result.decision) !== canonicalJson(redo.decision)) return bad("decision");
