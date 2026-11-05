@@ -21,6 +21,15 @@ def _same_kind(a: Any, b: Any) -> bool:
     return isinstance(a, bool) == isinstance(b, bool)
 
 
+def _strict_eq(a: Any, b: Any) -> bool:
+    """Equality that keeps bool apart from int at every depth, so `[True]` is not `[1]`."""
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(_strict_eq(x, y) for x, y in zip(a, b))
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_strict_eq(a[k], b[k]) for k in a)
+    return _same_kind(a, b) and a == b
+
+
 def _is_number(x: Any) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool)
 
@@ -56,9 +65,9 @@ class Constraint:
         if val is _MISSING:
             return False
         op = self.op
-        if op == "==":     return _same_kind(val, self.value) and val == self.value
+        if op == "==":     return _strict_eq(val, self.value)
         if op == "!=":
-            if val == self.value and not _same_kind(val, self.value):
+            if val == self.value and not _strict_eq(val, self.value):
                 return False  # 0 is not "not false": a type confusion must not slip past a negative line
             return not (val == self.value)
         if op in ("<", "<=", ">", ">="):
@@ -68,9 +77,9 @@ class Constraint:
             if op == "<=": return val <= self.value
             if op == ">":  return val > self.value
             return val >= self.value
-        if op == "in":     return any(_same_kind(val, v) and val == v for v in self.value)
+        if op == "in":     return any(_strict_eq(val, v) for v in self.value)
         if op == "not_in":
-            if any(val == v and not _same_kind(val, v) for v in self.value):
+            if any(val == v and not _strict_eq(val, v) for v in self.value):
                 return False
             return not any(val == v for v in self.value)
         raise ValueError(f"unknown operator: {self.op!r}")
