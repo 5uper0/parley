@@ -19,6 +19,7 @@ such `_meta`, so the two never collide.
 """
 import json
 import logging
+import re
 import sys
 from importlib import metadata
 from typing import Any, Callable, Dict, Optional
@@ -222,6 +223,18 @@ TOOLS = [
 ]
 
 
+# Python's own conversion errors append the offending value; our deliberate messages name only
+# fields and limits, so they are left readable.
+_VALUE_ECHO = re.compile(
+    r"(could not convert string to float:|invalid literal for int\(\) with base \d+:|"
+    r"could not convert .*?:)\s*.*$")
+
+
+def _scrub(message: str) -> str:
+    """A party's own value must not travel back to the caller or into logs."""
+    return _VALUE_ECHO.sub(lambda m: m.group(1) + " <value>", message)
+
+
 def _require(arguments: dict, *keys: str) -> None:
     missing = [k for k in keys if k not in arguments]
     if missing:
@@ -278,8 +291,15 @@ def tool_verify_receipt(arguments: dict) -> dict:
         raise ValueError("expected_owners must be a list of owner names")
     transcript = Transcript.from_dict(arguments["transcript"])
     recomputed = transcript.hash()
+    found = sorted({v["owner"] for e in transcript.entries for v in e["verdicts"]})
     return {"match": recomputed == expected.lower(),
             "max_min_verified": verify_outcome(transcript, expected_owners=owners),
+            "owners_found": found,
+            "owners_pinned": owners is not None,
+            "note": ("tamper-evident only: these checks do not prove nobody's red line was "
+                     "crossed or that the owners listed are the real participants. Each owner "
+                     "replays their own sheet (parley_check_party), and the caller pins "
+                     "expected_owners from their own join records."),
             "expected_sha256": expected, "recomputed_sha256": recomputed}
 
 
@@ -336,9 +356,10 @@ def _tools_call(params: Any) -> dict:
     try:
         payload = TOOL_HANDLERS[name](arguments)
     except Exception as exc:  # a tool failure is a result the model can read, per the MCP spec
-        log.info("tool %s failed: %s: %s", name, type(exc).__name__, exc)
+        safe = _scrub(str(exc))
+        log.info("tool %s failed: %s: %s", name, type(exc).__name__, safe)
         return {"isError": True,
-                "content": [{"type": "text", "text": f"{type(exc).__name__}: {exc}"}]}
+                "content": [{"type": "text", "text": f"{type(exc).__name__}: {safe}"}]}
     text = json.dumps(payload, sort_keys=True, ensure_ascii=False)
     return {"isError": False, "content": [{"type": "text", "text": text}]}
 

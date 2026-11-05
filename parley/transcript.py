@@ -13,6 +13,8 @@ from typing import Any, Optional
 from .preferences import PreferenceSheet
 
 _VERDICT_KEYS = frozenset({"owner", "acceptable", "score", "reason", "sig", "pubkey_hex"})
+# Present only on run-bound verdicts, so every hash already on record for an unbound one is unchanged.
+_BOUND_KEYS = frozenset({"session", "nonce"})
 
 
 _TUPLE_TAG = "__tuple__"
@@ -55,7 +57,9 @@ class Transcript:
             "option": option,
             "verdicts": [
                 {"owner": v.owner, "acceptable": v.acceptable, "score": v.score,
-                 "reason": v.reason, "sig": v.sig, "pubkey_hex": v.pubkey_hex}
+                 "reason": v.reason, "sig": v.sig, "pubkey_hex": v.pubkey_hex,
+                 **({"session": v.session, "nonce": v.nonce}
+                    if (v.session is not None or v.nonce is not None) else {})}
                 for v in verdicts
             ],
         })
@@ -89,9 +93,14 @@ class Transcript:
                 raise ValueError(f"entry {i} 'verdicts' must be a list")
             verdicts = []
             for j, v in enumerate(entry["verdicts"]):
-                if not isinstance(v, dict) or set(v) != _VERDICT_KEYS:
-                    raise ValueError(f"entry {i} verdict {j} must carry exactly {sorted(_VERDICT_KEYS)}")
-                verdicts.append({k: copy.deepcopy(v[k]) for k in _VERDICT_KEYS})
+                keys = set(v) if isinstance(v, dict) else set()
+                if not isinstance(v, dict) or keys not in (_VERDICT_KEYS, _VERDICT_KEYS | _BOUND_KEYS):
+                    raise ValueError(f"entry {i} verdict {j} must carry exactly {sorted(_VERDICT_KEYS)}"
+                                     f" (plus session and nonce together when run-bound)")
+                if keys > _VERDICT_KEYS and not all(
+                        isinstance(v[k], str) and v[k] for k in _BOUND_KEYS):
+                    raise ValueError(f"entry {i} verdict {j}: session and nonce must be non-empty strings")
+                verdicts.append({k: copy.deepcopy(v[k]) for k in keys})
             t.entries.append({"option": copy.deepcopy(entry["option"]), "verdicts": verdicts})
         t.result = copy.deepcopy(result)
         return t

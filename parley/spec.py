@@ -5,6 +5,7 @@ recipe is shareable/importable JSON and never executable code (a gallery can't s
 This module *compiles* that declarative form into the existing engine — `PreferenceSheet`,
 `Agent`, `run_consensus` — which stays unchanged. Zero-dependency: stdlib only.
 """
+import math
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -13,6 +14,30 @@ from .consensus import run_consensus
 from .preferences import HardConstraint, PreferenceSheet
 
 _MISSING = object()
+
+
+def _same_kind(a: Any, b: Any) -> bool:
+    """True/False must not equal 1/0: a red line `reviewed == true` is not met by `1`."""
+    return isinstance(a, bool) == isinstance(b, bool)
+
+
+def _is_number(x: Any) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def validate_options(options: list) -> None:
+    """Fail loudly at load: duplicate ids and non-finite numbers would otherwise show up as a
+    silent deadlock or a poisoned score."""
+    seen = set()
+    for opt in options:
+        if isinstance(opt, dict):
+            if "id" in opt:
+                if opt["id"] in seen:
+                    raise ValueError(f"duplicate option id: {opt['id']!r}")
+                seen.add(opt["id"])
+            for key, val in opt.items():
+                if isinstance(val, float) and not math.isfinite(val):
+                    raise ValueError(f"non-finite number in option {opt.get('id')!r}, attribute {key!r}")
 
 
 @dataclass(frozen=True)
@@ -31,14 +56,23 @@ class Constraint:
         if val is _MISSING:
             return False
         op = self.op
-        if op == "==":     return val == self.value
-        if op == "!=":     return val != self.value
-        if op == "<":      return val < self.value
-        if op == "<=":     return val <= self.value
-        if op == ">":      return val > self.value
-        if op == ">=":     return val >= self.value
-        if op == "in":     return val in self.value
-        if op == "not_in": return val not in self.value
+        if op == "==":     return _same_kind(val, self.value) and val == self.value
+        if op == "!=":
+            if val == self.value and not _same_kind(val, self.value):
+                return False  # 0 is not "not false": a type confusion must not slip past a negative line
+            return not (val == self.value)
+        if op in ("<", "<=", ">", ">="):
+            if not (_is_number(val) and _is_number(self.value)):
+                return False  # fail closed: booleans and non-numbers are not ordered
+            if op == "<":  return val < self.value
+            if op == "<=": return val <= self.value
+            if op == ">":  return val > self.value
+            return val >= self.value
+        if op == "in":     return any(_same_kind(val, v) and val == v for v in self.value)
+        if op == "not_in":
+            if any(val == v and not _same_kind(val, v) for v in self.value):
+                return False
+            return not any(val == v for v in self.value)
         raise ValueError(f"unknown operator: {self.op!r}")
 
     def describe(self) -> str:
@@ -49,7 +83,12 @@ class Constraint:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Constraint":
-        return cls(attr=d["attr"], op=d["op"], value=d["value"])
+        op, value = d["op"], d["value"]
+        if op in ("in", "not_in") and not isinstance(value, list):
+            raise ValueError(f"operator {op!r} needs a list value")
+        if op in ("<", "<=", ">", ">=") and not _is_number(value):
+            raise ValueError(f"operator {op!r} needs a number, not booleans or text")
+        return cls(attr=d["attr"], op=op, value=value)
 
 
 @dataclass(frozen=True)
@@ -146,7 +185,9 @@ class DecisionSpec:
 
     @classmethod
     def from_dict(cls, d: dict) -> "DecisionSpec":
-        return cls(title=d["title"], options=list(d["options"]),
+        options = list(d["options"])
+        validate_options(options)
+        return cls(title=d["title"], options=options,
                    parties=[PartySpec.from_dict(p) for p in d.get("parties", [])])
 
     @classmethod

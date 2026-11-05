@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+import uuid
 
 from parley.consensus import run_consensus
 from parley.net.client import discover
@@ -40,9 +41,9 @@ def _label(o):
     return f'{o["day"].capitalize()} {o["hour"]:02d}:00'
 
 
-def check_signatures(transcript):
-    """Stop the run unless every verdict carries a valid signature."""
-    if not verify_transcript(transcript, require_signed=True):
+def check_signatures(transcript, session=None):
+    """Stop the run unless every verdict carries a valid signature bound to this run."""
+    if not verify_transcript(transcript, require_signed=True, expected_session=session):
         raise SystemExit("signature check FAILED: a verdict is unsigned or its signature does "
                          "not validate; this transcript proves nothing")
 
@@ -70,8 +71,11 @@ def run_scenario(profiles, base_port=8101, as_json=False):
             print(f"\n  Discovered {len(agents)} bots: {', '.join(a.owner for a in agents)}")
             print("  Coordinator asks each bot to /consider every option (HTTP)…\n")
 
+        session = uuid.uuid4().hex  # this run's id: signed into every verdict, with a nonce each
+        for a in agents:
+            a.bind(session)
         r = run_consensus(agents, OPTIONS)
-        check_signatures(r.transcript)
+        check_signatures(r.transcript, session)
         non_betrayal = {
             p: r.transcript.verify_non_betrayal(PROFILES[p](), r.decision) for p in profiles
         }

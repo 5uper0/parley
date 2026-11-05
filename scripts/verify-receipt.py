@@ -61,7 +61,7 @@ def _acceptance(raw: Any, index: int) -> Acceptance:
     return Acceptance(**{k: raw.get(k) for k in ACCEPTANCE_KEYS})
 
 
-def verify(receipt: Any) -> dict:
+def verify(receipt: Any, roster=None) -> dict:
     """Re-derive every checkable claim in a receipt. Returns a report; `report["ok"]` is the
     single answer, `report["errors"]` says why when it is False."""
     errors: list = []
@@ -109,6 +109,16 @@ def verify(receipt: Any) -> dict:
 
     owners = {v["owner"] for e in transcript.entries for v in e["verdicts"]}
     participants = receipt["participants"]
+    if roster is not None:
+        # The owner set comes from the owners' own pins, never from the coordinator-written receipt.
+        if not (isinstance(roster, dict) and roster and all(isinstance(k, str) for k in roster)):
+            errors.append("roster must be a non-empty {owner: pubkey} object")
+            participants = None
+        elif participants != sorted(roster) and set(participants or []) != set(roster):
+            errors.append("the receipt's participants are not the roster's owners")
+            participants = sorted(roster)
+        else:
+            participants = sorted(roster)
     roster_shape_ok = (isinstance(participants, list) and bool(participants)
                        and all(isinstance(p, str) for p in participants)
                        and len(set(participants)) == len(participants))
@@ -144,7 +154,7 @@ def verify(receipt: Any) -> dict:
     elif crypto is None:
         verdict_sigs = "unchecked"
         errors.append(f"verdicts carry signatures that were not checked: {INSTALL_HINT}")
-    elif crypto.verify_transcript(transcript, require_signed=all_verdicts_signed):
+    elif crypto.verify_transcript(transcript, require_signed=all_verdicts_signed, roster=roster):
         verdict_sigs = "verified"
     else:
         verdict_sigs = "FAILED"
@@ -169,7 +179,7 @@ def verify(receipt: Any) -> dict:
             if crypto is None:
                 signature = "unchecked"
             else:
-                signature = "verified" if crypto.verify_acceptance(acc) else "FAILED"
+                signature = "verified" if crypto.verify_acceptance(acc, roster=roster) else "FAILED"
         else:
             signature = "unsigned"
         duplicate = acc.owner in seen
@@ -191,7 +201,8 @@ def verify(receipt: Any) -> dict:
         acc_ok = False
 
     all_signed = bool(accs) and all(a.sig and a.pubkey_hex for a in accs)
-    verifier = crypto.verify_acceptance if (crypto is not None and all_signed) else None
+    verifier = ((lambda a: crypto.verify_acceptance(a, roster=roster))
+                if (crypto is not None and all_signed) else None)
     unanimous = agreement(transcript, accs, verifier=verifier,
                           participants=set(participants) if roster_ok else None)
     unanimous_ok = unanimous == receipt["unanimous_acceptance"]
@@ -200,9 +211,23 @@ def verify(receipt: Any) -> dict:
     if not unanimous_ok:
         errors.append("receipt's unanimous_acceptance claim does not match the recomputation")
 
+    pinned_ok = True
+    if roster is not None:
+        # Pinned keys only mean something if every verdict and every acceptance is signed.
+        pinned_ok = (verdict_sigs == "verified"
+                     and all(a["signature"] == "verified" for a in report["acceptances"])
+                     and set(roster) == owners)
+        if not pinned_ok:
+            errors.append("with a roster, every verdict and acceptance must carry a signature under "
+                          "the owner's pinned key, and the record's owners must be exactly the roster")
     report["ok"] = (hash_ok and result_ok and max_min_ok and roster_ok and acc_ok
-                    and unanimous_ok and verdict_sigs in ("none", "verified"))
+                    and unanimous_ok and verdict_sigs in ("none", "verified") and pinned_ok
+                    and not errors_from_roster(errors))
     return report
+
+
+def errors_from_roster(errors: list) -> bool:
+    return any(e.startswith(("roster must", "the receipt's participants are not")) for e in errors)
 
 
 def _mark(ok: bool) -> str:
@@ -294,14 +319,27 @@ def render(report: dict) -> str:
 def main(argv: Optional[list] = None) -> int:
     parser = argparse.ArgumentParser(description="Check a receipt from examples/real_decision.py.")
     parser.add_argument("receipt", help="path to the receipt JSON")
+    parser.add_argument("--roster", help="JSON file {owner: pubkey_hex} that each owner pinned at join, "
+                        "out of band from whoever wrote the receipt; without it a signature only "
+                        "proves the record was not edited, not who signed")
     args = parser.parse_args(argv)
+    roster = None
+    if args.roster:
+        try:
+            with open(args.roster, encoding="utf-8") as fh:
+                roster = json.load(fh)
+            if not isinstance(roster, dict):
+                raise ValueError("roster must be a JSON object")
+        except (OSError, ValueError) as exc:
+            print(f"cannot read roster: {exc}", file=sys.stderr)
+            return 2
     try:
         with open(args.receipt, encoding="utf-8") as fh:
             receipt = json.load(fh)
     except (OSError, ValueError) as exc:
         print(f"cannot read receipt: {exc}", file=sys.stderr)
         return 2
-    report = verify(receipt)
+    report = verify(receipt, roster=roster)
     sys.stdout.write(render(report))
     return 0 if report["ok"] else 1
 

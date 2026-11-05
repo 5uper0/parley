@@ -24,6 +24,9 @@ class Verdict:
     # plain strings so the zero-dependency core never imports the crypto lib.
     sig: Optional[str] = None
     pubkey_hex: Optional[str] = None
+    # run binding (verdict/0.2): which run and which asking this verdict answers
+    session: Optional[str] = None
+    nonce: Optional[str] = None
 
 
 class Agent:

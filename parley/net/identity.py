@@ -16,14 +16,22 @@ from ..ratify import acceptance_payload
 from ..transcript import canonical_json
 
 
-def verdict_payload(option, owner, acceptable, score, reason) -> bytes:
+def verdict_payload(option, owner, acceptable, score, reason, session=None, nonce=None) -> bytes:
     """Canonical bytes a bot signs for one verdict — binds owner+option+content.
 
-    `type` separates this domain from acceptance signatures (`ratify.acceptance_payload`)."""
-    return canonical_json(
-        {"type": "verdict/0.1", "owner": owner, "option": option, "acceptable": acceptable,
-         "score": score, "reason": reason},
-    ).encode("utf-8")
+    `type` separates this domain from acceptance signatures (`ratify.acceptance_payload`).
+    With a session id and a nonce (chosen by the room, per option per run) the type is
+    `verdict/0.2`: a genuine signed verdict cannot be replayed into another run (R2)."""
+    body = {"type": "verdict/0.1", "owner": owner, "option": option, "acceptable": acceptable,
+            "score": score, "reason": reason}
+    if session is not None or nonce is not None:
+        body.update(type="verdict/0.2", session=session, nonce=nonce)
+    return canonical_json(body).encode("utf-8")
+
+
+def _norm(pubkey_hex):
+    """Hex is case-insensitive to the verifier, so compare keys in one case only."""
+    return pubkey_hex.lower() if isinstance(pubkey_hex, str) else pubkey_hex
 
 
 @dataclass(frozen=True)
@@ -66,14 +74,15 @@ class Identity:
 
     def sign_verdict(self, option, verdict) -> str:
         return self.sign(verdict_payload(
-            option, verdict.owner, verdict.acceptable, verdict.score, verdict.reason))
+            option, verdict.owner, verdict.acceptable, verdict.score, verdict.reason,
+            getattr(verdict, "session", None), getattr(verdict, "nonce", None)))
 
     def sign_acceptance(self, payload: bytes) -> tuple:
         """`ratify.Signer`: sign the canonical acceptance bytes, return (sig_hex, pubkey_hex)."""
         return self.sign(payload), self.card().pubkey_hex
 
 
-def verify_acceptance(acceptance) -> bool:
+def verify_acceptance(acceptance, roster=None) -> bool:
     """A signed `ratify.Acceptance` must validate against its own pubkey over its own content.
 
     Unsigned acceptances fail: ratification is the one step where a missing signature is never
@@ -83,13 +92,16 @@ def verify_acceptance(acceptance) -> bool:
     """
     if not acceptance.sig or not acceptance.pubkey_hex:
         return False
+    if roster is not None and _norm(roster.get(acceptance.owner)) != _norm(acceptance.pubkey_hex):
+        return False  # R1: the key must be the one this owner pinned at join, not one the host minted
     card = AgentCard(owner=acceptance.owner, pubkey_hex=acceptance.pubkey_hex)
     payload = acceptance_payload(acceptance.owner, acceptance.decision,
                                  acceptance.transcript_hash, acceptance.accepted)
     return card.verify(payload, acceptance.sig)
 
 
-def verify_transcript(transcript, require_signed: bool = False) -> bool:
+def verify_transcript(transcript, require_signed: bool = False, expected_session=None,
+                      roster=None) -> bool:
     """Every SIGNED verdict must validate against its own pubkey for its own option.
 
     Returns False if any signed verdict fails — i.e. the coordinator fabricated or
@@ -101,16 +113,44 @@ def verify_transcript(transcript, require_signed: bool = False) -> bool:
     that strips signatures makes the check pass silently. When every participant is
     expected to sign (the all-remote case), pass ``require_signed=True`` — then a verdict
     missing its ``sig``/``pubkey_hex`` fails closed.
+
+    ``expected_session`` (R2): when given, every verdict must be run-bound to exactly that
+    session, and no nonce may repeat, so a verdict from another run, or one reused inside this
+    run, fails. A transcript with stripped bindings fails closed.
+
+    ``roster`` (R1): ``{owner: pubkey_hex}`` pinned by each owner at join, out of band from the
+    host. A signed verdict must carry exactly its owner's pinned key, otherwise a host that mints
+    its own keys could forge a transcript that verifies. The roster must come from the owners,
+    never from the receipt. Independently of a roster, one key may not stand for two owners and
+    one owner may not use two keys in the same record.
     """
+    if roster is not None or expected_session is not None:
+        require_signed = True  # a pin or a session binding on an unsigned verdict binds nothing
+    roster = {o: _norm(k) for o, k in roster.items()} if roster is not None else None
+    seen_nonces = set()
+    key_of, owners_of = {}, {}
     for entry in transcript.entries:
         for v in entry["verdicts"]:
+            if expected_session is not None:
+                if v.get("session") != expected_session or not isinstance(v.get("nonce"), str) \
+                        or not v["nonce"] or v["nonce"] in seen_nonces:
+                    return False
+                seen_nonces.add(v["nonce"])
             if not v.get("sig") or not v.get("pubkey_hex"):
                 if require_signed:
                     return False  # fail closed: an expected signature is missing (downgrade)
                 continue
+            pub = _norm(v["pubkey_hex"])
+            if roster is not None and roster.get(v["owner"]) != pub:
+                return False
+            if key_of.setdefault(v["owner"], pub) != pub:
+                return False
+            if owners_of.setdefault(pub, v["owner"]) != v["owner"]:
+                return False
             card = AgentCard(owner=v["owner"], pubkey_hex=v["pubkey_hex"])
             payload = verdict_payload(
-                entry["option"], v["owner"], v["acceptable"], v["score"], v["reason"])
+                entry["option"], v["owner"], v["acceptable"], v["score"], v["reason"],
+                v.get("session"), v.get("nonce"))
             if not card.verify(payload, v["sig"]):
                 return False
     return True

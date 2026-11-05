@@ -377,3 +377,31 @@ def test_console_script_is_declared():
     with open(os.path.join(ROOT, "pyproject.toml"), "rb") as fh:
         scripts = tomllib.load(fh)["project"].get("scripts", {})
     assert scripts.get("parley-mcp") == "parley.mcp:main"
+
+
+def test_verify_receipt_says_whether_owners_were_pinned(decided):
+    """R6: a bare green result reads as proof. The reply must say which owners it found and
+    whether the caller pinned them, and name the owner replay as the missing check."""
+    unpinned = _payload(_talk([INIT, _call("parley_verify_receipt", {
+        "transcript": decided["transcript"], "sha256": decided["transcript_sha256"]})])[0][-1])
+    assert unpinned["owners_pinned"] is False
+    assert unpinned["owners_found"] == sorted(unpinned["owners_found"]) and unpinned["owners_found"]
+    assert "parley_check_party" in unpinned["note"]
+
+    owners = unpinned["owners_found"]
+    pinned = _payload(_talk([INIT, _call("parley_verify_receipt", {
+        "transcript": decided["transcript"], "sha256": decided["transcript_sha256"],
+        "expected_owners": owners})])[0][-1])
+    assert pinned["owners_pinned"] is True
+
+
+def test_tool_errors_do_not_echo_spec_values():
+    """R7: an error text can carry a party's value back to the caller and into logs."""
+    spec = {"title": "t", "options": [{"id": "a", "cost": "SECRET-VALUE"}],
+            "parties": [{"owner": "A", "hard": [],
+                         "utility": [{"attr": "cost", "direction": "lower", "lo": 0, "hi": 10}]}]}
+    replies, stderr = _talk([INIT, _call("parley_decide", {"spec": spec})])
+    result = replies[-1]["result"]
+    assert result["isError"] is True
+    assert "SECRET-VALUE" not in json.dumps(result)
+    assert "SECRET-VALUE" not in stderr
