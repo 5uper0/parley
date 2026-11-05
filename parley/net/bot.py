@@ -10,6 +10,7 @@ preference-extraction and DoS holes. The private sheet never crosses the wire.
 Run standalone:  PARLEY_TOKEN=$(openssl rand -hex 16) python -m parley.net.bot --profile ana --port 8101
 """
 import argparse
+import dataclasses
 import hmac
 import json
 import math
@@ -121,7 +122,16 @@ def _make_handler(agent, identity, auth_token, limiter):
                 option = data["option"]
                 if not isinstance(option, dict):
                     raise ValueError("option must be an object")
+                session, nonce = data.get("session"), data.get("nonce")
+                if (session is None) != (nonce is None):
+                    raise ValueError("session and nonce come together")
+                if session is not None and not (
+                        isinstance(session, str) and isinstance(nonce, str)
+                        and 0 < len(session) <= 128 and 0 < len(nonce) <= 128):
+                    raise ValueError("session and nonce must be short strings")
                 v = agent.consider(option)  # predicates may raise on malformed options
+                if session is not None:
+                    v = dataclasses.replace(v, session=session, nonce=nonce)
             except UtilityError:  # NaN can only come from the sheet: the body parser refuses NaN/Infinity
                 self._send(500, {"error": "internal error"})
                 return
@@ -130,6 +140,8 @@ def _make_handler(agent, identity, auth_token, limiter):
                 return
             out = {"owner": v.owner, "acceptable": v.acceptable,
                    "score": v.score, "reason": v.reason}
+            if v.session is not None:
+                out["session"], out["nonce"] = v.session, v.nonce
             if identity:
                 out["sig"] = identity.sign_verdict(option, v)
                 out["pubkey_hex"] = identity.card().pubkey_hex

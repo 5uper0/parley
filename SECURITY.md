@@ -28,7 +28,11 @@ framing* is still welcome):
 - **Signatures are tamper-evidence, not authenticity.** `verify_transcript` checks each signature
   against the pubkey carried *in the same record*; there is no trusted `owner → key` roster yet, so a
   coordinator that assembles the transcript could sign a fabricated verdict with its own key. The
-  roster-pinned check (pin each owner's key from its `/card`) lands in v0.2. One client-side piece
+  check exists but is opt-in: `verify_transcript(roster={owner: pubkey})`, `verify_acceptance(roster=)`
+  and `scripts/verify-receipt.py --roster file.json` reject any key other than the one each owner pinned
+  at join, out of band from the host (a roster read from the receipt binds nothing); a roster also
+  requires every verdict and acceptance to be signed. Without a roster, one key standing for two owners,
+  or one owner using two keys, fails; nothing more. One client-side piece
   is in: when a bot's `/card` advertises a key, `RemoteAgent` refuses any `/consider` reply that
   lacks a signature or carries a different key. The client checks that a signature is present
   under the card's key; whether the signature is valid is checked by
@@ -40,8 +44,12 @@ framing* is still welcome):
   pubkey carried *in the same acceptance*, so anyone with a key can sign an acceptance under another
   owner's name. Unsigned acceptances authenticate nothing: `agreement()` without a `verifier` is
   tamper-evidence only. Closed by the same v0.2 roster pin.
-- **No replay binding.** Verdict payloads carry no session id or nonce, so a genuine signed verdict
-  is replayable into another parley that reuses the same option.
+- **Replay binding is opt-in.** `RemoteAgent.bind(session)` makes the bot sign `verdict/0.2` with the
+  room's session id and a fresh nonce per option; `verify_transcript(expected_session=...)` then rejects a
+  verdict from another run, a repeated nonce, or a stripped binding. A caller that does not bind, or does
+  not pass `expected_session`, still gets the old unbound behaviour: a genuine signed verdict is replayable
+  into another parley that reuses the same option. Session id and nonce are chosen by the coordinator, so
+  this is only meaningful together with the owner-key roster below.
 - **Strategic reporting of soft scores is not prevented.** Red lines are enforced in code, but the soft
   score each party reports is self-declared. A party that misreports it can tilt the pick among options
   that are acceptable to everyone, at the other parties' expense; in our own simulation (2026-10-25) a

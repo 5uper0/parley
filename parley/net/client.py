@@ -13,6 +13,7 @@ checked by `verify_transcript`; the core client imports no crypto.
 """
 import json
 import math
+import secrets
 import string
 import urllib.request
 
@@ -24,6 +25,7 @@ class RemoteAgent:
         self.url = url.rstrip("/")
         self.token = token
         self.timeout = timeout
+        self.session = None  # set by bind(): the room's id for this run
         card = self._get("/card")  # discovery
         if not isinstance(card, dict) or not isinstance(card.get("owner"), str) or not card["owner"]:
             raise ValueError(f"malformed card from {self.url}")
@@ -43,8 +45,18 @@ class RemoteAgent:
         with urllib.request.urlopen(req, timeout=self.timeout) as r:
             return json.loads(r.read())
 
+    def bind(self, session: str) -> None:
+        """Tie every following question to this run: the room chooses the session id, and a fresh
+        random nonce goes out with each option, so a signed answer cannot be reused elsewhere."""
+        self.session = session
+
     def consider(self, option) -> Verdict:
-        body = json.dumps({"option": option}).encode("utf-8")
+        payload = {"option": option}
+        nonce = None
+        if self.session is not None:
+            nonce = secrets.token_hex(16)
+            payload.update(session=self.session, nonce=nonce)
+        body = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(self.url + "/consider", data=body, headers=self._headers())
         with urllib.request.urlopen(req, timeout=self.timeout) as r:
             d = json.loads(r.read())
@@ -53,9 +65,13 @@ class RemoteAgent:
         if self.pubkey_hex is not None and (d.get("pubkey_hex") != self.pubkey_hex
                                             or not d.get("sig")):
             raise ValueError(f"verdict from {self.url} is not signed by the key its card advertised")
+        if self.session is not None and (d.get("session") != self.session or d.get("nonce") != nonce):
+            raise ValueError(f"verdict from {self.url} does not echo this run's session and nonce")
         return Verdict(
             owner=d["owner"], acceptable=d["acceptable"], score=d["score"],
             reason=d["reason"], sig=d.get("sig"), pubkey_hex=d.get("pubkey_hex"),
+            session=d.get("session") if self.session is not None else None,
+            nonce=d.get("nonce") if self.session is not None else None,
         )
 
 
@@ -74,7 +90,7 @@ def _well_formed(d, owner) -> bool:
         and isinstance(score, (int, float)) and not isinstance(score, bool)
         and math.isfinite(score) and 0.0 <= score <= 1.0
         and d.get("reason") == ("ok" if acceptable else "red-line")
-        and all(d.get(k) is None or isinstance(d[k], str) for k in ("sig", "pubkey_hex"))
+        and all(d.get(k) is None or isinstance(d[k], str) for k in ("sig", "pubkey_hex", "session", "nonce"))
     )
 
 
