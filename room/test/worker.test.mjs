@@ -112,3 +112,15 @@ test("record link is indexed when the room closes and on a result read, but not 
   assert.deepEqual((await run("POST", "/verdicts")).posts, []);                                                    // done:false: nothing
   assert.deepEqual((await run("POST", "/join")).posts, []);
 });
+
+test("a result read indexes the record link without a second room fetch", async () => {
+  const closed = "b".repeat(32), posts = []; let roomCalls = 0;
+  const env = { LIMIT_SECRET: "s", COUNTERS: { idFromName: () => "c", get: () => ({ fetch: async () => new Response("{}") }) },
+    RECORDS: { idFromName: (n) => n, get: (id) => ({ fetch: async (_u, init) => (init?.method === "POST" && posts.push({ id, ...JSON.parse(init.body) }), new Response("{}")) }) },
+    ROOM: { idFromName: (n) => n, get: () => ({ fetch: async () => (roomCalls++, new Response(JSON.stringify({ record_token: "e".repeat(32) }))) }) } };
+  const pending = [];
+  await worker.fetch(new Request(`https://r/rooms/${closed}/result`), env, { waitUntil: (p) => pending.push(p) });
+  await Promise.all(pending);
+  assert.equal(roomCalls, 1);                                                                    // only the read itself
+  assert.deepEqual(posts, [{ id: "e".repeat(32), room: closed }]);
+});

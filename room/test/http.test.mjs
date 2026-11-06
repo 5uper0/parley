@@ -238,3 +238,21 @@ test("options are fixed at creation: no route changes them, and a second create 
   assert.equal((await handle(req("POST", { options: [{ a: 1 }, { a: 2 }], owners: ["ann", "bob"] }), "", s)).status, 409);
   assert.equal((await s.get()).options.length, 1);
 });
+
+test("record tokens are random per room, not derived from anything fixed", async () => {
+  const tokens = [];
+  for (let n = 0; n < 2; n++) {
+    const s = mkStore(), options = [{ a: 1 }];
+    const made = await (await handle(req("POST", { options, owners: ["ann", "bob"] }), "", s)).json();
+    for (const owner of ["ann", "bob"]) {
+      const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+      const j = await (await handle(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens[owner] }), "/join", s)).json();
+      const v = verdictFor({ owner, hard: [], utility: [] }, options[0]);
+      const sig = hex(await crypto.subtle.sign({ name: "Ed25519" }, kp.privateKey, verdictPayload({ option: options[0], owner, ...v, session: j.session, nonce: j.nonces[0] })));
+      await handle(req("POST", { owner, verdicts: [{ acceptable: v.acceptable, score: v.score, reason: v.reason, sig }] }), "/verdicts", s);
+    }
+    tokens.push((await (await handle(req("GET"), "/result", s)).json()).record_token);
+  }
+  assert.match(tokens[0], /^[0-9a-f]{32}$/);
+  assert.notEqual(tokens[0], tokens[1]);
+});

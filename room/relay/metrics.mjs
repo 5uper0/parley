@@ -69,3 +69,12 @@ export function relayEventFor(method, path, status, errorCode, done) {
   if (method === "POST" && path === "/verdicts") return done ? "room_closed" : "submitted";
   return null;
 }
+
+/** The one list of keys a counter may hold, built from the same sets the events come from. */
+export function isCounterKey(k) {
+  if (typeof k !== "string") return false;
+  if (DEVICE_EVENTS.has(k) && k !== "q_answered") return true;
+  if (/^q_answered_[1-4]$/.test(k)) return true;
+  if (RELAY_EVENTS.has(k)) return true;
+  return k.startsWith("rejected_") && REJECT_CODES.has(k.slice("rejected_".length));
+}

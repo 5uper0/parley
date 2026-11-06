@@ -141,3 +141,53 @@ test("/m caps the body even without a content-length header, and the report toke
   const near = await worker.fetch(new Request("https://r/m/report", { headers: { authorization: "Bearer o" } }), e);
   assert.equal(near.status, 404);
 });
+
+import { isCounterKey } from "../relay/metrics.mjs";
+import { readCapped, MetricsLimiter } from "../relay/worker.mjs";
+
+test("isCounterKey is built from the same sets as the events", () => {
+  for (const k of ["page_start", "q_answered_1", "q_answered_4", "result_viewed_ok", "result_refused", "room_created", "joined", "submitted", "room_closed", "rejected_bad-token", "rejected_locked"]) assert.equal(isCounterKey(k), true, k);
+  for (const k of ["q_answered", "q_answered_5", "rejected_", "rejected_x".repeat(2), "rejected_slow-down", "room/abc", "__proto__", "", 7, null]) assert.equal(isCounterKey(k), false, String(k));
+});
+
+test("readCapped stops reading at the cap and cancels the stream", async () => {
+  let pulled = 0, cancelled = false;
+  const body = new ReadableStream({ pull(c) { pulled++; c.enqueue(new Uint8Array(100)); }, cancel() { cancelled = true; } });
+  assert.equal(await readCapped({ body }, 128), null);
+  assert.ok(cancelled);
+  assert.ok(pulled <= 4, `pulled ${pulled} chunks`);                           // it did not read on forever
+  assert.equal(await readCapped({ body: null }, 128), "");
+  assert.equal(await readCapped(new Request("https://x/", { method: "POST", body: "hello" }), 128), "hello");
+});
+
+test("MetricsLimiter: 20 an hour, an alarm about an hour out, alarm wipes", async () => {
+  const m = new Map(); let alarm = null;
+  const lim = new MetricsLimiter({ storage: { get: async (k) => m.get(k), put: async (k, v) => m.set(k, structuredClone(v)), setAlarm: async (t) => { alarm = t; }, deleteAll: async () => { m.clear(); alarm = null; } } });
+  for (let i = 0; i < 20; i++) assert.equal((await lim.fetch()).status, 200);
+  assert.equal((await lim.fetch()).status, 429);                                // the 21st beacon
+  assert.ok(alarm > Date.now() + 3500_000 && alarm < Date.now() + 3700_000);
+  await lim.alarm();
+  assert.equal(m.size, 0);
+});
+
+test("counting goes through waitUntil once and a failing counter never breaks the response", async () => {
+  const waited = [];
+  const e = env();
+  e.COUNTERS = { idFromName: () => "c", get: () => ({ fetch: async () => { throw new Error("counter down"); } }) };
+  const res = await worker.fetch(post('{"event":"page_start","lang":"en"}'), e, { waitUntil: (p) => waited.push(p) });
+  assert.equal(res.status, 200);
+  assert.equal(waited.length, 1);
+  await assert.doesNotReject(Promise.all(waited));
+  const e2 = env();
+  e2.COUNTERS = { idFromName: () => { throw new Error("sync failure"); }, get: () => ({}) };
+  assert.equal((await worker.fetch(post('{"event":"page_start","lang":"en"}'), e2, { waitUntil: () => {} })).status, 200);
+});
+
+test("bad beacons answer exactly {error:no}; the report is no-store", async () => {
+  const e = env();
+  const res = await worker.fetch(post('{"event":"hack","lang":"en"}'), e);
+  assert.equal(await res.text(), '{"error":"no"}');
+  e.COUNTERS = { idFromName: () => "c", get: () => ({ fetch: async () => new Response("{}", { headers: { "cache-control": "no-store" } }) }) };
+  const rep = await worker.fetch(new Request("https://r/m/report", { headers: { authorization: "Bearer op" } }), e);
+  assert.equal(rep.status, 200);
+});

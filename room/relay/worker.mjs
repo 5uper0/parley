@@ -3,10 +3,9 @@
 
 import { serialHandler } from "./http.mjs";
 import { rateAllow, ROOM_TTL_MS } from "./core.mjs";
-import { MAX_BODY_BYTES, beaconKey, bump, prune, dayOf, weeklyReport, relayEventFor } from "./metrics.mjs";
+import { MAX_BODY_BYTES, isCounterKey, beaconKey, bump, prune, dayOf, weeklyReport, relayEventFor } from "./metrics.mjs";
 
 const ROOMS_PER_HOUR = 20, BEACONS_PER_HOUR = 20;
-const ALLOWED_KEY = /^(page_start|q_answered_[1-4]|result_viewed_ok|result_refused|room_created|joined|submitted|room_closed|rejected_[a-z-]{1,30})$/;
 
 export class Room {
   constructor(state) { this.state = state; this.handle = serialHandler(); }
@@ -80,7 +79,7 @@ export class Counters {
       return new Response(JSON.stringify(weeklyReport(counters)), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
     }
     const { key } = await request.json();               // parse first: nothing is awaited between the read and the write below
-    if (!ALLOWED_KEY.test(key)) return new Response("{}", { status: 400 });
+    if (!isCounterKey(key)) return new Response("{}", { status: 400 });
     const counters = (await this.state.storage.get("c")) || {};
     await this.state.storage.put("c", prune(bump(counters, dayOf(Date.now()), key), Date.now()));
     return new Response("{}");
@@ -113,21 +112,23 @@ const count = (env, ctx, key) => {
 /** Run a room request and count what happened from path, status and error code only. */
 async function counted(env, ctx, request, path, run, roomId) {
   const res = await run();
-  let code, done;
+  let code, done, token;
   if (res.status >= 400 || (request.method === "POST" && path === "/verdicts")) {
     try { const b = await res.clone().json(); code = b.error; done = b.done; } catch { /* not json */ }
+  } else if (request.method === "GET" && path === "/result" && res.status === 200) {
+    try { token = (await res.clone().json()).record_token; } catch { /* not json */ }   // already in the response: no second room fetch
   }
   count(env, ctx, relayEventFor(request.method, path, res.status, code, done));
   // The room just closed, or a client reads a closed room's result: (re)index its record link. Idempotent, so retries are free.
   if (roomId && env.RECORDS && (done === true || (request.method === "GET" && path === "/result" && res.status === 200))) {
-    const p = registerRecord(env, roomId).catch(() => {});
+    const p = registerRecord(env, roomId, token).catch(() => {});
     if (ctx?.waitUntil) ctx.waitUntil(p);
   }
   return res;
 }
 
 /** Reads at most `max` bytes of the body, whatever the headers claim; null if it is longer. */
-async function readCapped(request, max) {
+export async function readCapped(request, max) {
   if (!request.body) return "";
   const reader = request.body.getReader(), parts = [];
   let total = 0;
@@ -150,9 +151,12 @@ async function sameToken(given, expected) {
   return diff === 0;
 }
 
-async function registerRecord(env, roomId) {
-  const r = await env.ROOM.get(env.ROOM.idFromName(roomId)).fetch(`https://r/rooms/${roomId}/result`);
-  const { record_token } = await r.json();
+async function registerRecord(env, roomId, known) {
+  let record_token = known;
+  if (!record_token) {                                   // the room just closed: read the token from the room
+    const r = await env.ROOM.get(env.ROOM.idFromName(roomId)).fetch(`https://r/rooms/${roomId}/result`);
+    ({ record_token } = await r.json());
+  }
   if (!/^[0-9a-f]{32}$/.test(record_token || "")) return;
   await env.RECORDS.get(env.RECORDS.idFromName(record_token)).fetch("https://r/", { method: "POST", body: JSON.stringify({ room: roomId }) });
 }
