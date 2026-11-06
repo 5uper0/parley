@@ -17,3 +17,5 @@ If a phone dies between taking its seat and saving its key, that seat cannot be 
 Each person's link also carries a hash of the room's names, and the page itself carries the option list: a phone refuses a room whose names or options differ from those, so the relay cannot add a seat, drop one, or change what is being decided without the phone noticing.
 
 What this does not give: the relay issues the seats and records the keys, so a dishonest relay could answer for someone else with a key of its own, or show two people two different records. Each person's own conditions still hold (an option they ruled out cannot be agreed), but the phone does not authenticate the other people. To catch two different records, compare the record code on each screen.
+
+Seats: a link preview that only reads the page binds nothing; the seat is taken when the person presses the button. A second device with the same link is refused. The creator gets an `organizer_key` once, in the creation response, and can free a seat whose phone was lost (`POST /reissue`, before that person has submitted): the old link dies and the nonces change. The organizer screen for this is not built yet.
