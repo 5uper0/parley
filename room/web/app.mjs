@@ -1,4 +1,5 @@
-// Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
+// Phone page. One column, one button per screen. Hash routes: "#/" create a room, "#/o/<room>/<roster hash>" organizer (reissue),
+// "#/r/<room>/<name>/<token>/<roster hash>" a person, "#/record/<token>" a shared record.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
 import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk, saveOrganizerKey, loadOrganizerKey, reissueSeat } from "./client.mjs";
@@ -21,8 +22,9 @@ const el = (tag, attrs = {}, ...kids) => {
 };
 const show = (...nodes) => { $app.replaceChildren(...nodes); window.scrollTo(0, 0); };
 const btn = (label, onclick, cls = "") => el("button", { type: "button", class: cls, onclick }, label);
+let rerender = null; // screens that hold one-time data (the first share screen) re-render themselves instead of re-routing
 const langSwitch = () => el("p", { class: "lang" }, ...["en", "es"].map((l) =>
-  el("button", { type: "button", class: l === lang ? "on" : "", onclick: () => { lang = l; route(); } }, l.toUpperCase())));
+  el("button", { type: "button", class: l === lang ? "on" : "", onclick: () => { lang = l; (rerender || route)(); } }, l.toUpperCase())));
 const fail = (msg, retry) => show(langSwitch(), el("p", { class: "err" }, msg), retry ? btn(t().back, retry) : "");
 const optName = (id) => t().opt[id];
 
@@ -57,10 +59,15 @@ function seatCard(id, rh, name, token) {
   };
   if (token) showLink(token);
   const note = el("p", { class: "note" });
+  let confirmed = false;
   return el("div", { class: "card" }, el("strong", {}, name), out,
     btn(t().reissue, async () => {
       const k = loadOrganizerKey(sessionStorage, id);
       if (!k) { note.textContent = t().reissueKey; return; }
+      if (!confirmed) { // a seat already opened on a phone dies on reissue: say so first
+        const st = await getStatus(fetch, RELAY, id).catch(() => null);
+        if (st && Array.isArray(st.joined) && st.joined.includes(name)) { confirmed = true; note.textContent = t().reissueJoined; return; }
+      }
       try { showLink(await reissueSeat(fetch, RELAY, id, k, name)); note.textContent = t().reissued; }
       catch (e) { note.textContent = t()[reissueErr[e.message]] || t().err; }
     }), note);
@@ -69,13 +76,14 @@ function seatCard(id, rh, name, token) {
 async function share(id, owners, tokens) {
   const rh = await rosterHash(owners);
   history.replaceState(null, "", `#/o/${id}/${rh}`); // a reload lands on the organizer screen; the key is not in the URL
+  rerender = () => share(id, owners, tokens);
   show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => seatCard(id, rh, name, tokens[name])));
 }
 
 async function organizer(id, rh) {
   let status;
   try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
-  if ((await rosterHash(status.owners)) !== rh) return fail(t().badRoom);
+  if (!Array.isArray(status.owners) || !Array.isArray(status.submitted) || (await rosterHash(status.owners)) !== rh) return fail(t().badRoom);
   const todo = status.owners.filter((o) => !status.submitted.includes(o));
   show(langSwitch(), el("h2", {}, t().organizerTitle), el("p", { class: "note" }, t().organizerNote),
     ...todo.map((name) => seatCard(id, rh, name, null)), todo.length ? "" : el("p", {}, t().allAnswered));
@@ -214,12 +222,13 @@ async function recordPage(token) {
 
 function route() {
   clearTimeout(pollTimer);
+  rerender = null;
   const rec = location.hash.match(/^#\/record\/([0-9a-f]{32})$/);
   if (rec) return recordPage(rec[1]);
   const org = location.hash.match(/^#\/o\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
   if (org) return organizer(org[1], org[2]);
   const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
-  if (!m) return /^#\/r\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
+  if (!m) return /^#\/[ro]\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
   let owner;
   try { owner = decodeURIComponent(m[2]); } catch { return fail(t().lost); }
   linkRosterHash = m[4];

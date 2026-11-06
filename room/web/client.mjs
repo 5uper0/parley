@@ -40,6 +40,7 @@ export const loadOrganizerKey = (storage, roomId) => storage.getItem(orgKey(room
 export async function reissueSeat(fetchFn, base, roomId, organizerKey, owner) {
   const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/reissue`, { organizer_key: organizerKey, owner });
   if (!r.ok) throw new Error(r.data.error);
+  if (!/^[0-9a-f]{32}$/.test(r.data.token || "")) throw new Error("bad-token"); // a relay can send anything
   return r.data.token;
 }
 

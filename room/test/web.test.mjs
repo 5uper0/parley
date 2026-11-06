@@ -1,4 +1,5 @@
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
@@ -201,8 +202,25 @@ test("organizer key: sessionStorage only, reissue gives a working new seat, old 
   await assert.rejects(reissueSeat(f, BASE, room.id, "0".repeat(32), "bo"), /bad-organizer-key/);
 });
 
-test("a room without an organizer key cannot be reissued", async () => {
+test("a missing organizer key is refused", async () => {
   const f = relayFetch();
   const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["ann", "bo"] });
-  await assert.rejects(reissueSeat(f, BASE, room.id, undefined, "ann"), /bad-organizer-key|no-organizer/);
+  await assert.rejects(reissueSeat(f, BASE, room.id, undefined, "ann"), /bad-organizer-key/);
+});
+
+test("the organizer key is held in sessionStorage only and never reaches a URL, localStorage or a log", () => {
+  const app = readFileSync(new URL("../web/app.mjs", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../web/client.mjs", import.meta.url), "utf8");
+  const calls = [...app.matchAll(/(save|load)OrganizerKey\(([^,]+),/g)].map((m) => m[2]);
+  assert.ok(calls.length >= 2 && calls.every((a) => a === "sessionStorage"), "every key read/write uses sessionStorage");
+  assert.equal([...app.matchAll(/organizer_key/g)].length, 1);                       // only room.organizer_key handed to saveOrganizerKey
+  assert.match(app, /saveOrganizerKey\(sessionStorage, room\.id, room\.organizer_key\)/);
+  const urls = [...app.matchAll(/(?:replaceState\([^)]*|const seatUrl[^\n]*)/g)].map((m) => m[0]).join("\n");
+  assert.ok(urls.includes("replaceState") && !/key/i.test(urls), "no key in any URL template");
+  assert.ok(!/console\./.test(app + client), "no logging");
+});
+
+test("a relay that returns a malformed token for a reissue is refused", async () => {
+  const f = async () => new Response(JSON.stringify({ token: "/../x" }), { status: 200 });
+  await assert.rejects(reissueSeat(f, BASE, "a".repeat(32), "b".repeat(32), "ann"), /bad-token/);
 });
