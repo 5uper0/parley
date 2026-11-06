@@ -44,6 +44,11 @@ export async function reissueSeat(fetchFn, base, roomId, organizerKey, owner) {
   return r.data.token;
 }
 
+/** Has this seat been opened on a phone? null = unknown (status failed or malformed): the caller must not reissue blind. */
+export function seatJoined(status, name) {
+  return status && Array.isArray(status.joined) ? status.joined.includes(name) : null;
+}
+
 export async function joinRoom(fetchFn, base, roomId, owner, device, token) {
   const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/join`, { owner, pubkey_hex: device.pubkeyHex, token });
   if (!r.ok) throw new Error(r.data.error);

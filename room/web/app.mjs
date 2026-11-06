@@ -2,7 +2,7 @@
 // "#/r/<room>/<name>/<token>/<roster hash>" a person, "#/record/<token>" a shared record.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk, saveOrganizerKey, loadOrganizerKey, reissueSeat } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk, saveOrganizerKey, loadOrganizerKey, reissueSeat, seatJoined } from "./client.mjs";
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
@@ -50,27 +50,37 @@ function who() {
 const seatUrl = (rh, id, name, token) => `${location.href.split("#")[0]}#/r/${id}/${encodeURIComponent(name)}/${token}/${rh}`;
 const reissueErr = { "bad-organizer-key": "reissueKey", "no-organizer": "reissueKey", locked: "reissueLocked", "already-submitted": "reissueDone" };
 
+const seatTokens = {}; // `${room}/${name}` -> current token, so a re-render never shows a dead link
+
 function seatCard(id, rh, name, token) {
+  const tkey = `${id}/${name}`;
+  if (token) seatTokens[tkey] = token;
   const out = el("div", {});
   const showLink = (tk) => {
+    seatTokens[tkey] = tk;
     const url = seatUrl(rh, id, name, tk);
     out.replaceChildren(el("code", {}, url), btn(t().copy, () => navigator.clipboard?.writeText(url)),
       el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
   };
-  if (token) showLink(token);
+  if (seatTokens[tkey]) showLink(seatTokens[tkey]);
   const note = el("p", { class: "note" });
   let confirmed = false;
-  return el("div", { class: "card" }, el("strong", {}, name), out,
-    btn(t().reissue, async () => {
-      const k = loadOrganizerKey(sessionStorage, id);
-      if (!k) { note.textContent = t().reissueKey; return; }
+  const go = el("button", { type: "button", onclick: async () => {
+    const k = loadOrganizerKey(sessionStorage, id);
+    if (!k) { note.textContent = t().reissueKey; return; }
+    go.disabled = true;
+    try {
       if (!confirmed) { // a seat already opened on a phone dies on reissue: say so first
         const st = await getStatus(fetch, RELAY, id).catch(() => null);
-        if (st && Array.isArray(st.joined) && st.joined.includes(name)) { confirmed = true; note.textContent = t().reissueJoined; return; }
+        const j = seatJoined(st, name);
+        if (j === null) { note.textContent = t().err; return; }
+        if (j) { confirmed = true; note.textContent = t().reissueJoined; return; }
       }
-      try { showLink(await reissueSeat(fetch, RELAY, id, k, name)); note.textContent = t().reissued; }
-      catch (e) { note.textContent = t()[reissueErr[e.message]] || t().err; }
-    }), note);
+      showLink(await reissueSeat(fetch, RELAY, id, k, name)); note.textContent = t().reissued; confirmed = false;
+    } catch (e) { note.textContent = t()[reissueErr[e.message]] || t().err; }
+    finally { go.disabled = false; }
+  } }, t().reissue);
+  return el("div", { class: "card" }, el("strong", {}, name), out, go, note);
 }
 
 async function share(id, owners, tokens) {
@@ -86,7 +96,7 @@ async function organizer(id, rh) {
   if (!Array.isArray(status.owners) || !Array.isArray(status.submitted) || (await rosterHash(status.owners)) !== rh) return fail(t().badRoom);
   const todo = status.owners.filter((o) => !status.submitted.includes(o));
   show(langSwitch(), el("h2", {}, t().organizerTitle), el("p", { class: "note" }, t().organizerNote),
-    ...todo.map((name) => seatCard(id, rh, name, null)), todo.length ? "" : el("p", {}, t().allAnswered));
+    ...todo.map((name) => seatCard(id, rh, name, seatTokens[`${id}/${name}`])), todo.length ? "" : el("p", {}, t().allAnswered));
 }
 
 const key = (id, owner) => `parley-room-${id}-${owner}`;

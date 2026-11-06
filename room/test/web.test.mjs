@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom, saveOrganizerKey, loadOrganizerKey, reissueSeat } from "../web/client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom, saveOrganizerKey, loadOrganizerKey, reissueSeat, seatJoined } from "../web/client.mjs";
 
 // Fetch shim: routes /rooms[/id[/path]] to the relay handler with one in-memory store per room.
 function relayFetch() {
@@ -215,6 +215,8 @@ test("the organizer key is held in sessionStorage only and never reaches a URL, 
   assert.ok(calls.length >= 2 && calls.every((a) => a === "sessionStorage"), "every key read/write uses sessionStorage");
   assert.equal([...app.matchAll(/organizer_key/g)].length, 1);                       // only room.organizer_key handed to saveOrganizerKey
   assert.match(app, /saveOrganizerKey\(sessionStorage, room\.id, room\.organizer_key\)/);
+  assert.ok(!/pushState|location\.hash\s*=/.test(app), "no other URL writer");
+  assert.ok(!/localStorage[^\n]*(?:Key|key)/.test(app.split("\n").filter((l) => /Organizer|organizer|\bk\b/.test(l)).join("\n")), "key lines never touch localStorage");
   const urls = [...app.matchAll(/(?:replaceState\([^)]*|const seatUrl[^\n]*)/g)].map((m) => m[0]).join("\n");
   assert.ok(urls.includes("replaceState") && !/key/i.test(urls), "no key in any URL template");
   assert.ok(!/console\./.test(app + client), "no logging");
@@ -223,4 +225,12 @@ test("the organizer key is held in sessionStorage only and never reaches a URL, 
 test("a relay that returns a malformed token for a reissue is refused", async () => {
   const f = async () => new Response(JSON.stringify({ token: "/../x" }), { status: 200 });
   await assert.rejects(reissueSeat(f, BASE, "a".repeat(32), "b".repeat(32), "ann"), /bad-token/);
+});
+
+test("seatJoined: joined, not joined, and unknown never reads as safe", () => {
+  assert.equal(seatJoined({ joined: ["ann"] }, "ann"), true);
+  assert.equal(seatJoined({ joined: ["ann"] }, "bo"), false);
+  assert.equal(seatJoined({}, "ann"), null);
+  assert.equal(seatJoined({ joined: "ann" }, "ann"), null);
+  assert.equal(seatJoined(null, "ann"), null);
 });
