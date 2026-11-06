@@ -10,6 +10,22 @@ class_name = "Room"
 name = "LIMIT"
 class_name = "Limiter"
 
+[[durable_objects.bindings]]
+name = "MLIMIT"
+class_name = "MetricsLimiter"
+
+[[durable_objects.bindings]]
+name = "COUNTERS"
+class_name = "Counters"
+
+# No request logs and no traces: /m must leave nothing but a counter.
+[observability]
+enabled = false
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["Room", "Limiter"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["MetricsLimiter", "Counters"]
