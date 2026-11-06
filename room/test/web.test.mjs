@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom } from "../web/client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom, saveOrganizerKey, loadOrganizerKey, reissueSeat } from "../web/client.mjs";
 
 // Fetch shim: routes /rooms[/id[/path]] to the relay handler with one in-memory store per room.
 function relayFetch() {
@@ -178,4 +178,31 @@ test("record page shape check: bad hash, owners, unknown or prototype decision i
     { ...ok, decision: { id: "constructor" } }, { ...ok, decision: { id: "toString" } }, { ...ok, decision: { id: "nope" } }, { ...ok, decision: null },
     { ...ok, status: "other" }, null, "x",
   ]) assert.equal(recordShapeOk(bad, ids), false, JSON.stringify(bad)?.slice(0, 50));
+});
+
+test("organizer key: sessionStorage only, reissue gives a working new seat, old link dies, no key in the link", async () => {
+  const f = relayFetch();
+  const store = new Map(); const ss = { setItem: (k, v) => store.set(k, v), getItem: (k) => store.get(k) ?? null };
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["ann", "bo"] });
+  saveOrganizerKey(ss, room.id, "not-a-key");
+  assert.equal(loadOrganizerKey(ss, room.id), null);                       // junk is never stored
+  saveOrganizerKey(ss, room.id, room.organizer_key);
+  assert.equal(loadOrganizerKey(ss, room.id), room.organizer_key);
+  const lost = await newDevice();
+  await joinRoom(f, BASE, room.id, "ann", lost, room.tokens.ann);           // ann's phone is lost after joining
+  const token = await reissueSeat(f, BASE, room.id, loadOrganizerKey(ss, room.id), "ann");
+  assert.match(token, /^[0-9a-f]{32}$/);
+  assert.ok(!token.includes(room.organizer_key) && token !== room.tokens.ann);
+  await assert.rejects(joinRoom(f, BASE, room.id, "ann", await newDevice(), room.tokens.ann)); // old link is dead
+  const dev = await newDevice();
+  const { session, nonces } = await joinRoom(f, BASE, room.id, "ann", dev, token);
+  await submitAnswers(f, BASE, room.id, { owner: "ann", sheet: sheetFromAnswers("ann", answers({})), options: room.options, owners: ["ann", "bo"], session, nonces, device: dev });
+  await assert.rejects(reissueSeat(f, BASE, room.id, room.organizer_key, "ann"), /already-submitted/);
+  await assert.rejects(reissueSeat(f, BASE, room.id, "0".repeat(32), "bo"), /bad-organizer-key/);
+});
+
+test("a room without an organizer key cannot be reissued", async () => {
+  const f = relayFetch();
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["ann", "bo"] });
+  await assert.rejects(reissueSeat(f, BASE, room.id, undefined, "ann"), /bad-organizer-key|no-organizer/);
 });

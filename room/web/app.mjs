@@ -1,7 +1,7 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk, saveOrganizerKey, loadOrganizerKey, reissueSeat } from "./client.mjs";
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
@@ -39,20 +39,46 @@ function who() {
       if (owners.length < 2 || owners.length > 5) return fail(t().whoCount, who);
       try {
         const room = await createRoom(fetch, RELAY, { options: HEIRS_OPTIONS, owners });
+        saveOrganizerKey(sessionStorage, room.id, room.organizer_key);
         share(room.id, owners, room.tokens);
       } catch { fail(t().err); }
     }, "primary"));
 }
 
+const seatUrl = (rh, id, name, token) => `${location.href.split("#")[0]}#/r/${id}/${encodeURIComponent(name)}/${token}/${rh}`;
+const reissueErr = { "bad-organizer-key": "reissueKey", "no-organizer": "reissueKey", locked: "reissueLocked", "already-submitted": "reissueDone" };
+
+function seatCard(id, rh, name, token) {
+  const out = el("div", {});
+  const showLink = (tk) => {
+    const url = seatUrl(rh, id, name, tk);
+    out.replaceChildren(el("code", {}, url), btn(t().copy, () => navigator.clipboard?.writeText(url)),
+      el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
+  };
+  if (token) showLink(token);
+  const note = el("p", { class: "note" });
+  return el("div", { class: "card" }, el("strong", {}, name), out,
+    btn(t().reissue, async () => {
+      const k = loadOrganizerKey(sessionStorage, id);
+      if (!k) { note.textContent = t().reissueKey; return; }
+      try { showLink(await reissueSeat(fetch, RELAY, id, k, name)); note.textContent = t().reissued; }
+      catch (e) { note.textContent = t()[reissueErr[e.message]] || t().err; }
+    }), note);
+}
+
 async function share(id, owners, tokens) {
   const rh = await rosterHash(owners);
-  const base = location.href.split("#")[0];
-  show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => {
-    const url = `${base}#/r/${id}/${encodeURIComponent(name)}/${tokens[name]}/${rh}`;
-    return el("div", { class: "card" }, el("strong", {}, name), el("code", {}, url),
-      btn(t().copy, () => navigator.clipboard?.writeText(url)),
-      el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
-  }));
+  history.replaceState(null, "", `#/o/${id}/${rh}`); // a reload lands on the organizer screen; the key is not in the URL
+  show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => seatCard(id, rh, name, tokens[name])));
+}
+
+async function organizer(id, rh) {
+  let status;
+  try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
+  if ((await rosterHash(status.owners)) !== rh) return fail(t().badRoom);
+  const todo = status.owners.filter((o) => !status.submitted.includes(o));
+  show(langSwitch(), el("h2", {}, t().organizerTitle), el("p", { class: "note" }, t().organizerNote),
+    ...todo.map((name) => seatCard(id, rh, name, null)), todo.length ? "" : el("p", {}, t().allAnswered));
 }
 
 const key = (id, owner) => `parley-room-${id}-${owner}`;
@@ -190,6 +216,8 @@ function route() {
   clearTimeout(pollTimer);
   const rec = location.hash.match(/^#\/record\/([0-9a-f]{32})$/);
   if (rec) return recordPage(rec[1]);
+  const org = location.hash.match(/^#\/o\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
+  if (org) return organizer(org[1], org[2]);
   const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
   if (!m) return /^#\/r\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
   let owner;
