@@ -91,6 +91,7 @@ export function issuedTokens(room) { return { ...room.tokens }; }
  *  Wrong keys count against the same decaying limit as bad submissions, so the key cannot be guessed. */
 export function reissue(room, organizerKey, owner, now = Date.now()) {
   if (room.result) fail("room-closed");
+  if (typeof room.organizerKey !== "string" || !room.organizerKey) fail("no-organizer"); // rooms stored before reissue existed
   // the right key always gets through; only wrong guesses are counted, so a link holder cannot lock the creator out
   if (typeof organizerKey !== "string" || organizerKey !== room.organizerKey) {
     const live = (room.organizerStamps || []).filter((t) => now - t < BAD_WINDOW_MS);

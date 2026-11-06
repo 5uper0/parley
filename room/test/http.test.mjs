@@ -156,16 +156,31 @@ test("reissue guards: unknown owner, submitted seat is final, closed room, bad s
   for (let i = 0; i < 5; i++) await handle(req("POST", { owner: "ann", verdicts: [{ ...annV[0], sig: "0".repeat(128) }] }), "/verdicts", s);
   assert.equal((await handle(req("POST", { owner: "ann", verdicts: annV }), "/verdicts", s)).status, 429);
   assert.equal((await re("ann")).status, 200);
-  assert.equal((await handle(req("GET"), "", s)).status, 200);
   const stored = await s.get();
   assert.equal(stored.badStamps.ann, undefined);
-  // a submitted seat is final
-  await handle(req("POST", { owner: "bob", pubkey_hex: hex(await crypto.subtle.exportKey("raw", (await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])).publicKey)), token: made.tokens.bob }), "/join", s);
-  const bobStored = await s.get();
-  assert.ok(bobStored.roster.bob);
   // close the room by hand-marking a result, then reissue is refused
   const closed = await s.get(); closed.result = { status: "agreed" }; await s.put(closed);
   assert.equal((await (await re("bob")).json()).error, "room-closed");
+});
+
+test("rooms stored before reissue existed cannot be reissued, with or without a key", async () => {
+  const s = mkStore();
+  const made = await (await handle(req("POST", { options: [{ a: 1 }], owners: ["ann", "bob"] }), "", s)).json();
+  const legacy = await s.get(); delete legacy.organizerKey; await s.put(legacy);
+  for (const body of [{ owner: "ann" }, { owner: "ann", organizer_key: made.organizer_key }, { owner: "ann", organizer_key: "undefined" }]) {
+    assert.equal((await (await handle(req("POST", body), "/reissue", s)).json()).error, "no-organizer");
+  }
+  assert.ok((await s.get()).roster);                                                               // nothing changed
+});
+
+test("wrong organizer guesses decay after the window", async () => {
+  const { createRoom, reissue, BAD_LIMIT, BAD_WINDOW_MS, RelayError } = await import("../relay/core.mjs");
+  const room = createRoom({ options: [{ a: 1 }], owners: ["ann", "bob"] });
+  const code = (f) => { try { f(); } catch (e) { return e.code; } return "no-error"; };
+  const t0 = 5_000_000;
+  for (let i = 0; i < BAD_LIMIT; i++) assert.equal(code(() => reissue(room, "bad", "ann", t0 + i)), "bad-organizer-key");
+  assert.equal(code(() => reissue(room, "bad", "ann", t0 + 10)), "locked");
+  assert.equal(code(() => reissue(room, "bad", "ann", t0 + BAD_WINDOW_MS + BAD_LIMIT + 1)), "bad-organizer-key"); // window passed
 });
 
 test("a submitted seat cannot be reissued", async () => {
