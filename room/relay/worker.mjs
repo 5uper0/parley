@@ -84,9 +84,11 @@ async function clientKey(request, secret) {
 // Counting never delays a response: it runs after it (ctx.waitUntil) and its failure is ignored.
 const count = (env, ctx, key) => {
   if (!env.COUNTERS || !key) return;
-  const p = env.COUNTERS.get(env.COUNTERS.idFromName("all")).fetch("https://c/", { method: "POST", body: JSON.stringify({ key }) }).catch(() => {});
-  if (ctx?.waitUntil) ctx.waitUntil(p);
-  return p;
+  try {
+    const p = env.COUNTERS.get(env.COUNTERS.idFromName("all")).fetch("https://c/", { method: "POST", body: JSON.stringify({ key }) }).catch(() => {});
+    if (ctx?.waitUntil) ctx.waitUntil(p);
+    return p;
+  } catch { /* a failed count never fails a room request */ }
 };
 
 /** Run a room request and count what happened from path, status and error code only. */

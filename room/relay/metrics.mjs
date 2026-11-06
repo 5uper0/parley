@@ -1,4 +1,4 @@
-// Anonymous daily counters for the Room funnel (docs/room/analytics-events.md). No ids, no cookies,
+// Anonymous daily counters for the Room funnel. No ids, no cookies,
 // no address, nothing finer than a day. This module is pure; the Worker and the Counters object use it.
 
 export const DEVICE_EVENTS = new Set(["page_start", "q_answered", "result_viewed_ok", "result_refused"]);
