@@ -5,6 +5,11 @@ import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswer
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
+// Anonymous daily counters, off until the privacy text and the security review are done.
+const beacon = (event, n) => {
+  if (window.PARLEY_METRICS !== true) return;
+  try { fetch(`${RELAY}/m`, { method: "POST", keepalive: true, credentials: "omit", referrerPolicy: "no-referrer", body: JSON.stringify({ event, ...(n ? { n } : {}), lang }) }).catch(() => {}); } catch { /* never block the page */ }
+};
 const $app = document.getElementById("app");
 let lang = pickLang(navigator);
 const t = () => T[lang];
@@ -58,6 +63,7 @@ async function person(id, owner, token) {
   if (!status.owners.includes(owner)) return fail(t().lost);
   // the room as the organizer made it: names from the link, options from this page, never the relay's word
   if (!(await checkRoom(status, linkRosterHash, HEIRS_OPTIONS))) return fail(t().badRoom);
+  beacon("page_start");
   show(langSwitch(), el("h1", {}, t().joinTitle(owner)), el("p", {}, t().joinLead), el("p", { class: "note" }, t().inRoom(status.owners.join(", "))), el("p", { class: "note" }, t().notLegal),
     btn(t().start, () => { if (status.submitted.includes(owner)) return waiting(id, owner); if (localStorage.getItem(`parley-sent-${id}-${owner}`)) return resend(id, owner); questions(id, owner, token, status); }, "primary"));
 }
@@ -85,7 +91,7 @@ function questions(id, owner, token, status) {
     if (i >= steps.length) return check(id, owner, token, status, a);
     const [title, body, collect] = steps[i]();
     show(langSwitch(), el("p", { class: "note" }, `${i + 1} / ${steps.length}`), el("h2", {}, title), body,
-      i > 0 ? btn(t().back, () => go(i - 1)) : "", btn(t().next, () => { collect(); go(i + 1); }, "primary"));
+      i > 0 ? btn(t().back, () => go(i - 1)) : "", btn(t().next, () => { collect(); beacon("q_answered", i + 1); go(i + 1); }, "primary"));
   };
   go(0);
 }
@@ -153,7 +159,8 @@ async function finish(id, owner, result) {
   const sent = JSON.parse(localStorage.getItem(`parley-sent-${id}-${owner}`) || "null") || undefined;
   if (!sent && localStorage.getItem(key(id, owner))) return fail(t().notVerified); // this phone joined but lost what it sent
   const v = await verifyResult(result, sent, { options: HEIRS_OPTIONS, rosterHash: linkRosterHash });
-  if (!v.ok) return fail(t().notVerified);
+  if (!v.ok) { beacon("result_refused"); return fail(t().notVerified); }
+  beacon("result_viewed_ok");
   localStorage.removeItem(key(id, owner)); // the signing key is no longer needed once the room has closed
   showResult(result);
 }

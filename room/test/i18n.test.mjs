@@ -45,3 +45,10 @@ test("Room page: no third-party script, no indexing, no referrer, CSP script-src
     assert.ok(!/https?:\/\/(?!wa\.me)/.test(code), `${f} mentions an external URL`);
   }
 });
+
+test("page beacons are off unless the deploy sets PARLEY_METRICS, and carry no identifiers", () => {
+  const js = readFileSync(new URL("../web/app.mjs", import.meta.url), "utf8");
+  assert.match(js, /window\.PARLEY_METRICS !== true\) return/);
+  assert.ok(js.includes("body: JSON.stringify({ event, ...(n ? { n } : {}), lang })"), "beacon body is exactly event, n, lang");
+  assert.match(js, /credentials: "omit"/);
+});
