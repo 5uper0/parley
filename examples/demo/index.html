@@ -295,7 +295,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
 <div class="hero-band"><div class="hero-inner">
   <header>
     <div class="brand"><a href="/" class="logo">parley<span class="d">.</span></a>
-      <div class="tag">a group decision your agents can't lie about — and you can check</div></div>
+      <div class="tag">a group decision your agents can't lie about, and you can check</div></div>
     <div class="hdr-nav">
       <a href="/">← parleyprotocol.com</a>
       <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">GitHub</a>
@@ -307,8 +307,8 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
     <div class="hero-copy">
     <section class="hero">
       <span class="eyebrow"><span class="dot"></span>Provable AI consensus</span>
-      <h1>Your AI speaks for you. <span class="g">Prove it never sold you out.</span></h1>
-      <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>under rules enforced in code</b> — and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>.</p>
+      <h1>Your AI speaks for you. <span class="g">Check what it agreed to.</span></h1>
+      <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>under rules enforced in code</b>, and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>.</p>
       <div class="hero-actions">
         <button class="cta" onclick="run()">Replay a sample decision</button>
         <span class="muted" style="font-size:13px">Pick a sample scenario below, then hit Run. Same engine, sample inputs.</span>
@@ -337,7 +337,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
       <b>Want to bring your own agent to a live Parley?</b>
       <span>A hosted Arena is on the drawing board — state your position, watch real agents negotiate it in real time. Interest decides whether it gets built.</span>
     </div>
-    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">I'm interested — say so in Discussions →</a>
+    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">Say you're interested in Discussions ↗</a>
   </aside>
 </div></div>
 
@@ -348,7 +348,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
       <div class="prop">
         <span class="ic i-redline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></span>
         <h3>Red lines enforced in code</h3>
-        <p>A hard limit is a code predicate. An option that crosses one is rejected outright — never negotiated away.</p>
+        <p>A hard limit is a code predicate. An option that crosses one is rejected outright and never negotiated away.</p>
       </div>
       <div class="prop">
         <span class="ic i-engine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h9"/><path d="M4 12h16"/><path d="M4 17h6"/></svg></span>
@@ -358,7 +358,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
       <div class="prop">
         <span class="ic i-verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
         <h3>A receipt you verify yourself</h3>
-        <p>The transcript records masked verdicts only, sealed with SHA-256. Each owner replays their own private limits locally — no sheet is ever revealed.</p>
+        <p>The transcript records masked verdicts only, sealed with SHA-256. Each owner replays their own private limits locally. No sheet is ever revealed.</p>
       </div>
     </div>
   </div>
@@ -376,27 +376,27 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
 
   <p class="situation" id="situation">…</p>
 
-  <h2 id="h-parties" class="step">The people involved — each keeps its position private</h2>
+  <h2 id="h-parties" class="step">The people involved. Each keeps its position private</h2>
   <div class="grid cards" id="parties"></div>
 
   <h2 id="h-options" class="step">The options on the table</h2>
   <div id="options"></div>
-  <p class="muted" id="masknote" style="margin-top:8px">Each chip is a <em>masked</em> verdict — the coordinator sees only who accepted, never which limit was crossed.</p>
+  <p class="muted" id="masknote" style="margin-top:8px">Each chip is a <em>masked</em> verdict. The coordinator sees only who accepted, never which limit was crossed.</p>
 
   <div style="margin:32px 0 8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <button class="btn" onclick="run()">Run it ↻</button>
     <span class="muted" style="font-size:13px">every verdict and hash on this page was computed by the real engine — reproduce them yourself with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
   </div>
 
-  <h2 id="h-viz" class="step">The fair answer — lift the least-happy party</h2>
+  <h2 id="h-viz" class="step">The fair answer: lift the least-happy party</h2>
   <div id="viz"></div>
   <div class="outcome" id="outcome"></div>
 
-  <h2 id="h-receipt" class="step">The receipt — a tamper-evident, replayable transcript</h2>
+  <h2 id="h-receipt" class="step">The receipt: a tamper-evident, replayable transcript</h2>
   <div class="receipt" id="receipt">running…</div>
   <div class="verify">
     <button class="vbtn" onclick="doVerify()">Verify transcript <span class="seal">✓</span></button>
-    <span class="vok" id="vok"><span class="seal">✓ verified</span> — every party replayed its own limits against the decision; none crossed. Tamper-evident (SHA-256).</span>
+    <span class="vok" id="vok"><span class="seal">✓ verified</span> Every party replayed its own limits against the decision; none crossed. Tamper-evident (SHA-256).</span>
   </div>
 
   </div>
@@ -559,7 +559,7 @@ function render(){
   document.getElementById('vok').style.display='none';
 
   // section headings adapt a touch
-  document.getElementById('h-parties').firstChild.textContent = P ? 'The people involved — each keeps its position private' : 'The parties — each keeps its sheet private';
+  document.getElementById('h-parties').firstChild.textContent = P ? 'The people involved. Each keeps its position private' : 'The parties. Each keeps its sheet private';
 }
 
 function doVerify(){
