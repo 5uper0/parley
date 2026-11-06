@@ -141,3 +141,11 @@ async function verifyEd25519(pubHex, payload, sigHex) {
     return await globalThis.crypto.subtle.verify({ name: "Ed25519" }, key, bytes(sigHex), payload);
   } catch { return false; }
 }
+
+/** Is a record-page response well formed? A malicious relay can send anything; unknown decision ids and prototype keys fail. */
+export function recordShapeOk(r, knownOptionIds) {
+  if (!r || typeof r !== "object" || !Array.isArray(r.owners) || !r.owners.every((o) => typeof o === "string")) return false;
+  if (typeof r.transcript_hash !== "string" || !/^[0-9a-f]{64}$/.test(r.transcript_hash)) return false;
+  if (r.status === "deadlock") return true;
+  return r.status === "agreed" && typeof r.decision?.id === "string" && Object.hasOwn(knownOptionIds, r.decision.id);
+}

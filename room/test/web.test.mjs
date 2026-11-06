@@ -165,3 +165,17 @@ test("the join-screen check refuses a room whose names or options differ from th
   assert.equal(await checkRoom({ ...status, options: status.options.slice(1) }, await rosterHash(["a", "b"]), HEIRS_OPTIONS), false);
   await assert.rejects(verifyResult({}, undefined, undefined), /needs the page/);
 });
+
+import { recordShapeOk } from "../web/client.mjs";
+
+test("record page shape check: bad hash, owners, unknown or prototype decision ids are refused", () => {
+  const ids = { buyout: 1, keep: 1 };
+  const ok = { status: "agreed", decision: { id: "buyout" }, owners: ["a", "b"], transcript_hash: "a".repeat(64) };
+  assert.equal(recordShapeOk(ok, ids), true);
+  assert.equal(recordShapeOk({ ...ok, status: "deadlock", decision: null }, ids), true);
+  for (const bad of [
+    { ...ok, transcript_hash: "z".repeat(64) }, { ...ok, transcript_hash: "a".repeat(63) }, { ...ok, owners: "a,b" }, { ...ok, owners: [1] },
+    { ...ok, decision: { id: "constructor" } }, { ...ok, decision: { id: "toString" } }, { ...ok, decision: { id: "nope" } }, { ...ok, decision: null },
+    { ...ok, status: "other" }, null, "x",
+  ]) assert.equal(recordShapeOk(bad, ids), false, JSON.stringify(bad)?.slice(0, 50));
+});

@@ -1,7 +1,7 @@
 // Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk } from "./client.mjs";
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
@@ -178,7 +178,7 @@ async function recordPage(token) {
   let r;
   try { const res = await fetch(`${RELAY}/records/${token}`); if (!res.ok) return fail(t().recordGone); r = await res.json(); } catch { return fail(t().recordGone); }
   const agreed = r.status === "agreed";
-  const shapeOk = Array.isArray(r.owners) && typeof r.transcript_hash === "string" && /^[0-9a-f]{64}$/.test(r.transcript_hash) && (agreed ? t().opt[r.decision?.id] : r.status === "deadlock");
+  const shapeOk = recordShapeOk(r, t().opt);
   if (!shapeOk) return fail(t().recordGone);
   show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle), agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "",
     el("p", { class: "note" }, t().inRoom(r.owners.join(", "))), el("h3", {}, t().recordTitle),
