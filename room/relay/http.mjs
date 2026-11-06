@@ -1,7 +1,7 @@
 // HTTP surface over core.mjs. `store` is {get(), put(room)}: a Durable Object's storage in
 // production, a Map in tests. Errors carry a code only, never a value (R7).
 
-import { createRoom, join, reissue, submit, publicRoom, nonceFor, issuedTokens, RelayError, BAD_CODES } from "./core.mjs";
+import { createRoom, join, reissue, submit, publicRecord, publicRoom, nonceFor, issuedTokens, RelayError, BAD_CODES } from "./core.mjs";
 
 const MAX_BODY = 64 * 1024;
 const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
@@ -55,6 +55,11 @@ export async function handle(request, path, store) {
       }
       await store.put(room);
       return json({ done: room.result !== null });
+    }
+    if (path === "/record" && m === "GET") {
+      if (!room.result) return err("pending", 425);
+      const t = new URL(request.url).searchParams.get("t");
+      return t && t === room.result.record_token ? json(publicRecord(room)) : err("not-found", 404);
     }
     if (path === "/result" && m === "GET") {
       return room.result ? json(room.result) : err("pending", 425);

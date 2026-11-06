@@ -84,6 +84,11 @@ export function nonceFor(room, owner) {
   return room.nonces[owner];
 }
 
+/** What a shared record link shows: the outcome, the names and the code. No keys, verdicts or scores. */
+export function publicRecord(room) {
+  return { status: room.result.status, decision: room.result.decision, owners: room.owners, transcript_hash: room.result.transcript_hash };
+}
+
 /** The tokens are shown once, in the creation response; publicRoom never carries them. */
 export function issuedTokens(room) { return { ...room.tokens }; }
 
@@ -168,6 +173,6 @@ async function finish(room) {
   };
   // A string, not an object: JSON.stringify would turn 1.0 into 1 and break the hash for any verifier.
   const transcriptJson = canonicalJson(record);
-  room.result = { ...result, transcript_json: transcriptJson, transcript_hash: await sha256Hex(transcriptJson),
+  room.result = { ...result, record_token: randomHex(16), transcript_json: transcriptJson, transcript_hash: await sha256Hex(transcriptJson),
                   roster: { ...room.roster }, session: room.session };
 }

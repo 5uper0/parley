@@ -200,3 +200,41 @@ test("the relay writes no logs (tokens and keys never reach a log line)", () => 
     assert.ok(!/console\./.test(readFileSync(new URL(`../relay/${f}`, import.meta.url), "utf8")), `${f} logs`);
   }
 });
+
+test("record link: own token, pending until closed, wrong token refused, shows no keys, verdicts or scores", async () => {
+  const s = mkStore();
+  const options = [{ a: 1 }];
+  const made = await (await handle(req("POST", { options, owners: ["ann", "bob"] }), "", s)).json();
+  const rec = (t) => handle(new Request(`https://x/rooms/a/record${t ? `?t=${t}` : ""}`), "/record", s);
+  assert.equal((await rec("x")).status, 425);                                                  // not closed yet
+  for (const owner of ["ann", "bob"]) {
+    const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+    const j = await (await handle(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens[owner] }), "/join", s)).json();
+    const v = verdictFor({ owner, hard: [], utility: [] }, options[0]);
+    const sig = hex(await crypto.subtle.sign({ name: "Ed25519" }, kp.privateKey, verdictPayload({ option: options[0], owner, ...v, session: j.session, nonce: j.nonces[0] })));
+    await handle(req("POST", { owner, verdicts: [{ acceptable: v.acceptable, score: v.score, reason: v.reason, sig }] }), "/verdicts", s);
+  }
+  const result = await (await handle(req("GET"), "/result", s)).json();
+  assert.match(result.record_token, /^[0-9a-f]{32}$/);
+  const room0 = await s.get();
+  for (const other of [...Object.values(made.tokens), made.organizer_key, made.session, ...Object.values(room0.roster)]) assert.notEqual(result.record_token, other);   // its own secret
+  assert.equal((await rec()).status, 404);
+  assert.equal((await rec("0".repeat(32))).status, 404);
+  assert.equal((await rec(made.organizer_key)).status, 404);                                    // no other secret opens it
+  const ok = await rec(result.record_token);
+  assert.equal(ok.status, 200);
+  const body = await ok.json();
+  assert.deepEqual(Object.keys(body).sort(), ["decision", "owners", "status", "transcript_hash"]);
+  const text = JSON.stringify(body);
+  assert.ok(!text.includes(result.record_token) && !text.includes("sig") && !text.includes("score") && !text.includes(made.tokens.ann));
+});
+
+test("options are fixed at creation: no route changes them, and a second create at the same room is refused", async () => {
+  const s = mkStore();
+  await handle(req("POST", { options: [{ a: 1 }], owners: ["ann", "bob"] }), "", s);
+  for (const [m, p] of [["POST", "/options"], ["PUT", "/options"], ["POST", "/reopen"], ["DELETE", ""]]) {
+    assert.equal((await handle(req(m, { options: [{ a: 1 }, { a: 2 }] }), p, s)).status, 404, `${m} ${p}`);
+  }
+  assert.equal((await handle(req("POST", { options: [{ a: 1 }, { a: 2 }], owners: ["ann", "bob"] }), "", s)).status, 409);
+  assert.equal((await s.get()).options.length, 1);
+});

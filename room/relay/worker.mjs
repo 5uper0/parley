@@ -52,6 +52,25 @@ export class MetricsLimiter {
   }
 }
 
+/** One object per record token: {room, at}, written once, wiped by an alarm 30 days later. Holds no names, answers or keys. */
+export class Records {
+  constructor(state) { this.state = state; }
+  async alarm() { await this.state.storage.deleteAll(); }
+  async fetch(request) {
+    const now = Date.now();
+    if (request.method === "GET") {
+      const e = await this.state.storage.get("e");
+      return e && now - e.at < ROOM_TTL_MS ? new Response(JSON.stringify({ room: e.room }), { status: 200 }) : new Response("{}", { status: 404 });
+    }
+    const { room } = await request.json();                // parsed first: nothing is awaited between the check and the write below
+    if (!/^[0-9a-f]{32}$/.test(room)) return new Response("{}", { status: 400 });
+    if (await this.state.storage.get("e")) return new Response("{}");   // already registered: keep the first entry and its date
+    await this.state.storage.put("e", { room, at: now });
+    await this.state.storage.setAlarm(now + ROOM_TTL_MS);
+    return new Response("{}");
+  }
+}
+
 /** The only place counters live: day -> key -> number. POST /bump {key} adds one; GET returns the weekly report. */
 export class Counters {
   constructor(state) { this.state = state; }
@@ -92,13 +111,18 @@ const count = (env, ctx, key) => {
 };
 
 /** Run a room request and count what happened from path, status and error code only. */
-async function counted(env, ctx, request, path, run) {
+async function counted(env, ctx, request, path, run, roomId) {
   const res = await run();
   let code, done;
   if (res.status >= 400 || (request.method === "POST" && path === "/verdicts")) {
     try { const b = await res.clone().json(); code = b.error; done = b.done; } catch { /* not json */ }
   }
   count(env, ctx, relayEventFor(request.method, path, res.status, code, done));
+  // The room just closed, or a client reads a closed room's result: (re)index its record link. Idempotent, so retries are free.
+  if (roomId && env.RECORDS && (done === true || (request.method === "GET" && path === "/result" && res.status === 200))) {
+    const p = registerRecord(env, roomId).catch(() => {});
+    if (ctx?.waitUntil) ctx.waitUntil(p);
+  }
   return res;
 }
 
@@ -126,6 +150,24 @@ async function sameToken(given, expected) {
   return diff === 0;
 }
 
+async function registerRecord(env, roomId) {
+  const r = await env.ROOM.get(env.ROOM.idFromName(roomId)).fetch(`https://r/rooms/${roomId}/result`);
+  const { record_token } = await r.json();
+  if (!/^[0-9a-f]{32}$/.test(record_token || "")) return;
+  await env.RECORDS.get(env.RECORDS.idFromName(record_token)).fetch("https://r/", { method: "POST", body: JSON.stringify({ room: roomId }) });
+}
+
+async function handleRecord(env, token) {
+  const nf = () => new Response(JSON.stringify({ error: "not-found" }), { status: 404 });
+  if (!env.RECORDS || !/^[0-9a-f]{32}$/.test(token)) return nf();
+  const hit = await env.RECORDS.get(env.RECORDS.idFromName(token)).fetch("https://r/");
+  if (hit.status !== 200) return nf();
+  const { room } = await hit.json();
+  const res = await env.ROOM.get(env.ROOM.idFromName(room)).fetch(`https://r/rooms/${room}/record?t=${token}`);
+  if (res.status !== 200) return nf();                         // a vanished room looks the same as an unknown token
+  return new Response(res.body, { status: 200, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+}
+
 async function handleMetrics(request, env, ctx, url) {
   const nope = () => new Response(JSON.stringify({ error: "no" }), { status: 400 });
   if (request.method === "GET" && url.pathname === "/m/report") {
@@ -150,6 +192,8 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/m" || url.pathname === "/m/report") return handleMetrics(request, env, ctx, url);
+    const rec = url.pathname.match(/^\/records\/([0-9a-f]{32})$/);
+    if (rec && request.method === "GET") return handleRecord(env, rec[1]);
     const m = url.pathname.match(/^\/rooms\/([0-9a-f]{32})(\/.*)?$/);
     if (request.method === "POST" && url.pathname === "/rooms") {
       if (!env.LIMIT_SECRET) return new Response(JSON.stringify({ error: "internal" }), { status: 500 });
@@ -162,6 +206,6 @@ export default {
     }
     // Rooms are created only above, behind the limiter; a direct POST to a chosen id must not reach the object.
     if (!m || (!m[2] && request.method !== "GET")) return new Response(JSON.stringify({ error: "not-found" }), { status: 404 });
-    return counted(env, ctx, request, m[2] || "", () => env.ROOM.get(env.ROOM.idFromName(m[1])).fetch(request));
+    return counted(env, ctx, request, m[2] || "", () => env.ROOM.get(env.ROOM.idFromName(m[1])).fetch(request), m[1]);
   },
 };
