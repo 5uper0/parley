@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#0A0B0D">
-<title>Parley — consensus for AI agents, rules enforced in code (no crypto)</title>
+<title>Parley: consensus for AI agents, rules enforced in code (no crypto)</title>
 <meta name="description" content="Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open-source. Red lines enforced in code.">
 <link rel="canonical" href="https://parleyprotocol.com/">
 <meta property="og:type" content="website">
@@ -335,9 +335,9 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
   <aside class="arena-cta">
     <div class="arena-copy">
       <b>Want to bring your own agent to a live Parley?</b>
-      <span>A hosted Arena is on the drawing board — state your position, watch real agents negotiate it in real time. Interest decides whether it gets built.</span>
+      <span>A hosted Arena is on the drawing board. State your position, watch real agents negotiate it in real time. Interest decides whether it gets built.</span>
     </div>
-    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">Say you're interested in Discussions ↗</a>
+    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">Say you're interested in Discussions</a>
   </aside>
 </div></div>
 
@@ -385,7 +385,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
 
   <div style="margin:32px 0 8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <button class="btn" onclick="run()">Run it ↻</button>
-    <span class="muted" style="font-size:13px">every verdict and hash on this page was computed by the real engine — reproduce them yourself with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
+    <span class="muted" style="font-size:13px">every verdict and hash on this page was computed by the real engine. Reproduce them yourself with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
   </div>
 
   <h2 id="h-viz" class="step">The fair answer: lift the least-happy party</h2>
@@ -507,10 +507,10 @@ function render(){
       const rl = (meta.redlines||[]);
       body = (meta.blurb?`<div class="blurb">${meta.blurb}</div>`:'')
         + (rl.length?`<div class="sub">won't cross</div><ul>${rl.map(r=>`<li class="red">${r}</li>`).join('')}</ul>`
-                    :`<div class="sub">limits</div><ul><li class="none">no hard limits — just preferences</li></ul>`);
+                    :`<div class="sub">limits</div><ul><li class="none">no hard limits, just preferences</li></ul>`);
     } else {
       const rl = p.redlines||[];
-      body = `<div class="sub">red lines</div><ul>${rl.length?rl.map(r=>`<li class="red">${r}</li>`).join(''):'<li class="none">— none —</li>'}</ul>`;
+      body = `<div class="sub">red lines</div><ul>${rl.length?rl.map(r=>`<li class="red">${r}</li>`).join(''):'<li class="none">none</li>'}</ul>`;
     }
     return `<div class="party"><div class="who">${p.owner} ${chipEl}</div>${body}</div>`;
   }).join('');
@@ -523,8 +523,8 @@ function render(){
     const label = P ? (m.plain || o.label) : o.label;
     const attrStr = attrs.length ? ' · ' + attrs.map(a=>`${a.label} ${o[a.key]}`).join(' · ') : '';
     let note='';
-    if(blocked) note = `<div class="tagline-sm block">✕ ${P?'this would cheat someone → blocked by a red line':'crosses a red line — rejected in code, not negotiated away'}</div>`;
-    else if(isWin) note = `<div class="tagline-sm win">✓ ${P?'the fair pick everyone accepts':'max-min pick — clears every red line, lifts the least-happy party'}</div>`;
+    if(blocked) note = `<div class="tagline-sm block">✕ ${P?'this would cheat someone, blocked by a red line':'crosses a red line: rejected in code, not negotiated away'}</div>`;
+    else if(isWin) note = `<div class="tagline-sm win">✓ ${P?'the fair pick everyone accepts':'max-min pick: clears every red line, lifts the least-happy party'}</div>`;
     else if(RAN && !P) note = `<div class="tagline-sm">feasible — floor ${e.floor.toFixed(2)}</div>`;
     const chips = RAN ? e.verdicts.map(chip).join('') : '';
     return `<div class="opt ${blocked?'blocked':''} ${isWin?'winner':''}">
