@@ -1,7 +1,8 @@
-// Phone page. One column, one button per screen. Hash routes: "#/" organizer, "#/r/<room>/<name>" a person.
+// Phone page. One column, one button per screen. Hash routes: "#/" create a room, "#/o/<room>/<roster hash>" organizer (reissue),
+// "#/r/<room>/<name>/<token>/<roster hash>" a person, "#/record/<token>" a shared record.
 import { T, pickLang } from "./i18n.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers, PRIORITIES } from "./heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk } from "./client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, signAnswers, postAnswers, getStatus, getResult, verifyResult, rosterHash, checkRoom, recordShapeOk, saveOrganizerKey, loadOrganizerKey, reissueSeat, seatJoined } from "./client.mjs";
 import { canonicalJson } from "../engine.mjs";
 
 const RELAY = window.PARLEY_RELAY || "";
@@ -21,8 +22,9 @@ const el = (tag, attrs = {}, ...kids) => {
 };
 const show = (...nodes) => { $app.replaceChildren(...nodes); window.scrollTo(0, 0); };
 const btn = (label, onclick, cls = "") => el("button", { type: "button", class: cls, onclick }, label);
+let rerender = null; // screens that hold one-time data (the first share screen) re-render themselves instead of re-routing
 const langSwitch = () => el("p", { class: "lang" }, ...["en", "es"].map((l) =>
-  el("button", { type: "button", class: l === lang ? "on" : "", onclick: () => { lang = l; route(); } }, l.toUpperCase())));
+  el("button", { type: "button", class: l === lang ? "on" : "", onclick: () => { lang = l; (rerender || route)(); } }, l.toUpperCase())));
 const fail = (msg, retry) => show(langSwitch(), el("p", { class: "err" }, msg), retry ? btn(t().back, retry) : "");
 const optName = (id) => t().opt[id];
 
@@ -39,20 +41,62 @@ function who() {
       if (owners.length < 2 || owners.length > 5) return fail(t().whoCount, who);
       try {
         const room = await createRoom(fetch, RELAY, { options: HEIRS_OPTIONS, owners });
+        saveOrganizerKey(sessionStorage, room.id, room.organizer_key);
         share(room.id, owners, room.tokens);
       } catch { fail(t().err); }
     }, "primary"));
 }
 
+const seatUrl = (rh, id, name, token) => `${location.href.split("#")[0]}#/r/${id}/${encodeURIComponent(name)}/${token}/${rh}`;
+const reissueErr = { "bad-organizer-key": "reissueKey", "no-organizer": "reissueKey", locked: "reissueLocked", "already-submitted": "reissueDone" };
+
+const seatTokens = {}; // `${room}/${name}` -> current token, so a re-render never shows a dead link
+
+function seatCard(id, rh, name, token) {
+  const tkey = `${id}/${name}`;
+  if (token) seatTokens[tkey] ??= token; // a re-render passes the original token again; never overwrite a reissued one
+  const out = el("div", {});
+  const showLink = (tk) => {
+    seatTokens[tkey] = tk;
+    const url = seatUrl(rh, id, name, tk);
+    out.replaceChildren(el("code", {}, url), btn(t().copy, () => navigator.clipboard?.writeText(url)),
+      el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
+  };
+  if (seatTokens[tkey]) showLink(seatTokens[tkey]);
+  const note = el("p", { class: "note" });
+  let confirmed = false;
+  const go = el("button", { type: "button", onclick: async () => {
+    const k = loadOrganizerKey(sessionStorage, id);
+    if (!k) { note.textContent = t().reissueKey; return; }
+    go.disabled = true;
+    try {
+      if (!confirmed) { // a seat already opened on a phone dies on reissue: say so first
+        const st = await getStatus(fetch, RELAY, id).catch(() => null);
+        const j = seatJoined(st, name);
+        if (j === null) { note.textContent = t().err; return; }
+        if (j) { confirmed = true; note.textContent = t().reissueJoined; return; }
+      }
+      showLink(await reissueSeat(fetch, RELAY, id, k, name)); note.textContent = t().reissued; confirmed = false;
+    } catch (e) { note.textContent = t()[reissueErr[e.message]] || t().err; }
+    finally { go.disabled = false; }
+  } }, t().reissue);
+  return el("div", { class: "card" }, el("strong", {}, name), out, go, note);
+}
+
 async function share(id, owners, tokens) {
   const rh = await rosterHash(owners);
-  const base = location.href.split("#")[0];
-  show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => {
-    const url = `${base}#/r/${id}/${encodeURIComponent(name)}/${tokens[name]}/${rh}`;
-    return el("div", { class: "card" }, el("strong", {}, name), el("code", {}, url),
-      btn(t().copy, () => navigator.clipboard?.writeText(url)),
-      el("a", { class: "button", href: `https://wa.me/?text=${encodeURIComponent(t().waText(name, url))}`, target: "_blank", rel: "noopener" }, t().whatsapp));
-  }));
+  history.replaceState(null, "", `#/o/${id}/${rh}`); // a reload lands on the organizer screen; the key is not in the URL
+  rerender = () => share(id, owners, tokens);
+  show(langSwitch(), el("h2", {}, t().shareTitle), ...owners.map((name) => seatCard(id, rh, name, tokens[name])));
+}
+
+async function organizer(id, rh) {
+  let status;
+  try { status = await getStatus(fetch, RELAY, id); } catch { return fail(t().lost); }
+  if (!Array.isArray(status.owners) || !Array.isArray(status.submitted) || (await rosterHash(status.owners)) !== rh) return fail(t().badRoom);
+  const todo = status.owners.filter((o) => !status.submitted.includes(o));
+  show(langSwitch(), el("h2", {}, t().organizerTitle), el("p", { class: "note" }, t().organizerNote),
+    ...todo.map((name) => seatCard(id, rh, name, seatTokens[`${id}/${name}`])), todo.length ? "" : el("p", {}, t().allAnswered));
 }
 
 const key = (id, owner) => `parley-room-${id}-${owner}`;
@@ -188,10 +232,13 @@ async function recordPage(token) {
 
 function route() {
   clearTimeout(pollTimer);
+  rerender = null;
   const rec = location.hash.match(/^#\/record\/([0-9a-f]{32})$/);
   if (rec) return recordPage(rec[1]);
+  const org = location.hash.match(/^#\/o\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
+  if (org) return organizer(org[1], org[2]);
   const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
-  if (!m) return /^#\/r\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
+  if (!m) return /^#\/[ro]\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
   let owner;
   try { owner = decodeURIComponent(m[2]); } catch { return fail(t().lost); }
   linkRosterHash = m[4];

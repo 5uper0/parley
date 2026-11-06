@@ -1,8 +1,9 @@
 import { test } from "node:test";
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import { handle } from "../relay/http.mjs";
 import { HEIRS_OPTIONS, sheetFromAnswers, describeAnswers } from "../web/heirs.mjs";
-import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom } from "../web/client.mjs";
+import { newDevice, restoreDevice, createRoom, joinRoom, submitAnswers, getResult, getStatus, verifyResult, rosterHash, checkRoom, saveOrganizerKey, loadOrganizerKey, reissueSeat, seatJoined } from "../web/client.mjs";
 
 // Fetch shim: routes /rooms[/id[/path]] to the relay handler with one in-memory store per room.
 function relayFetch() {
@@ -178,4 +179,60 @@ test("record page shape check: bad hash, owners, unknown or prototype decision i
     { ...ok, decision: { id: "constructor" } }, { ...ok, decision: { id: "toString" } }, { ...ok, decision: { id: "nope" } }, { ...ok, decision: null },
     { ...ok, status: "other" }, null, "x",
   ]) assert.equal(recordShapeOk(bad, ids), false, JSON.stringify(bad)?.slice(0, 50));
+});
+
+test("organizer key: sessionStorage only, reissue gives a working new seat, old link dies, no key in the link", async () => {
+  const f = relayFetch();
+  const store = new Map(); const ss = { setItem: (k, v) => store.set(k, v), getItem: (k) => store.get(k) ?? null };
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["ann", "bo"] });
+  saveOrganizerKey(ss, room.id, "not-a-key");
+  assert.equal(loadOrganizerKey(ss, room.id), null);                       // junk is never stored
+  saveOrganizerKey(ss, room.id, room.organizer_key);
+  assert.equal(loadOrganizerKey(ss, room.id), room.organizer_key);
+  const lost = await newDevice();
+  await joinRoom(f, BASE, room.id, "ann", lost, room.tokens.ann);           // ann's phone is lost after joining
+  const token = await reissueSeat(f, BASE, room.id, loadOrganizerKey(ss, room.id), "ann");
+  assert.match(token, /^[0-9a-f]{32}$/);
+  assert.ok(!token.includes(room.organizer_key) && token !== room.tokens.ann);
+  await assert.rejects(joinRoom(f, BASE, room.id, "ann", await newDevice(), room.tokens.ann)); // old link is dead
+  const dev = await newDevice();
+  const { session, nonces } = await joinRoom(f, BASE, room.id, "ann", dev, token);
+  await submitAnswers(f, BASE, room.id, { owner: "ann", sheet: sheetFromAnswers("ann", answers({})), options: room.options, owners: ["ann", "bo"], session, nonces, device: dev });
+  await assert.rejects(reissueSeat(f, BASE, room.id, room.organizer_key, "ann"), /already-submitted/);
+  await assert.rejects(reissueSeat(f, BASE, room.id, "0".repeat(32), "bo"), /bad-organizer-key/);
+});
+
+test("a missing organizer key is refused", async () => {
+  const f = relayFetch();
+  const room = await createRoom(f, BASE, { options: HEIRS_OPTIONS, owners: ["ann", "bo"] });
+  await assert.rejects(reissueSeat(f, BASE, room.id, undefined, "ann"), /bad-organizer-key/);
+});
+
+test("the organizer key is held in sessionStorage only and never reaches a URL, localStorage or a log", () => {
+  const app = readFileSync(new URL("../web/app.mjs", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../web/client.mjs", import.meta.url), "utf8");
+  const calls = [...app.matchAll(/(save|load)OrganizerKey\(([^,]+),/g)].map((m) => m[2]);
+  assert.ok(calls.length >= 2 && calls.every((a) => a === "sessionStorage"), "every key read/write uses sessionStorage");
+  assert.equal([...app.matchAll(/organizer_key/g)].length, 1);                       // only room.organizer_key handed to saveOrganizerKey
+  assert.match(app, /saveOrganizerKey\(sessionStorage, room\.id, room\.organizer_key\)/);
+  assert.ok(!/pushState|location\.hash\s*=/.test(app), "no other URL writer");
+  const card = app.slice(app.indexOf("function seatCard("), app.indexOf("async function share("));
+  assert.ok(!/localStorage/.test(card), "the seat card (where the organizer key is read) never touches localStorage");
+  assert.match(card, /seatTokens\[tkey\] \?\?= token/, "a re-render must not overwrite a reissued token with the original");
+  const urls = [...app.matchAll(/(?:replaceState\([^)]*|const seatUrl[^\n]*)/g)].map((m) => m[0]).join("\n");
+  assert.ok(urls.includes("replaceState") && !/key/i.test(urls), "no key in any URL template");
+  assert.ok(!/console\./.test(app + client), "no logging");
+});
+
+test("a relay that returns a malformed token for a reissue is refused", async () => {
+  const f = async () => new Response(JSON.stringify({ token: "/../x" }), { status: 200 });
+  await assert.rejects(reissueSeat(f, BASE, "a".repeat(32), "b".repeat(32), "ann"), /bad-token/);
+});
+
+test("seatJoined: joined, not joined, and unknown never reads as safe", () => {
+  assert.equal(seatJoined({ joined: ["ann"] }, "ann"), true);
+  assert.equal(seatJoined({ joined: ["ann"] }, "bo"), false);
+  assert.equal(seatJoined({}, "ann"), null);
+  assert.equal(seatJoined({ joined: "ann" }, "ann"), null);
+  assert.equal(seatJoined(null, "ann"), null);
 });

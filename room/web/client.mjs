@@ -31,6 +31,24 @@ export async function createRoom(fetchFn, base, { options, owners }) {
   return r.data; // {id, session, options, owners, tokens: {owner: token}, ...}
 }
 
+/** The creator's key lives in the tab's sessionStorage only: never in a URL, a log or localStorage. */
+const orgKey = (roomId) => `parley-org-${roomId}`;
+export const saveOrganizerKey = (storage, roomId, key) => { if (/^[0-9a-f]{32}$/.test(key || "")) storage.setItem(orgKey(roomId), key); };
+export const loadOrganizerKey = (storage, roomId) => storage.getItem(orgKey(roomId));
+
+/** Lost phone: the creator gets a new token for one unsubmitted seat. The old link stops working. */
+export async function reissueSeat(fetchFn, base, roomId, organizerKey, owner) {
+  const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/reissue`, { organizer_key: organizerKey, owner });
+  if (!r.ok) throw new Error(r.data.error);
+  if (!/^[0-9a-f]{32}$/.test(r.data.token || "")) throw new Error("bad-token"); // a relay can send anything
+  return r.data.token;
+}
+
+/** Has this seat been opened on a phone? null = unknown (status failed or malformed): the caller must not reissue blind. */
+export function seatJoined(status, name) {
+  return status && Array.isArray(status.joined) ? status.joined.includes(name) : null;
+}
+
 export async function joinRoom(fetchFn, base, roomId, owner, device, token) {
   const r = await call(fetchFn, base, "POST", `/rooms/${roomId}/join`, { owner, pubkey_hex: device.pubkeyHex, token });
   if (!r.ok) throw new Error(r.data.error);
