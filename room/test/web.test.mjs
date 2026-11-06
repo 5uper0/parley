@@ -216,7 +216,9 @@ test("the organizer key is held in sessionStorage only and never reaches a URL, 
   assert.equal([...app.matchAll(/organizer_key/g)].length, 1);                       // only room.organizer_key handed to saveOrganizerKey
   assert.match(app, /saveOrganizerKey\(sessionStorage, room\.id, room\.organizer_key\)/);
   assert.ok(!/pushState|location\.hash\s*=/.test(app), "no other URL writer");
-  assert.ok(!/localStorage[^\n]*(?:Key|key)/.test(app.split("\n").filter((l) => /Organizer|organizer|\bk\b/.test(l)).join("\n")), "key lines never touch localStorage");
+  const card = app.slice(app.indexOf("function seatCard("), app.indexOf("async function share("));
+  assert.ok(!/localStorage/.test(card), "the seat card (where the organizer key is read) never touches localStorage");
+  assert.match(card, /seatTokens\[tkey\] \?\?= token/, "a re-render must not overwrite a reissued token with the original");
   const urls = [...app.matchAll(/(?:replaceState\([^)]*|const seatUrl[^\n]*)/g)].map((m) => m[0]).join("\n");
   assert.ok(urls.includes("replaceState") && !/key/i.test(urls), "no key in any URL template");
   assert.ok(!/console\./.test(app + client), "no logging");

@@ -54,7 +54,7 @@ const seatTokens = {}; // `${room}/${name}` -> current token, so a re-render nev
 
 function seatCard(id, rh, name, token) {
   const tkey = `${id}/${name}`;
-  if (token) seatTokens[tkey] = token;
+  if (token) seatTokens[tkey] ??= token; // a re-render passes the original token again; never overwrite a reissued one
   const out = el("div", {});
   const showLink = (tk) => {
     seatTokens[tkey] = tk;
