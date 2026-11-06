@@ -166,15 +166,30 @@ async function finish(id, owner, result) {
 }
 
 function showResult(r) {
+  const recordUrl = /^[0-9a-f]{32}$/.test(r.record_token || "") ? `${location.href.split("#")[0]}#/record/${r.record_token}` : null;
   const agreed = r.status === "agreed";
   show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle),
     agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "", el("p", { class: "note" }, agreed ? t().agreedNote : t().deadNote),
     el("p", { class: "note" }, t().inRoom(Object.keys(r.roster).join(", "))), Object.keys(r.roster).length === 2 ? el("p", { class: "note" }, t().twoNote) : "", el("h3", {}, t().recordTitle), el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 32).match(/.{1,8}/g).join(" "))),
-    el("p", { class: "note" }, t().notLegal), btn(t().save, () => window.print()));
+    el("p", { class: "note" }, t().notLegal), recordUrl ? el("p", {}, t().shareRecord, ": ", el("code", {}, recordUrl)) : "", btn(t().save, () => window.print()));
+}
+
+async function recordPage(token) {
+  let r;
+  try { const res = await fetch(`${RELAY}/records/${token}`); if (!res.ok) return fail(t().recordGone); r = await res.json(); } catch { return fail(t().recordGone); }
+  const agreed = r.status === "agreed";
+  const shapeOk = Array.isArray(r.owners) && typeof r.transcript_hash === "string" && /^[0-9a-f]{64}$/.test(r.transcript_hash) && (agreed ? t().opt[r.decision?.id] : r.status === "deadlock");
+  if (!shapeOk) return fail(t().recordGone);
+  show(langSwitch(), el("h2", {}, agreed ? t().agreedTitle : t().deadTitle), agreed ? el("p", { class: "big" }, optName(r.decision.id)) : "",
+    el("p", { class: "note" }, t().inRoom(r.owners.join(", "))), el("h3", {}, t().recordTitle),
+    el("p", {}, t().recordLead, ": ", el("code", {}, r.transcript_hash.slice(0, 32).match(/.{1,8}/g).join(" "))),
+    el("p", { class: "note" }, t().recordPageNote), el("p", { class: "note" }, t().notLegal), btn(t().save, () => window.print()));
 }
 
 function route() {
   clearTimeout(pollTimer);
+  const rec = location.hash.match(/^#\/record\/([0-9a-f]{32})$/);
+  if (rec) return recordPage(rec[1]);
   const m = location.hash.match(/^#\/r\/([0-9a-f]{32})\/([^/]+)\/([0-9a-f]{32})\/([0-9a-f]{32})$/);
   if (!m) return /^#\/r\//.test(location.hash) ? fail(t().lost) : home(); // an old or damaged link says so instead of opening "create a room"
   let owner;
