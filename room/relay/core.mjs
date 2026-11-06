@@ -7,6 +7,7 @@ import { canonicalJson, Fl, chooseFromEntries, sha256Hex } from "../engine.mjs";
 
 const HEX = /^[0-9a-f]+$/;
 const MAX_OPTIONS = 8, MAX_OWNERS = 12, MAX_NAME = 64;
+export const BAD_ORGANIZER_CODE = "bad-organizer-key";
 export const BAD_LIMIT = 5, BAD_WINDOW_MS = 10 * 60 * 1000; // P2: per owner, decays; a link holder can slow one owner, never freeze the room
 export const ROOM_TTL_MS = 30 * 24 * 3600 * 1000; // answers' verdicts are deleted this long after creation
 
@@ -55,9 +56,11 @@ export function createRoom({ options, owners }) {
     session: randomHex(16), options, owners: [...owners],
     nonces: Object.fromEntries(owners.map((o) => [o, options.map(() => randomHex(12))])), // unique per verdict
     tokens: Object.fromEntries(owners.map((o) => [o, randomHex(16)])), // each person's link carries theirs; /join needs it
+    organizerKey: randomHex(16), // shown once to the creator; only it can reissue a seat
     roster: {},            // owner -> pubkey_hex, pinned at join
     verdicts: {},          // owner -> [ {acceptable, score, reason, sig} per option ]
     result: null, badStamps: {}, // owner -> timestamps of rejected submissions
+    organizerStamps: [],  // wrong organizer-key guesses
   };
 }
 
@@ -84,6 +87,27 @@ export function nonceFor(room, owner) {
 /** The tokens are shown once, in the creation response; publicRoom never carries them. */
 export function issuedTokens(room) { return { ...room.tokens }; }
 
+/** The creator frees a seat whose phone was lost, before that person has submitted: new token, key unpinned.
+ *  Wrong keys count against the same decaying limit as bad submissions, so the key cannot be guessed. */
+export function reissue(room, organizerKey, owner, now = Date.now()) {
+  if (room.result) fail("room-closed");
+  if (typeof room.organizerKey !== "string" || !room.organizerKey) fail("no-organizer"); // rooms stored before reissue existed
+  // the right key always gets through; only wrong guesses are counted, so a link holder cannot lock the creator out
+  if (typeof organizerKey !== "string" || organizerKey !== room.organizerKey) {
+    const live = (room.organizerStamps || []).filter((t) => now - t < BAD_WINDOW_MS);
+    if (live.length >= BAD_LIMIT) fail("locked");
+    room.organizerStamps = [...live, now];
+    fail(BAD_ORGANIZER_CODE);
+  }
+  if (!room.owners.includes(owner)) fail("unknown-owner");
+  if (room.verdicts[owner]) fail("already-submitted");   // a submitted verdict is final
+  delete room.roster[owner];
+  delete room.badStamps[owner];                          // the new device does not inherit the lost one's lock
+  room.tokens[owner] = randomHex(16);
+  room.nonces[owner] = room.options.map(() => randomHex(12)); // fresh nonces: nothing signed before can be replayed
+  return room.tokens[owner];
+}
+
 export function join(room, owner, pubkeyHex, token) {
   if (!room.owners.includes(owner)) fail("unknown-owner");
   if (typeof token !== "string" || token !== room.tokens[owner]) fail("bad-token"); // knowing a name is not enough to take a seat
@@ -95,7 +119,7 @@ export function join(room, owner, pubkeyHex, token) {
 }
 
 /** verdicts: one per option, in option order: {acceptable, score, reason, sig}. */
-export const BAD_CODES = new Set(["bad-signature", "bad-verdicts"]);
+export const BAD_CODES = new Set(["bad-signature", "bad-verdicts", "bad-organizer-key"]);
 
 export async function submit(room, owner, verdicts, now = Date.now()) {
   if (room.result) fail("room-closed");

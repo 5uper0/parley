@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handle, serialHandler } from "../relay/http.mjs";
@@ -98,4 +99,104 @@ test("P0: knowing a name is not enough: join needs the person's token; tokens ar
   const view = JSON.stringify(await (await handle(req("GET"), "", s)).json());
   assert.ok(!view.includes(made.tokens.ann) && !view.includes(made.tokens.bob) && !view.includes("tokens"));
   assert.equal((await handle(req("POST", { owner: "bob", pubkey_hex, token: made.tokens.bob }), "/join", s)).status, 200);
+});
+
+test("seat identity: a link preview GET binds nothing, a second device is refused, the creator can reissue a lost seat", async () => {
+  const s = mkStore();
+  const made = await (await handle(req("POST", { options: [{ a: 1 }], owners: ["ann", "bob"] }), "", s)).json();
+  assert.match(made.organizer_key, /^[0-9a-f]{32}$/);
+  // preview bots GET the page data: nobody is bound
+  for (const path of ["", "/result"]) await handle(req("GET"), path, s);
+  assert.deepEqual((await (await handle(req("GET"), "", s)).json()).joined, []);
+  const key = async () => hex(await crypto.subtle.exportKey("raw", (await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])).publicKey));
+  const join = async (owner, token) => handle(req("POST", { owner, pubkey_hex: await key(), token }), "/join", s);
+  assert.equal((await join("ann", made.tokens.ann)).status, 200);
+  assert.equal((await (await join("ann", made.tokens.ann)).json()).error, "already-joined");   // second device, same token
+  // reissue needs the creator's key; wrong guesses are counted and then locked out
+  const reissue = (organizer_key, owner) => handle(req("POST", { organizer_key, owner }), "/reissue", s);
+  for (let i = 0; i < 5; i++) assert.equal((await (await reissue("0".repeat(32), "ann")).json()).error, "bad-organizer-key");
+  assert.equal((await (await reissue("1".repeat(32), "ann")).json()).error, "locked");        // more guessing is locked
+  assert.equal((await reissue(made.organizer_key, "ann")).status, 200);                         // the creator is never locked out
+});
+
+test("reissue with the right key: new token, old token dead, fresh nonces, a working new seat", async () => {
+  const s = mkStore();
+  const options = [{ a: 1 }, { a: 2 }];
+  const made = await (await handle(req("POST", { options, owners: ["ann", "bob"] }), "", s)).json();
+  const pub = async () => hex(await crypto.subtle.exportKey("raw", (await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])).publicKey));
+  const join = async (owner, token) => handle(req("POST", { owner, pubkey_hex: await pub(), token }), "/join", s);
+  const first = await (await join("ann", made.tokens.ann)).json();
+  const { token } = await (await handle(req("POST", { organizer_key: made.organizer_key, owner: "ann" }), "/reissue", s)).json();
+  assert.notEqual(token, made.tokens.ann);
+  assert.equal((await (await join("ann", made.tokens.ann)).json()).error, "bad-token");       // old link is dead
+  const secondRes = await join("ann", token);
+  assert.equal(secondRes.status, 200);                                                           // the seat really was freed
+  const second = await secondRes.json();
+  assert.equal(second.nonces.length, options.length);
+  assert.notDeepEqual(second.nonces, first.nonces);                                              // nothing signed earlier replays
+  const view = JSON.stringify(await (await handle(req("GET"), "", s)).json());
+  assert.ok(!view.includes(made.organizer_key) && !view.includes("organizer"));                 // never in the public view
+});
+
+test("reissue guards: unknown owner, submitted seat is final, closed room, bad stamps cleared", async () => {
+  const s = mkStore();
+  const options = [{ a: 1 }];
+  const made = await (await handle(req("POST", { options, owners: ["ann", "bob"] }), "", s)).json();
+  const re = (owner, key = made.organizer_key) => handle(req("POST", { organizer_key: key, owner }), "/reissue", s);
+  assert.equal((await (await re("zed")).json()).error, "unknown-owner");                        // right key, unknown owner
+  const dev = async (owner) => {
+    const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+    const j = await (await handle(req("POST", { owner, pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens[owner] }), "/join", s)).json();
+    const v = verdictFor({ owner, hard: [], utility: [] }, options[0]);
+    const sig = hex(await crypto.subtle.sign({ name: "Ed25519" }, kp.privateKey, verdictPayload({ option: options[0], owner, ...v, session: j.session, nonce: j.nonces[0] })));
+    return [{ acceptable: v.acceptable, score: v.score, reason: v.reason, sig }];
+  };
+  const annV = await dev("ann");
+  // junk from ann's lost device locks her, reissue clears it for the new device
+  for (let i = 0; i < 5; i++) await handle(req("POST", { owner: "ann", verdicts: [{ ...annV[0], sig: "0".repeat(128) }] }), "/verdicts", s);
+  assert.equal((await handle(req("POST", { owner: "ann", verdicts: annV }), "/verdicts", s)).status, 429);
+  assert.equal((await re("ann")).status, 200);
+  const stored = await s.get();
+  assert.equal(stored.badStamps.ann, undefined);
+  // close the room by hand-marking a result, then reissue is refused
+  const closed = await s.get(); closed.result = { status: "agreed" }; await s.put(closed);
+  assert.equal((await (await re("bob")).json()).error, "room-closed");
+});
+
+test("rooms stored before reissue existed cannot be reissued, with or without a key", async () => {
+  const s = mkStore();
+  const made = await (await handle(req("POST", { options: [{ a: 1 }], owners: ["ann", "bob"] }), "", s)).json();
+  const legacy = await s.get(); delete legacy.organizerKey; await s.put(legacy);
+  for (const body of [{ owner: "ann" }, { owner: "ann", organizer_key: made.organizer_key }, { owner: "ann", organizer_key: "undefined" }]) {
+    assert.equal((await (await handle(req("POST", body), "/reissue", s)).json()).error, "no-organizer");
+  }
+  assert.ok((await s.get()).roster);                                                               // nothing changed
+});
+
+test("wrong organizer guesses decay after the window", async () => {
+  const { createRoom, reissue, BAD_LIMIT, BAD_WINDOW_MS, RelayError } = await import("../relay/core.mjs");
+  const room = createRoom({ options: [{ a: 1 }], owners: ["ann", "bob"] });
+  const code = (f) => { try { f(); } catch (e) { return e.code; } return "no-error"; };
+  const t0 = 5_000_000;
+  for (let i = 0; i < BAD_LIMIT; i++) assert.equal(code(() => reissue(room, "bad", "ann", t0 + i)), "bad-organizer-key");
+  assert.equal(code(() => reissue(room, "bad", "ann", t0 + 10)), "locked");
+  assert.equal(code(() => reissue(room, "bad", "ann", t0 + BAD_WINDOW_MS + BAD_LIMIT + 1)), "bad-organizer-key"); // window passed
+});
+
+test("a submitted seat cannot be reissued", async () => {
+  const s = mkStore();
+  const options = [{ a: 1 }];
+  const made = await (await handle(req("POST", { options, owners: ["ann", "bob"] }), "", s)).json();
+  const kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+  const j = await (await handle(req("POST", { owner: "ann", pubkey_hex: hex(await crypto.subtle.exportKey("raw", kp.publicKey)), token: made.tokens.ann }), "/join", s)).json();
+  const v = verdictFor({ owner: "ann", hard: [], utility: [] }, options[0]);
+  const sig = hex(await crypto.subtle.sign({ name: "Ed25519" }, kp.privateKey, verdictPayload({ option: options[0], owner: "ann", ...v, session: j.session, nonce: j.nonces[0] })));
+  assert.equal((await handle(req("POST", { owner: "ann", verdicts: [{ acceptable: v.acceptable, score: v.score, reason: v.reason, sig }] }), "/verdicts", s)).status, 200);
+  assert.equal((await (await handle(req("POST", { organizer_key: made.organizer_key, owner: "ann" }), "/reissue", s)).json()).error, "already-submitted");
+});
+
+test("the relay writes no logs (tokens and keys never reach a log line)", () => {
+  for (const f of ["core.mjs", "http.mjs", "worker.mjs"]) {
+    assert.ok(!/console\./.test(readFileSync(new URL(`../relay/${f}`, import.meta.url), "utf8")), `${f} logs`);
+  }
 });
