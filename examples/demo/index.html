@@ -44,7 +44,7 @@
   --verify-bg:rgba(20,164,115,.09); --verify-hair:rgba(20,164,115,.24);
   --red-bg:rgba(217,58,58,.08); --red-hair:rgba(217,58,58,.26);
   --bg:#0A0B0D; --surface:#121316; --surface-top:#16181C; --sunken:#0C0D10;
-  --ink:#F4F6F7; --muted:#9AA0A9; --dim:#6A6F78; --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.14);
+  --ink:#F4F6F7; --muted:#9AA0A9; --dim:#7E848E; --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.14);
   --sans:"Inter",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
   --r:10px; --r-lg:14px; --r-full:9999px; --ease:cubic-bezier(.16,1,.3,1);
   --ambient:inset 0 1px 0 rgba(255,255,255,.03);
@@ -55,7 +55,7 @@
   --indigo:#3A45B0; --indigo-dim:#8E9BE1; --verify:#0E8F63; --red:#C42121; --amber:#B87C15;
   --verify-bg:#E7F6EF; --verify-hair:#BFE6D6; --red-bg:#FCEAEA; --red-hair:#F2CFCF;
   --bg:#F6F7FB; --surface:#FFFFFF; --surface-top:#FFFFFF; --sunken:#EEF0F5;
-  --ink:#12151C; --muted:#535A68; --dim:#8A909C; --hair:#E3E6EF; --hair2:#D3D7E1;
+  --ink:#12151C; --muted:#535A68; --dim:#6B717D; --hair:#E3E6EF; --hair2:#D3D7E1;
   --ambient:inset 0 1px 0 rgba(255,255,255,.4);
   --indigo-bg:rgba(58,69,176,.07); --indigo-hair:rgba(58,69,176,.24);
   --band-bg:rgba(18,21,28,.022);
@@ -153,11 +153,6 @@ h2::after{content:"";flex:1;height:1px;background:var(--hair)}
 
 /* hero */
 .hero{margin:24px 0 8px;position:relative}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;font-weight:600;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);
-  background:var(--indigo-bg);
-  border:1px solid var(--indigo-hair);border-radius:var(--r-full);padding:6px 13px}
-.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--verify)}
 .hero h1{font-size:clamp(30px,6.2vw,50px);line-height:1.04;letter-spacing:-.033em;font-weight:560;
   margin:18px 0 0;max-width:16ch}
 .hero h1 .g{color:var(--indigo)}
@@ -250,8 +245,7 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
 .demo-head{margin:0 0 18px}
 @media (max-width:560px){.hero h1{max-width:20ch}.hero-actions{gap:10px}}
 @media (prefers-reduced-motion:reduce){
-  .eyebrow .dot{animation:none}
-  .party,.opt,.bar,.vok,.opt.winner,.opt.blocked{animation:none}
+    .party,.opt,.bar,.vok,.opt.winner,.opt.blocked{animation:none}
   *{scroll-behavior:auto}
 }
 
@@ -306,7 +300,6 @@ h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
   <div class="hero-cols">
     <div class="hero-copy">
     <section class="hero">
-      <span class="eyebrow"><span class="dot"></span>Provable AI consensus</span>
       <h1>Your AI speaks for you. <span class="g">Check what it agreed to.</span></h1>
       <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>under rules enforced in code</b>, and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>.</p>
       <div class="hero-actions">
