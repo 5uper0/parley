@@ -36,6 +36,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://parleyprotocol.com/consensus-protocol-for-ai-agents-no-blockchain/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://parleyprotocol.com/fair-group-decision-private-limits/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
