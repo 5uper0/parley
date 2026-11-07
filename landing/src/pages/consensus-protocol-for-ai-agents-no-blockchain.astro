@@ -1,0 +1,235 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const propBase =
+  "rounded-[14px] border-t border-r border-b-[3px] border-l-[3px] border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const chainGives = [
+  {
+    n: "01",
+    head: "Agreement on one ordered record.",
+    body: "A chain makes strangers accept the same history. Parley gets the same from one SHA-256 over the canonical JSON of every masked verdict and the result. Change one byte and the digest changes.",
+  },
+  {
+    n: "02",
+    head: "A rule nobody can bend.",
+    body: "A smart contract runs fixed code. Parley runs fixed code too: red lines are predicates, and run_consensus is a short deterministic function. Anyone holding the record can run it again and compare.",
+  },
+  {
+    n: "03",
+    head: "Proof that a party was not cheated.",
+    body: "A chain shows what happened on the ledger. It does not know what you wanted. In Parley each owner replays their own private sheet against the decision on their own machine, and nothing about the sheet leaves it.",
+  },
+];
+
+const faqs = [
+  {
+    q: "Is Parley a consensus protocol in the blockchain sense?",
+    a: "No. There is no ledger, no token and no fault-tolerant replication. It decides one choice among a fixed list of options for several owners, and the record can be re-checked. Agreement here means the group's pick under a stated rule, not network-wide agreement on state.",
+  },
+  {
+    q: "What replaces the trust a chain provides?",
+    a: "Three things you can read in the source: red lines as code predicates, a deterministic max-min rule over masked verdicts, and a hashed transcript that each owner replays locally. A coordinator that edits the record changes the hash, and one that announces a different option is caught by re-running the rule over the recorded verdicts.",
+  },
+  {
+    q: "Does it need signatures?",
+    a: "Not by default. Ed25519-signed verdicts are an optional extra. Without them the hash shows the record was not edited after the fact, not who produced it. SECURITY.md calls this tamper-evidence, not authenticity.",
+  },
+  {
+    q: "What does it not do?",
+    a: "It does not stop a party from misreporting its soft scores to tilt the pick among acceptable options, it does not resist collusion, and the soft scores are visible in the transcript. The README lists these as known limits.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/consensus-protocol-for-ai-agents-no-blockchain/#article",
+      headline: "A consensus protocol for AI agents without a blockchain",
+      description:
+        "How several owners' AI agents reach one decision with no ledger and no token: red lines as code, max-min over masked verdicts, and a hashed transcript each owner replays locally.",
+      url: "https://parleyprotocol.com/consensus-protocol-for-ai-agents-no-blockchain/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/consensus-protocol-for-ai-agents-no-blockchain/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="A consensus protocol for AI agents without a blockchain | Parley"
+  description="Several owners' AI agents reach one decision with no ledger and no token: red lines as code, max-min over masked verdicts, and a hashed transcript each owner replays locally."
+  path="/consensus-protocol-for-ai-agents-no-blockchain/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          Can AI agents reach a consensus without a blockchain?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          Yes, for one kind of agreement: several owners, each with an agent, choosing one option from a fixed list.
+          Parley does it with plain code and a hash. Nothing is stored on a ledger, nothing is paid in a token. This is
+          not consensus in the distributed-systems sense, where nodes agree on shared state. It is a group decision
+          that every owner can check afterwards. Parley does not stop a party from misreporting its soft scores
+          (see SECURITY.md).
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Everything named here is in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>source repository</a>. Related:{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>,{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What people reach for a chain to get, and what is used instead</h2>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            chainGives.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The rule, in one example</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Three owners choose a venue. Bob will not spend more than 700, written as a predicate. Only the words
+          <code class={code}>red-line</code> or <code class={code}>ok</code> leave each agent, never the number 700.
+          Options every agent accepted stay. Among those, the one with the highest minimum score wins, ties broken by
+          total score. With no such option the result is an honest deadlock, never a forced pick.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`result = run_consensus(agents, options)
+result.status                       # "agreed" or "deadlock"
+result.transcript.hash()            # SHA-256 over the canonical record
+result.transcript.verify_non_betrayal(my_sheet, result.decision)   # True, run on your machine`}</code></pre>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What this does not give you yet</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">No fault tolerance.</strong> One coordinator runs the rule. It cannot
+              forge a result without being caught on replay, but it can stall or drop out.
+            </li>
+            <li>
+              <strong class="text-ink">The hash is unsigned by default.</strong> It shows the record was not
+              edited, not who wrote it. Signed verdicts are an optional extra.
+            </li>
+            <li>
+              <strong class="text-ink">Scores are public.</strong> A coordinator can infer preference ordering
+              from them. The reason and the sheet stay hidden.
+            </li>
+            <li>
+              <strong class="text-ink">No outside user has run a real decision yet.</strong> The engine and the
+              checks are tested; field use is the next step.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Watch a sample decision resolve, then read the code.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo replays scripted runs of the same engine, no signup. The repository is Apache-2.0 and the core has no dependencies.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>Read the source</a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
