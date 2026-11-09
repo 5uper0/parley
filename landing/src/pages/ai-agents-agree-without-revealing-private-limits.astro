@@ -1,0 +1,249 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const boundary = [
+  {
+    n: "01",
+    head: "The limit stays on the owner's side.",
+    body: "A red line is a predicate in the owner's own sheet, a function that returns true for an option the owner can live with. The sheet is held by the owner's agent and is never handed to the coordinator or to the other agents.",
+  },
+  {
+    n: "02",
+    head: "Only a verdict crosses the boundary.",
+    body: "For each option an agent answers with one record: acceptable or not, a soft score between 0 and 1, and the word ok or red-line. It never names the rule that failed, and a rejected option reports score 0 instead of the real score.",
+  },
+  {
+    n: "03",
+    head: "The pick is computed over verdicts, not over limits.",
+    body: "The coordinator keeps the options every agent accepted and picks the one whose lowest score is highest, ties broken by total score. If no option is acceptable to everyone, the result is a deadlock. The rule needs no limit, only the verdicts.",
+  },
+];
+
+const faqs = [
+  {
+    q: "How does an agent reject an option without saying why?",
+    a: "Its sheet evaluates the option against every red line and keeps the list of crossed ones to itself. The verdict that leaves the agent carries acceptable=false, score 0 and the word red-line. The number behind the rule, say a budget of 700, never appears in a verdict.",
+  },
+  {
+    q: "How can the owner be sure the result respected their limit?",
+    a: "By replaying it. The transcript has verify_non_betrayal(sheet, decision), which runs the owner's own sheet against the decision on the owner's own machine. It returns true when every red line holds, and a deadlock returns true because it forces nothing on anyone. The sheet is read locally and is not sent anywhere.",
+  },
+  {
+    q: "Can the coordinator learn the limits anyway?",
+    a: "Partly. The scores of accepted options are public, so preference ordering among them shows. The acceptable flags show which options each agent would take, and enough probing options can pin a numeric red line. A party can also shade its soft scores to tilt the pick among acceptable options. SECURITY.md lists these as known limits.",
+  },
+  {
+    q: "Is the record itself trustworthy?",
+    a: "It is tamper-evident. The transcript hash is a SHA-256 over the canonical JSON of every recorded verdict and the result, so an edit changes the hash, if you hold the hash from outside the coordinator. Anyone can recompute the max-min pick from the recorded verdicts and compare it with the announced one, given a roster of expected owners the checker trusts. Signed verdicts with Ed25519 are an optional extra; without them the hash shows the record was not edited, not who produced it.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/ai-agents-agree-without-revealing-private-limits/#article",
+      headline: "How AI agents agree on a decision without revealing their owners' private limits",
+      description:
+        "Each agent keeps its owner's red lines as code and sends out only a masked verdict per option. The pick is max-min over verdicts, the record is hashed, and the owner replays their own sheet locally to check it.",
+      url: "https://parleyprotocol.com/ai-agents-agree-without-revealing-private-limits/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/ai-agents-agree-without-revealing-private-limits/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="How AI agents agree without revealing their owners' private limits | Parley"
+  description="Each agent keeps its owner's red lines as code and sends out only a masked verdict per option. The pick is max-min over verdicts, the record is hashed, and the owner replays their own sheet locally to check it."
+  path="/ai-agents-agree-without-revealing-private-limits/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          How can AI agents agree on a decision without revealing their owners' private limits?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          By keeping the limits inside each agent and sending out only answers. In Parley an owner's red lines are
+          code predicates held in a private sheet. For each option the agent sends one masked verdict: acceptable or
+          not, a score, and the word ok or red-line. The coordinator picks among the options every agent accepted,
+          hashes the record, and each owner replays their own sheet locally to confirm no limit was crossed. The
+          coordinator still learns something: accepted scores are public, scores can be shaded, and the yes or no
+          pattern over enough options can pin a numeric limit (see SECURITY.md).
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          Everything named here is in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>source repository</a>. Related:{" "}
+          <a href="/fair-group-decision-private-limits/" class={link}>a fair group decision with private limits</a>,{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>,{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Where the boundary is, and what crosses it</h2>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            boundary.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>One agent, one limit, two options</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Bob's agent holds a sheet with one red line, price at most 700, and a soft preference for cheaper. Ask it
+          about a 900 venue and a 500 venue. The first verdict says <code class={code}>red-line</code> with score 0;
+          the second says <code class={code}>ok</code> with the real score. Neither verdict contains the number 700,
+          and the sheet object never leaves the process that holds it.
+        </p>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`sheet = PreferenceSheet("bob",
+    hard=[HardConstraint("budget", lambda o: o["price"] <= 700)],
+    utility=lambda o: 1 - o["price"] / 1000)
+bob = Agent("bob", sheet)
+
+bob.consider({"id": "venue-a", "price": 900})
+# acceptable=False  score=0.0  reason="red-line"
+bob.consider({"id": "venue-b", "price": 500})
+# acceptable=True   score=0.5  reason="ok"
+
+result = run_consensus([ana, bob, cara], options)
+result.transcript.hash()                                           # SHA-256 over the record
+result.transcript.verify_non_betrayal(sheet, result.decision)      # True, on Bob's machine`}</code></pre>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What the coordinator can still learn</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">Accepted scores are public.</strong> The soft score of every option an
+              agent accepts is in the record, so the order of its preferences among those options shows.
+            </li>
+            <li>
+              <strong class="text-ink">The yes or no pattern leaks the feasible region.</strong> Over enough
+              options, especially ones that differ in a single number, the acceptable flags narrow down where a
+              numeric red line sits. The rule's name and text are never sent, but its effect is.
+            </li>
+            <li>
+              <strong class="text-ink">Scores are self-declared.</strong> An agent that shades its soft scores
+              can tilt the pick among options acceptable to everyone. Red lines are enforced in code; the scores
+              are not.{" "}
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a> lists all three
+              as known limits.
+            </li>
+            <li>
+              <strong class="text-ink">Unsigned by default.</strong> The hash shows the record was not edited,
+              not who wrote each verdict. Ed25519-signed verdicts are an optional extra that binds a key to the
+              exact option and verdict.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Watch a sample decision resolve, then read the code.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo replays scripted runs of the same engine, no signup. The repository is Apache-2.0 and the core has no dependencies.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>Read the source</a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
