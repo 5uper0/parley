@@ -50,7 +50,7 @@ const boundary = [
 const faqs = [
   {
     q: "How does an agent reject an option without saying why?",
-    a: "Its sheet evaluates the option against every red line and keeps the list of crossed ones to itself. The verdict that leaves the agent carries acceptable=false, score 0 and the word red-line. The number behind the rule, say a budget of 700, never appears in the verdict or in the record.",
+    a: "Its sheet evaluates the option against every red line and keeps the list of crossed ones to itself. The verdict that leaves the agent carries acceptable=false, score 0 and the word red-line. The number behind the rule, say a budget of 700, never appears in a verdict.",
   },
   {
     q: "How can the owner be sure the result respected their limit?",
@@ -62,7 +62,7 @@ const faqs = [
   },
   {
     q: "Is the record itself trustworthy?",
-    a: "It is tamper-evident. The transcript hash is a SHA-256 over the canonical JSON of every recorded verdict and the result, so an edit changes the hash. Anyone can recompute the max-min pick from the recorded verdicts and compare it with the announced one. Signed verdicts with Ed25519 are an optional extra; without them the hash shows the record was not edited, not who produced it.",
+    a: "It is tamper-evident. The transcript hash is a SHA-256 over the canonical JSON of every recorded verdict and the result, so an edit changes the hash, if you hold the hash from outside the coordinator. Anyone can recompute the max-min pick from the recorded verdicts and compare it with the announced one, given a roster of expected owners the checker trusts. Signed verdicts with Ed25519 are an optional extra; without them the hash shows the record was not edited, not who produced it.",
   },
 ];
 
