@@ -47,7 +47,9 @@ open(path, "w", encoding="utf-8").write(text)
 PY
 
 echo "▸ building landing (landing/) -> landing/dist"
-( cd landing && npm run build --silent )
+# Astro 7 needs node >= 22.23.4; bootstrap node_modules so a fresh worktree builds without manual steps.
+[ -d /opt/homebrew/opt/node@26/bin ] && export PATH="/opt/homebrew/opt/node@26/bin:$PATH"
+( cd landing && { [ -d node_modules ] || npm ci --silent; } && npm run build --silent )
 
 echo "▸ merging: landing/dist -> $OUT (root), $DEMO_RAW -> $OUT/demo"
 cp -r landing/dist/. "$OUT/"
