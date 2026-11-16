@@ -1,0 +1,255 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const steps = [
+  {
+    n: "01",
+    head: "Veto first.",
+    body: "Each agent answers every option with a masked verdict. An option any agent marks as crossing a red line is dropped. Only options acceptable to all agents stay in the pool.",
+  },
+  {
+    n: "02",
+    head: "Find each option's floor.",
+    body: "For every option left, take the lowest soft score among the agents. That number is the floor, the happiness of whoever likes the option least.",
+  },
+  {
+    n: "03",
+    head: "Highest floor wins.",
+    body: "The option with the highest floor is the decision. If two options share a floor, the higher total score wins. If the pool is empty, the result is a deadlock and nothing is forced on anyone.",
+  },
+];
+
+const faqs = [
+  {
+    q: "What does max-min fair mean for a group decision?",
+    a: "Among the options everyone can accept, choose the one that makes the worst-off participant as well off as possible. It is the egalitarian rule from social choice, often credited to Rawls. The code comment in parley/consensus.py calls it a Rawlsian max-min rule, not a majority vote.",
+  },
+  {
+    q: "Why not pick the option with the highest total score?",
+    a: "A sum lets two enthusiastic agents outweigh a third who is unhappy. In the example above, option A has the highest total (1.9) but Cara scores it 0.1. Max-min picks B, whose lowest score is 0.5. Parley still uses the total, but only to break a tie between options with the same floor.",
+  },
+  {
+    q: "Is a veto the same as a low score?",
+    a: "No. A veto comes from a red line, a code predicate that rejects the option outright, whatever the other agents think. A low score only lowers that option's floor. An option can lose on the floor and still be a valid decision; an option with a veto can never be one.",
+  },
+  {
+    q: "What happens when no option is acceptable to everyone?",
+    a: "The result is a deadlock with no decision. run_consensus records it and returns status deadlock. The coordinator does not relax a red line or choose the least bad option for the owners.",
+  },
+  {
+    q: "Can I check that the announced decision really is the max-min one?",
+    a: "Yes. verify_outcome(transcript, expected_owners=...) recomputes the max-min pick from the recorded verdicts and compares it with the announced decision. It needs no private sheet. It is only as good as the roster of owners you pass in; a roster taken from the same coordinator that wrote the record binds nothing.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/max-min-fair-decision-between-ai-agents/#article",
+      headline: "What is a max-min fair decision between AI agents?",
+      description:
+        "Max-min picks the option whose least-happy agent is happiest, among options every agent accepts. It does not average scores or count votes, and it returns a deadlock when nothing is acceptable to all.",
+      url: "https://parleyprotocol.com/max-min-fair-decision-between-ai-agents/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/max-min-fair-decision-between-ai-agents/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="What is a max-min fair decision between AI agents? | Parley"
+  description="Max-min picks the option whose least-happy agent is happiest, among options every agent accepts. It does not average scores or count votes, and it returns a deadlock when nothing is acceptable to all."
+  path="/max-min-fair-decision-between-ai-agents/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          What is a max-min fair decision between AI agents, and why not a majority vote?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          It is the option that makes the least-happy agent as happy as possible, chosen only among options every
+          agent accepts. Parley first drops any option an agent vetoes with a red line. It then ranks what is left
+          by its lowest soft score, the floor, and breaks ties by the total score. A majority vote or a plain sum
+          can pick an option one participant strongly dislikes; a floor cannot. If nothing is acceptable to all,
+          the answer is a deadlock.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          The rule is in <code class={code}>parley/consensus.py</code> in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>source repository</a>. Related:{" "}
+          <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>,{" "}
+          <a href="/fair-group-decision-private-limits/" class={link}>a fair group decision with private limits</a>,{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>The rule in three steps</h2>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            steps.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Three agents, three options, where a sum goes wrong</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Ana, Bob and Cara score three options, and nobody vetoes any of them. Ana and Bob love A, Cara barely
+          tolerates it. A has the highest total. B has the highest floor, so B is the decision. This is output of
+          the engine run on these scores, not a hand calculation.
+        </p>
+        <div class={`${card} mt-5 overflow-x-auto px-5 py-4`}>
+          <table class="w-full min-w-[420px] text-left font-mono text-[12.5px] leading-[1.9] text-muted">
+            <thead>
+              <tr class="text-subtle">
+                <th class="pr-4 font-semibold">option</th>
+                <th class="pr-4 font-semibold">Ana</th>
+                <th class="pr-4 font-semibold">Bob</th>
+                <th class="pr-4 font-semibold">Cara</th>
+                <th class="pr-4 font-semibold">floor</th>
+                <th class="font-semibold">total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="pr-4">A</td><td class="pr-4">0.9</td><td class="pr-4">0.9</td><td class="pr-4">0.1</td><td class="pr-4">0.1</td><td>1.9</td></tr>
+              <tr class="text-ink"><td class="pr-4">B</td><td class="pr-4">0.6</td><td class="pr-4">0.5</td><td class="pr-4">0.5</td><td class="pr-4">0.5</td><td>1.6</td></tr>
+              <tr><td class="pr-4">C</td><td class="pr-4">0.2</td><td class="pr-4">0.8</td><td class="pr-4">0.8</td><td class="pr-4">0.2</td><td>1.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`result = run_consensus([ana, bob, cara], options)
+result.status      # "agreed"
+result.decision    # {"id": "B"}   highest floor (0.5), not highest total (1.9 is A)
+verify_outcome(result.transcript, expected_owners=["ana", "bob", "cara"])   # True`}</code></pre>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What the rule does not do</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">It does not make scores honest.</strong> Soft scores are self-declared, so
+              an agent that shades them can tilt the pick among options everyone accepts. Red lines are enforced
+              in code; the scores are not.{" "}
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a> lists this as a
+              known limit.
+            </li>
+            <li>
+              <strong class="text-ink">It does not search for options.</strong> It ranks the options it is given.
+              A better option nobody proposed is never found.
+            </li>
+            <li>
+              <strong class="text-ink">It can end with no decision.</strong> A deadlock is the correct output when
+              every option crosses someone's red line, and the owners have to change the options or the limits.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Watch a sample decision resolve, then read the code.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo replays scripted runs of the same engine, no signup. The repository is Apache-2.0 and the core has no dependencies.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>Read the source</a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
