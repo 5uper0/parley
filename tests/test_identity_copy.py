@@ -42,7 +42,6 @@ ASSISTANT = re.compile(r"\bassistants?\b", re.IGNORECASE)
 TEXT_SUFFIXES = {".astro", ".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".html"}
 # The home page is rewritten by its own change; until it lands, its checks are expected to fail.
 # Remove this marker with that change.
-HOME_PENDING = pytest.mark.xfail(reason="home hero rewrite (index.astro) has not landed yet", strict=False)
 
 
 def _rel(path: Path) -> str:
@@ -113,7 +112,6 @@ def test_ac1_banned_words_appear_only_on_allowlisted_lines():
     assert allowed - hits == set(), "allowlist entries that match no banned line; remove or update them"
 
 
-@HOME_PENDING
 def test_ac2_home_source_has_banned_words_only_on_allowlisted_lines():
     hits = _hits([HOME], BANNED)
     allowed = {entry for entry in _allowlist() if entry[0] == _rel(HOME)}
@@ -137,7 +135,6 @@ def test_ac5_no_assistant_in_readme_film_copy_labels_or_alt_text():
     assert _hits(paths, ASSISTANT) == set()
 
 
-@HOME_PENDING
 def test_ac5_no_assistant_in_home_source():
     assert _hits([HOME], ASSISTANT) == set()
 
@@ -146,6 +143,5 @@ def test_ac7_readme_carries_the_one_liner_once_byte_for_byte():
     assert README.read_bytes().count(S.encode("utf-8")) == 1
 
 
-@HOME_PENDING
 def test_ac7_home_h1_source_carries_the_same_bytes():
     assert HOME.read_bytes().count(S.encode("utf-8")) >= 1

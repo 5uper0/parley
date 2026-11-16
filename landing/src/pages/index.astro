@@ -98,15 +98,8 @@ const jsonLd = JSON.stringify({
 <Layout
   title="Parley: agents that act for different people can agree"
   description={SUB}
+  defaultTheme="light"
 >
-  <!-- Home is light unless the visitor picked dark with the header toggle. -->
-  <script is:inline>
-    try {
-      if (localStorage.getItem("parley-theme") !== "dark") document.documentElement.dataset.theme = "light";
-    } catch (e) {
-      document.documentElement.dataset.theme = "light";
-    }
-  </script>
   <script type="application/ld+json" is:inline set:html={jsonLd} />
 
   <a
@@ -370,7 +363,7 @@ const jsonLd = JSON.stringify({
               aria-label="Example: what leaves the agent versus what stays private"
             >
               <span class="text-muted">leaves the agent:</span><br />
-              <span class="text-verify">acceptable</span> &middot; score 0.71 &middot;
+              <span class="text-ink">acceptable</span> &middot; score 0.71 &middot;
               reason "ok"<br />
               <span class="text-muted">stays private:</span><br />
               <span class="text-masked">the sheet, and which line was crossed</span>
@@ -399,7 +392,7 @@ const jsonLd = JSON.stringify({
               <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
                 A SHA-256 hash over the canonical, masked record. Each owner
                 replays their own private sheet locally to confirm no red line
-                was crossed, without revealing it.
+                was crossed, without handing it over.
               </p>
               <span
                 class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
@@ -428,7 +421,7 @@ const jsonLd = JSON.stringify({
             sheets, sixteen options, scored by the engine in this repository. Every
             verdict is recorded masked, hashed, and independently replayable by each
             owner against their own private sheet. The transcript hashes to
-            <code class="font-mono text-[0.9em] text-verify">4622d0a7ecc2&hellip;154a0d25</code>,
+            <code class="font-mono text-[0.9em] text-ink">4622d0a7ecc2&hellip;154a0d25</code>,
             and <code class="font-mono text-[0.9em]">landing/scripts/gen-tape.py</code>
             reproduces it byte for byte.
           </p>
@@ -489,7 +482,7 @@ const jsonLd = JSON.stringify({
           <div class="grid grid-cols-2 gap-x-8 gap-y-5 sm:flex sm:gap-10">
             <div>
               <div
-                class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-verify"
+                class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-ink"
               >
                 5/5
               </div>

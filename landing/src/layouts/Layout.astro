@@ -10,6 +10,7 @@ interface Props {
   noindex?: boolean;
   lang?: string;
   alternates?: { lang: string; path: string }[];
+  defaultTheme?: "dark" | "light";
 }
 
 const {
@@ -19,18 +20,19 @@ const {
   noindex = false,
   lang = "en",
   alternates = [],
+  defaultTheme = "dark",
 } = Astro.props;
 const url = `https://parleyprotocol.com${path}`;
 const ga4 = process.env.PARLEY_GA4_ID || "";
 ---
 
 <!doctype html>
-<html lang={lang} data-theme="dark">
+<html lang={lang} data-theme={defaultTheme}>
   <head>
     <script is:inline>
       try {
         var t = localStorage.getItem("parley-theme");
-        if (t === "light") document.documentElement.dataset.theme = "light";
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
       } catch (e) {}
     </script>
     <meta charset="utf-8" />
@@ -39,7 +41,7 @@ const ga4 = process.env.PARLEY_GA4_ID || "";
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#0A0B0D" />
+    <meta name="theme-color" content={defaultTheme === "light" ? "#F6F7FB" : "#0A0B0D"} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={url} />
