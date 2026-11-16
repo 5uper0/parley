@@ -1,0 +1,13 @@
+# Banned-word allowlist for the identity checks (tests/test_identity_copy.py, spec AC1, AC2, AC5).
+#
+# One entry per line, in the form
+#   path/from/repo/root:LINE: the full text of that line with leading and trailing spaces removed
+# An entry lets a banned word (or whole-word "assistant") stay on exactly that line of that file.
+# Only a negated limit sentence ("does not prove") or a quote of real program output belongs here;
+# a positive use is reworded instead. When the line moves or its text changes, the entry stops
+# matching and the test fails: update the entry or reword the line. An entry that matches no
+# banned line also fails the test, so the list cannot go stale.
+# Lines starting with # and blank lines are ignored.
+
+# Verbatim output of scripts/verify-receipt.py, shown in a code block.
+landing/src/pages/fair-group-decision-private-limits.astro:476: What this does NOT prove
