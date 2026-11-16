@@ -27,8 +27,11 @@ function init(): void {
       e.preventDefault();
       // location.hash (not replaceState) so hashchange fires and the page marks the section.
       location.hash = id;
-      section.scrollIntoView({ block: "start" });
-      headingOf(section).focus({ preventScroll: true });
+      const target = document.getElementById(id) as HTMLElement;
+      const focusEl = target === section ? headingOf(section) : target;
+      if (!focusEl.hasAttribute("tabindex")) focusEl.setAttribute("tabindex", "-1");
+      target.scrollIntoView({ block: "start" });
+      focusEl.focus({ preventScroll: true });
     });
   });
 
