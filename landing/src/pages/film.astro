@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Footer from "../components/Footer.astro";
+import FilmFooter from "../components/film/FilmFooter.astro";
 import FilmHeader from "../components/film/FilmHeader.astro";
 import HowItWorks from "../components/film/sections/HowItWorks.astro";
 import CodeSample from "../components/film/sections/CodeSample.astro";
@@ -8,9 +8,9 @@ import Receipt from "../components/film/sections/Receipt.astro";
 import Install from "../components/film/sections/Install.astro";
 import Docs from "../components/film/sections/Docs.astro";
 import Status from "../components/film/sections/Status.astro";
-import { hero, DEMO_URL } from "../data/film-copy";
-// PIECE B: import Hero from "../components/film/Hero.astro";
-// PIECE C: import Room from "../components/film/Room.astro";
+import { hero } from "../data/film-copy";
+import Hero from "../components/film/Hero.astro";
+import Room from "../components/film/Room.astro";
 
 const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
 ---
@@ -27,24 +27,9 @@ const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
     <FilmHeader />
 
     <main id="main" class="film-main flex-1 pb-20">
-      {/* PIECE B: replace this whole #hero-slot div with <Hero /> */}
-      <div id="hero-slot" class={`${wrap} pt-12`}>
-        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
-          {hero.headline}
-        </h1>
-        <p class="mt-5 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">{hero.sub}</p>
-        <p class="mt-7">
-          <a
-            href={DEMO_URL}
-            class="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo px-7 py-3 text-[15px] font-semibold text-bg"
-          >
-            {hero.button}
-          </a>
-        </p>
-      </div>
+      <Hero />
 
-      {/* PIECE C: replace this #room-slot div with <Room /> */}
-      <div id="room-slot"></div>
+      <Room />
 
       <div class={`${wrap} mt-16 flex flex-col gap-14`}>
         <HowItWorks />
@@ -56,7 +41,7 @@ const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
       </div>
     </main>
 
-    <Footer />
+    <FilmFooter />
   </div>
 
   <script is:inline>
