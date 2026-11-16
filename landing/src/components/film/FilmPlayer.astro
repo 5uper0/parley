@@ -1,0 +1,157 @@
+---
+import { hero } from "../../data/film-copy";
+
+// Caption start times in seconds, from the POC animatic.
+const CAPTION_AT = [0, 1.8, 3.7];
+const captions = hero.captions.map((text, i) => ({ text, at: CAPTION_AT[i] }));
+const ALT = "A table at night with three sealed notes, one for each owner";
+---
+
+<div class="film-player" data-film-player>
+  <script is:inline>
+    (function () {
+      var el = document.currentScript.parentElement;
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) el.setAttribute("data-js", "");
+    })();
+  </script>
+
+  <div class="film-frame">
+    <picture>
+      <img
+        src="/film/poster-land.jpg"
+        width="1600"
+        height="900"
+        alt={ALT}
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+    <video src="/film/animatic.mp4" muted playsinline preload="none" poster="" aria-hidden="true" tabindex="-1"
+    ></video>
+    <ol class="film-captions">
+      {
+        captions.map((c, i) => (
+          <li class={i === 0 ? "is-active" : undefined} data-at={c.at}>
+            {c.text}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <div class="film-bar">
+    <div class="film-controls">
+      <button type="button" data-film-toggle aria-label="Play the film">Play</button>
+      <button type="button" data-film-replay aria-label="Replay the film from the start">Replay</button>
+    </div>
+    <p class="film-label">Sample run, not a live feed</p>
+  </div>
+</div>
+
+<script>
+  import { initFilmPlayer } from "../../scripts/film-player";
+  initFilmPlayer();
+</script>
+
+<style>
+  .film-player {
+    font-family: var(--font-sans);
+  }
+  .film-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .film-frame img,
+  .film-frame video {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  /* The poster stays on screen until the first frame plays: no blank frame. */
+  .film-frame video {
+    opacity: 0;
+  }
+  .film-player[data-started] video {
+    opacity: 1;
+  }
+
+  /* Static state (no JS, reduced motion): every caption is readable text on
+     the poster. Fixed colors because they sit on the image in both themes. */
+  .film-captions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 10px 14px;
+    list-style: none;
+    background: rgba(0, 0, 0, 0.78);
+    color: #f4f6f7;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .film-captions li + li {
+    margin-top: 4px;
+  }
+  /* Film state: one caption at a time; the rest stay in the DOM for readers. */
+  .film-player[data-js] .film-captions {
+    font-size: 15px;
+  }
+  .film-player[data-js] .film-captions li {
+    margin: 0;
+  }
+  .film-player[data-js] .film-captions li:not(.is-active) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .film-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 16px;
+    margin-top: 10px;
+    min-height: 44px;
+  }
+  .film-controls {
+    display: none;
+    gap: 8px;
+  }
+  .film-player[data-js] .film-controls {
+    display: flex;
+  }
+  .film-controls button {
+    min-width: 76px;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .film-controls button:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+  .film-label {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+</style>

@@ -1,0 +1,12 @@
+---
+import { install } from "../../../data/film-copy";
+---
+
+<section id="install" class="film-section scroll-mt-24 border-l-2 border-transparent pl-4 md:pl-6" aria-labelledby="install-h">
+  <h2 id="install-h" class="font-display text-[26px] tracking-[-0.02em] text-ink">{install.title}</h2>
+  <p class="mt-4 max-w-[64ch] text-[15px]/[25px] text-muted">
+    <code class="rounded-[5px] border border-hairline bg-surface px-[6px] py-0.5 font-mono text-[14px] text-ink"
+      >{install.command}</code
+    >{install.rest}
+  </p>
+</section>
