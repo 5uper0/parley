@@ -1,0 +1,64 @@
+---
+// Two sections: "Who it is for" (copy 3.3, first line only: the second read as a consumer app)
+// and #install, #docs (copy 3.4, with the fallback heading). Strings verbatim.
+// Code lines are the copy file's shortened form of README lines 65-68, 73, 74 and 83 on origin/main.
+import { README_URL, REPO_URL } from "../../data/film-copy";
+
+const whoTitle = "Who it is for";
+const who = "People building agents that act for several people who want different things.";
+
+const title = "For developers";
+const command = "pip install parley-consensus";
+const code = `bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)], ...)
+result = run_consensus(agents, options)
+print(result.status, result.decision)   # agreed {'venue': 'garden', 'cost': 600}`;
+const under = "Open-source Python library. Python 3.10 or newer. Zero-dependency core. Apache-2.0. Also runs as an MCP server: ";
+const mcp = "parley-mcp";
+const links = [
+  { text: "Full example on GitHub", href: `${REPO_URL}#quickstart` },
+  { text: "Read the README", href: README_URL },
+];
+
+const pre =
+  "home-pre max-w-full overflow-x-auto rounded-xl border border-hairline bg-surface p-5 font-mono text-sm leading-loose whitespace-pre text-ink";
+---
+
+<section id="who" class="scroll-mt-24 py-10 md:py-16" aria-labelledby="who-h">
+  <div class="home-wrap">
+    <h2 id="who-h" class="font-display text-2xl leading-tight tracking-tight text-ink">{whoTitle}</h2>
+    <p class="mt-4 max-w-[64ch] text-lg leading-relaxed text-ink">{who}</p>
+  </div>
+</section>
+
+<section id="install" class="scroll-mt-24 py-10 md:py-16" aria-labelledby="install-h">
+  <div class="home-wrap">
+    <h2 id="install-h" class="font-display text-2xl leading-tight tracking-tight text-ink">{title}</h2>
+    <div class="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:gap-10">
+      <pre class={`${pre} min-w-0`} tabindex="0" aria-labelledby="install-h"><code>{command}</code></pre>
+      <p id="docs" class="flex scroll-mt-24 flex-wrap gap-x-8 text-base">
+        {
+          links.map((l) => (
+            <a
+              href={l.href}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex min-h-11 items-center text-indigo-text underline underline-offset-2"
+            >
+              {l.text}
+            </a>
+          ))
+        }
+      </p>
+    </div>
+    <pre class={`${pre} mt-4`} tabindex="0" aria-labelledby="install-h"><code>{code}</code></pre>
+    <p class="mt-4 max-w-[64ch] text-base leading-relaxed text-muted">
+      {under}<code class="font-mono text-sm text-ink">{mcp}</code>.
+    </p>
+  </div>
+</section>
+
+<style>
+  .home-pre {
+    font-variant-ligatures: none;
+  }
+</style>

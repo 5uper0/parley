@@ -1,0 +1,19 @@
+---
+// The homepage <main>: hero with the drawn sample, the receipt, then how, install, status, closing.
+// /film renders it as the preview route; the later swap puts the same component on /.
+import Hero from "./Hero.astro";
+import Receipt from "./Receipt.astro";
+import How from "./How.astro";
+import Install from "./Install.astro";
+import Status from "./Status.astro";
+import Closing from "./Closing.astro";
+---
+
+<main id="main" class="flex-1">
+  <Hero />
+  <Receipt />
+  <How />
+  <Install />
+  <Status />
+  <Closing />
+</main>

@@ -2,68 +2,21 @@
 import Layout from "../layouts/Layout.astro";
 import FilmFooter from "../components/film/FilmFooter.astro";
 import FilmHeader from "../components/film/FilmHeader.astro";
-import HowItWorks from "../components/film/sections/HowItWorks.astro";
-import CodeSample from "../components/film/sections/CodeSample.astro";
-import Receipt from "../components/film/sections/Receipt.astro";
-import Install from "../components/film/sections/Install.astro";
-import Docs from "../components/film/sections/Docs.astro";
-import Status from "../components/film/sections/Status.astro";
-import { hero } from "../data/film-copy";
-import Hero from "../components/film/Hero.astro";
-import Room from "../components/film/Room.astro";
-
-const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+import HomeV3 from "../components/home/HomeV3.astro";
+import { hero } from "../data/home-hero";
 ---
 
 <Layout title={`${hero.headline} | Parley`} description={hero.sub} path="/film/" noindex>
   <a
     href="#main"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-bg"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-ink focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-bg"
   >
     Skip to content
   </a>
 
   <div class="flex min-h-screen flex-col">
     <FilmHeader />
-
-    <main id="main" class="film-main flex-1 pb-20">
-      <Hero />
-
-      <Room />
-
-      <div class={`${wrap} mt-16 flex flex-col gap-14`}>
-        <HowItWorks />
-        <CodeSample />
-        <Receipt />
-        <Install />
-        <Docs />
-        <Status />
-      </div>
-    </main>
-
+    <HomeV3 />
     <FilmFooter />
   </div>
-
-  <script is:inline>
-    (function () {
-      function mark() {
-        var old = document.querySelectorAll(".film-section.hl");
-        for (var i = 0; i < old.length; i++) old[i].classList.remove("hl");
-        var el = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
-        var sec = el && el.closest(".film-section");
-        if (sec) sec.classList.add("hl");
-      }
-      window.addEventListener("hashchange", mark);
-      mark();
-    })();
-  </script>
 </Layout>
-
-<style>
-  /* :target keeps the highlight working with JS off; .hl is set on hash change. */
-  .film-main :global(.film-section.hl),
-  .film-main :global(.film-section:target),
-  .film-main :global(.film-section:has(:target)) {
-    border-left-color: var(--indigo);
-  }
-</style>
