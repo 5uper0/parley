@@ -2,12 +2,17 @@
 
 # parley.
 
-### Several owners, private limits, one decision that crosses nobody's red line
+### Agents that act for different people can agree without anyone handing over their limit.
 
-**Give each party's agent a private red line. Parley picks the option that crosses nobody's line and lifts
-the least-happy party, and every owner can check on their own machine that their limit held.** Nobody
-shows their sheet, not even to the coordinator.
-<br>Red lines are code, not prompts · multilateral (N&gt;2) · non-crypto · self-hosted · zero-dependency Python · Apache-2.0.
+Parley is an open-source Python library. Each person's hard limits run as code: an option over anyone's limit cannot win, nobody hands over their limit sheet, and every result leaves a record anyone can check.
+
+```bash
+pip install parley-consensus
+```
+
+Early, version 0.2.1, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat.
+
+Red lines are code, not prompts · multilateral (N&gt;2) · non-crypto · self-hosted · zero-dependency Python · Apache-2.0.
 
 [![ci](https://github.com/5uper0/parley/actions/workflows/ci.yml/badge.svg)](https://github.com/5uper0/parley/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -148,7 +153,7 @@ what the engine enforces in code: a red line rejects an option deterministically
 rule picks among options feasible for everyone, and the receipt hash makes any later edit to the
 transcript visible, provided the hash is kept by someone other than whoever might edit the
 transcript: it is unsigned and the server does not store it, so a hash and a transcript from the
-same hand prove nothing about each other. `max_min_verified` does not depend on the hash: it
+same hand say nothing about each other. `max_min_verified` does not depend on the hash: it
 recomputes the winner from the recorded verdicts. For private sheets, run one process per owner over HTTP
 ([`examples/run_env.py`](examples/run_env.py)); the coordinator then sees only masked verdicts.
 
@@ -158,26 +163,28 @@ Most agent tooling in 2026 solves either transport/identity (A2A, MCP) or 1:1 ag
 commerce (an agent buys/books for you), or *cooperative* debate between agents of the
 **same** owner. Parley targets the gap nobody productised: a group of delegates, each
 representing a **different** principal with **conflicting** and **private** interests,
-reaching a decision everyone can trust, and *prove* their agent didn't betray them.
+reaching a decision that crosses nobody's red line, where each owner can check afterwards
+that their own limit held.
 
-**Who it's for.** Teams and platforms where several parties must reach a decision that crosses none of
-their red lines, and each can prove that afterward. Built first for **regulated, multi-party workflows**: compliance &
-onboarding decisions (KYC/AML, sanctions red lines), marketplace & P2P disputes, and delegated
-governance (committees, panels).
+**Who it's for.** People building agents that act for different people: several parties must reach
+one decision that crosses none of their red lines, and each can check that afterward on their own
+machine. No outside user has run it yet. The worked examples in this repo are a P2P escrow dispute
+([`docs/dogfood-01-p2p-escrow.md`](docs/dogfood-01-p2p-escrow.md), synthetic) and an early lease exit
+replayed after the fact ([`docs/dogfood-02-early-lease-exit.md`](docs/dogfood-02-early-lease-exit.md)).
 
 The wedge is three properties, enforced in code rather than left to an LLM's discretion:
 
 1. **Deterministic red lines.** Each owner's hard constraints are predicates checked in
    code. A proposal that crosses one is *rejected*, never negotiated away. "My agent
-   won't betray me" becomes a provable property, not a hope.
+   won't betray me" becomes a property you can check, not a hope.
 2. **Conflicting-interest consensus.** The coordinator sees only masked verdicts, a
    feasibility flag, a soft score, and a *masked* reason (`ok`/`red-line`), never the
    private sheets or which constraint was at stake. A decision must be feasible for *every* agent; among those it
    picks by an egalitarian max-min rule (lift the least-happy participant), tie-broken by
    total welfare, social choice, not majority vote. No feasible option ⇒ honest deadlock.
 3. **Verifiable transcript.** A tamper-evident SHA-256 record of every masked verdict.
-   Each owner can replay their *own* private sheet locally to prove no red line was
-   crossed, without revealing the sheet to anyone.
+   Each owner can replay their *own* private sheet locally to check that none of their red
+   lines was crossed, without handing the sheet to anyone.
 
 ## Why this exists (and what we learned building it)
 
@@ -187,12 +194,12 @@ real question. The crypto answer to agent-trust (put it on a chain, add a token)
 the durable need is the **trust primitive itself**, decoupled from tokens.
 
 > **AI that can't lie, and you can check.** The 2026 agent-hype cycle proved virality can be
-> fully decoupled from truth. Parley is the provable version: every verdict in a parley is a
-> re-hashable receipt, and each owner replays their own private sheet to prove no red line was
-> crossed, no trust required, just the check.
+> fully decoupled from truth. Parley is the checkable version: every verdict in a parley is a
+> re-hashable receipt, and each owner replays their own private sheet to check that none of their
+> red lines was crossed.
 
 Building the v0 taught us the wedge is narrower and sharper than "multi-agent consensus": the value
-isn't the vote, voting is free (Snapshot, polls). The value is **provable non-betrayal under
+isn't the vote, voting is free (Snapshot, polls). The value is **non-betrayal each owner can check, under
 conflicting private interests**, that no party had to reveal their private sheet or which red line
 was at stake, no red line could be traded away, and everyone can check the receipt themselves. That's what doesn't compose from off-the-shelf
 parts, and it's the one thing we made enforceable in code rather than left to an LLM's goodwill. The
@@ -225,7 +232,7 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python examples/meeting.py
 # bots as separate processes, consensus over HTTP
 .venv/bin/python examples/run_env.py
-# run a real decision with real people, each one ratifies
+# run it with real people, each one ratifies
 .venv/bin/python examples/real_decision.py \
     --options examples/demo/recipe_committee.json
 ```
@@ -267,10 +274,10 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
 - **Signed verdicts (Ed25519).** Each bot signs its verdict over the specific option, binding the
   content to a key. `verify_transcript(require_signed=True)` then rejects any verdict that was
   altered, or that arrives unsigned when a signature was expected. **Scope (read this):** the check
-  proves each signature is internally consistent with the pubkey *carried in that record*. It does
-  **not** yet prove *authenticity*, that the pubkey is the owner's real key, because there is no
+  shows each signature is internally consistent with the pubkey *carried in that record*. It does
+  **not** yet establish *authenticity*, that the pubkey is the owner's real key, because there is no
   trusted `owner → key` roster: a coordinator that assembles the transcript could substitute its own
-  keypair. Treat signatures today as **tamper-evidence**, not third-party-provable identity.
+  keypair. Treat signatures today as **tamper-evidence**, not identity a third party can check.
 - **Auth + rate limiting + input validation.** Without a bearer token `/consider` returns 401;
   brute-force enumeration is throttled (429); oversized/malformed bodies are rejected (413/400).
   This closes the preference-extraction hole (an unauthenticated attacker previously reconstructed
@@ -280,9 +287,9 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
   coordinator that finalizes a *feasible-but-not-max-min* (or infeasible) option is caught. Anyone
   can replay it over the public record — no private sheet needed. Pass
   `expected_owners=` the roster you expect, or a coordinator that drops one owner from every entry
-  still passes. (`verify_non_betrayal` still only proves your *own* red lines held.)
+  still passes. (`verify_non_betrayal` still only checks your *own* red lines.)
 
-Not yet (v0.1 honest limits, do not treat as production-secure for adversarial principals):
+Not yet (v0.1 honest limits, do not rely on it against owners who try to cheat):
 - **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster
   (above); the roster-pinned check (verify against the key from each bot's discovery Agent Card) is v0.2.
   Today only the coordinator's own side pins it: the client checks that a signature is present
@@ -310,10 +317,10 @@ audit-grade signed transcripts, and managed self-hosting, not the algorithm. Fir
 segments: private multi-party B2B negotiation (procurement/SOW) and auditable delegated governance
 (committees, panels). Differentiator vs **Fetch.ai / Olas** (real prior art, agent platforms built around a ledger and a
 token): their pages describe no red-line or consensus mechanism, and Olas is on-chain and token-based;
-Parley does *multilateral group consensus*, provable non-betrayal, **no crypto**, self-hosted.
+Parley does *multilateral group consensus*, non-betrayal each owner can check, **no crypto**, self-hosted.
 
 The demo shows three people whose agents hold private, conflicting constraints reach a
-slot everyone's red lines allow, then each owner proves non-betrayal, and a second run
+slot everyone's red lines allow, then each owner checks that their own red lines held, and a second run
 that hits an honest deadlock instead of forcing a bad decision.
 
 ## Architecture
@@ -351,7 +358,7 @@ Report security issues privately via [SECURITY.md](SECURITY.md).
 
 ## Star history
 
-If Parley's approach to provable non-betrayal is interesting, a star helps others find it.
+If Parley's approach to non-betrayal each owner can check is interesting, a star helps others find it.
 
 <!-- Renders once the repo is public: -->
 [![Star History Chart](https://api.star-history.com/svg?repos=5uper0/parley&type=Date)](https://star-history.com/#5uper0/parley&Date)
