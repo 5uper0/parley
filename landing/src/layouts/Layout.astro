@@ -47,7 +47,6 @@ const ga4 = process.env.PARLEY_GA4_ID || "";
       <link rel="alternate" hreflang={a.lang} href={`https://parleyprotocol.com${a.path}`} />
     ))}
     {noindex && <meta name="robots" content="noindex" />}
-    <slot name="head" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={url} />
     <meta property="og:site_name" content="Parley" />
