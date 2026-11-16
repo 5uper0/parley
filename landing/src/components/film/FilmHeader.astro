@@ -1,0 +1,111 @@
+---
+import { menu, menuButton } from "../../data/film-copy";
+
+const item =
+  "inline-flex min-h-11 min-w-11 items-center px-3 text-[14px] text-muted transition-colors hover:text-ink";
+---
+
+<header class="film-header" data-film-header>
+  <div class="mx-auto flex w-full max-w-[880px] flex-wrap items-center justify-between gap-x-4 px-6 py-2 md:px-10">
+    <a href="/" class="inline-flex min-h-11 items-center font-display text-[21px] tracking-[-0.025em] text-ink">
+      parley<span class="text-redline" aria-hidden="true">.</span>
+    </a>
+    <button
+      type="button"
+      class="film-menu-btn min-h-11 min-w-11 items-center justify-center rounded-full border border-hairline bg-surface px-4 text-[14px] text-ink"
+      aria-expanded="false"
+      aria-controls="film-nav"
+      data-film-menu-btn
+    >
+      {menuButton}
+    </button>
+    <nav id="film-nav" class="film-nav w-full md:w-auto" aria-label="Sections" data-open="false">
+      <ul class="flex flex-wrap items-center gap-x-1">
+        {
+          menu.map((m) => (
+            <li>
+              <a
+                href={m.href}
+                class={item}
+                target={m.external ? "_blank" : undefined}
+                rel={m.external ? "noopener" : undefined}
+              >
+                {m.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    var header = document.querySelector("[data-film-header]");
+    if (!header) return;
+    var btn = header.querySelector("[data-film-menu-btn]");
+    var nav = header.querySelector("#film-nav");
+    function set(open) {
+      nav.dataset.open = open ? "true" : "false";
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+    header.setAttribute("data-js", "");
+    btn.addEventListener("click", function () {
+      set(nav.dataset.open !== "true");
+    });
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest("a")) set(false);
+    });
+    header.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && nav.dataset.open === "true") {
+        set(false);
+        btn.focus();
+      }
+    });
+  })();
+</script>
+
+<style>
+  .film-header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--hairline);
+  }
+  /* Without JS the phone menu is an open wrapped list, so the header only
+     sticks where it stays one row tall. */
+  .film-header[data-js] {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  @media (min-width: 768px) {
+    .film-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+  }
+  .film-menu-btn {
+    display: none;
+  }
+  .film-menu-btn:focus-visible {
+    outline: 2px solid var(--indigo);
+    outline-offset: 2px;
+  }
+  @media (max-width: 767px) {
+    .film-header[data-js] .film-menu-btn {
+      display: inline-flex;
+    }
+    .film-header[data-js] .film-nav[data-open="false"] {
+      display: none;
+    }
+    .film-header[data-js] .film-nav ul {
+      flex-direction: column;
+      align-items: stretch;
+      padding-bottom: 8px;
+    }
+    .film-header[data-js] .film-nav a {
+      width: 100%;
+    }
+  }
+</style>

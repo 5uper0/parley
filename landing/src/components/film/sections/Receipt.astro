@@ -1,0 +1,16 @@
+---
+import { receipt, DEMO_URL } from "../../../data/film-copy";
+---
+
+<section id="receipt" class="film-section scroll-mt-24 border-l-2 border-transparent pl-4 md:pl-6" aria-labelledby="receipt-h">
+  <h2 id="receipt-h" class="font-display text-[26px] tracking-[-0.02em] text-ink">{receipt.title}</h2>
+  <p class="mt-4 max-w-[64ch] text-[15px]/[25px] text-muted">{receipt.body}</p>
+  <p class="mt-6">
+    <a
+      href={DEMO_URL}
+      class="inline-flex min-h-12 items-center justify-center rounded-full bg-indigo px-7 py-3 text-[15px] font-semibold text-bg"
+    >
+      {receipt.button}
+    </a>
+  </p>
+</section>
