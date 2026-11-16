@@ -17,10 +17,10 @@ export PARLEY_PY="$PY"
 
 fail() { echo "✗ ship-gate FAILED: $1" >&2; exit 1; }
 
-echo "▸ 1/5 tests"
+echo "▸ 1/6 tests"
 "$PY" -m pytest -q || fail "pytest not green"
 
-echo "▸ 2/5 zero-dependency core"
+echo "▸ 2/6 zero-dependency core"
 # The core (parley/, minus the optional signed layer net/identity.py) must import only stdlib
 # or local parley modules. Correct check via sys.stdlib_module_names — not an ad-hoc grep.
 "$PY" - <<'PYCHECK' || fail "core imports a third-party package (keep it zero-dependency)"
@@ -51,17 +51,25 @@ if bad:
 print("  core is stdlib-only (nacl confined to net/identity.py)")
 PYCHECK
 
-echo "▸ 3/5 examples smoke"
+echo "▸ 3/6 examples smoke"
 "$PY" examples/meeting.py >/dev/null || fail "examples/meeting.py errored"
 
-# Gates 4 and 5 exist because the site twice shipped a number or a hash that the code did not
+# Gates 4, 5 and 6 exist because the site twice shipped a number or a hash that the code did not
 # back. Both failures were caught by a human reading the page, not by anything mechanical.
-echo "▸ 4/5 homepage tape matches a real engine run"
+echo "▸ 4/6 homepage tape matches a real engine run"
 "$PY" landing/scripts/gen-tape.py --check >/dev/null \
   || fail "landing/src/data/tape.ts is stale — regenerate with: $PY landing/scripts/gen-tape.py"
 echo "  tape hashes come from a live run"
 
-echo "▸ 5/5 published test-count claims are current"
+echo "▸ 5/6 homepage receipt matches a real run of the dinner sample"
+# Print what the checker returned, not a sentence written here.
+receipt_rc=0
+receipt_out="$("$PY" scripts/gen-receipt.py --check 2>&1)" || receipt_rc=$?
+printf '%s\n' "$receipt_out" | sed 's/^/  /'
+[ "$receipt_rc" -eq 0 ] \
+  || fail "the dinner receipt or the hero copy bound to it is stale; regenerate with: $PY scripts/gen-receipt.py"
+
+echo "▸ 6/6 published test-count claims are current"
 # Report what the checker actually found, rather than a sentence written here. The two trees
 # differ — the public mirror carries no data room — so a hardcoded verdict would state
 # something this gate did not verify. The detail is printed on failure too, so whoever hits

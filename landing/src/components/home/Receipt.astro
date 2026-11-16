@@ -1,0 +1,115 @@
+---
+// Section 1b (#receipt). The card prints what scripts/gen-receipt.py read off a real run;
+// ship-gate fails if receipt-dinner.ts drifts. The run is unsigned, so no verified seal.
+import { receipt } from "../../data/home-hero";
+import { receiptDinner } from "../../data/receipt-dinner";
+---
+
+<section id="receipt" class="scroll-mt-24 py-12 md:py-20" aria-labelledby="receipt-h">
+  <div class="home-wrap grid gap-x-8 gap-y-10 lg:grid-cols-12">
+    <figure class="lg:order-2 lg:col-span-5 lg:col-start-8 lg:w-100 lg:justify-self-end">
+      <div class="card rounded-xl border border-hairline bg-surface p-5 min-[721px]:p-6" data-receipt>
+        <svg class="flap" viewBox="0 0 400 40" preserveAspectRatio="none" aria-hidden="true">
+          <polygon points="0,0 400,0 200,40" vector-effect="non-scaling-stroke"></polygon>
+        </svg>
+        <span class="seal" aria-hidden="true"></span>
+        <p class="line text-sm text-muted">{receipt.label}</p>
+        <pre
+          class="mt-4 font-mono text-xs/5 whitespace-pre-wrap text-ink min-[721px]:text-sm/6">{receiptDinner.output.map((l, i) => <span class="line block" style={`--i:${i + 1}`}>{l}</span>)}</pre>
+        <p class="line mt-4 font-mono text-xs/5 break-all text-subtle" style={`--i:${receiptDinner.output.length + 1}`}>
+          sha256 {receiptDinner.sha256}
+        </p>
+      </div>
+      <figcaption class="mt-4 text-sm/6 text-muted">{receipt.caption}</figcaption>
+    </figure>
+
+    <div class="lg:order-1 lg:col-span-6">
+      <p class="max-w-prose text-lg/7 text-ink">{receipt.fold}</p>
+      <h2 id="receipt-h" class="mt-8 font-display text-3xl leading-tight tracking-tight text-ink">{receipt.title}</h2>
+      <p class="mt-4 max-w-prose text-base/7 text-muted">{receipt.body}</p>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var card = document.querySelector("[data-receipt]");
+    if (!card || !("IntersectionObserver" in window)) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    card.classList.add("sealed");
+    var io = new IntersectionObserver(
+      function (entries) {
+        if (!entries[0].isIntersecting) return;
+        card.classList.remove("sealed");
+        io.disconnect();
+      },
+      { threshold: 0.6 }
+    );
+    io.observe(card);
+  })();
+</script>
+
+<style>
+  /* Open is the default, so the receipt reads without JS and under reduced motion.
+     The script seals it and one observer opens it once. */
+  .card {
+    position: relative;
+  }
+  .flap {
+    position: absolute;
+    top: -1px;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 1.75rem;
+    overflow: visible;
+    opacity: 0.4;
+    transform: rotateX(180deg);
+    transform-origin: 50% 0;
+    transition:
+      transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 320ms linear;
+    pointer-events: none;
+  }
+  .flap polygon {
+    fill: var(--surface);
+    stroke: var(--hairline);
+    stroke-width: 1;
+  }
+  .seal {
+    position: absolute;
+    top: 1.75rem;
+    left: 50%;
+    z-index: 2;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: var(--masked);
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 200ms linear;
+  }
+  .line {
+    transition: opacity 320ms linear;
+    transition-delay: calc(var(--i, 0) * 60ms);
+  }
+  .card.sealed .flap {
+    opacity: 1;
+    transform: none;
+  }
+  .card.sealed .seal {
+    opacity: 1;
+  }
+  .card.sealed .line {
+    opacity: 0;
+    transition: none;
+  }
+  @media (min-width: 721px) {
+    .flap {
+      height: 2.5rem;
+    }
+    .seal {
+      top: 2.5rem;
+    }
+  }
+</style>
