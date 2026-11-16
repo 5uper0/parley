@@ -6,9 +6,10 @@ the engine prints, not text someone typed, so this script takes the exact code t
 package and reads the decision, each owner's replay and `Transcript.hash()` off the result.
 The hero draws the option cards and a yes/no grid, so the options and each transcript verdict
 are written too. A verdict is owner, option and `acceptable` only: scores and reasons stay out
-of the file. The hero also says why garden beats diner (they tie for the least-happy owner, garden
-has the higher total); `pick_facts` reads that off the transcript and refuses to write the file
-when it stops being true. The page promises the same output for any Bob limit from 600 to 899; both ends are run and a
+of the file. The hero also says why garden beats diner (they suit the least-happy owner equally,
+garden has the higher total); `pick_facts` reads that off the transcript and refuses to write the
+file when it stops being true. The hero labels the run with the parley version, read from
+pyproject.toml and never typed. The page promises the same output for any Bob limit from 600 to 899; both ends are run and a
 difference is an error, so that promise is checked too.
 
     .venv/bin/python scripts/gen-receipt.py           # rewrite receipt-dinner.ts, print the sha256
@@ -29,6 +30,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 COPY = REPO_ROOT / "landing" / "src" / "data" / "film-copy.ts"
 OUT = REPO_ROOT / "landing" / "src" / "data" / "receipt-dinner.ts"
+PYPROJECT = REPO_ROOT / "pyproject.toml"
 PAGE = REPO_ROOT / "landing" / "src" / "components" / "home" / "Receipt.astro"
 REGEN = ".venv/bin/python scripts/gen-receipt.py"
 LIMITS = (600, 899)
@@ -86,7 +88,7 @@ def run_sample(code: str, limit: int) -> Run:
 def pick_facts(entries: Rows, decision: Dict[str, object]) -> Dict[str, object]:
     """Why the picked option beat the other one everyone accepted, as two facts and no numbers.
 
-    The hero prints "tie for the least-happy owner, higher total". That is only true while exactly
+    The hero prints "suit that owner equally, so the higher total wins". That is only true while exactly
     two options are feasible, their lowest scores are equal and the picked one has the larger sum.
     """
     feasible = [e for e in entries if all(v["acceptable"] for v in e["verdicts"])]
@@ -108,6 +110,18 @@ def pick_facts(entries: Rows, decision: Dict[str, object]) -> Dict[str, object]:
     }
 
 
+def package_version(pyproject_path: Path = PYPROJECT) -> str:
+    """The version of the parley that ran, from [project] in pyproject.toml, as N.N.N."""
+    text = pyproject_path.read_text(encoding="utf-8")
+    project = re.search(r"^\[project\]\n(.*?)(?=^\[|\Z)", text, re.DOTALL | re.MULTILINE)
+    match = project and re.search(r'^version = "([^"]*)"$', project.group(1), re.MULTILINE)
+    if not match:
+        raise SystemExit(f"no [project] version in {pyproject_path}")
+    if not re.fullmatch(r"\d+\.\d+\.\d+", match.group(1)):
+        raise SystemExit(f"version {match.group(1)!r} in {pyproject_path} is not N.N.N; the hero sample label would be wrong")
+    return match.group(1)
+
+
 def generate(copy_path: Path = COPY) -> Run:
     code = sample_code(copy_path)
     runs = [run_sample(code, limit) for limit in LIMITS]
@@ -120,7 +134,8 @@ def ts_string(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def render(lines: List[str], digest: str, options: Rows, verdicts: Rows, pick: Dict[str, object]) -> str:
+def render(lines: List[str], digest: str, options: Rows, verdicts: Rows, pick: Dict[str, object], version: str = "") -> str:
+    version = version or package_version()
     body = "\n".join(f"    {ts_string(line)}," for line in lines)
     cards = "\n".join(
         f"    {{ venue: {ts_string(o['venue'])}, cost: {int(o['cost'])} }}," for o in options
@@ -136,6 +151,7 @@ def render(lines: List[str], digest: str, options: Rows, verdicts: Rows, pick: D
         f"// Source program: codeSample.code in film-copy.ts, Bob limits {LIMITS[0]} and {LIMITS[1]}.\n"
         f"\n"
         f"export const receiptDinner = {{\n"
+        f"  version: {ts_string(version)},\n"
         f"  output: [\n{body}\n  ],\n"
         f"  sha256: {ts_string(digest)},\n"
         f"  options: [\n{cards}\n  ],\n"

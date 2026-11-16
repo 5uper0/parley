@@ -3,6 +3,7 @@
 // Source program: codeSample.code in film-copy.ts, Bob limits 600 and 899.
 
 export const receiptDinner = {
+  version: "0.2.1",
   output: [
     "agreed {'venue': 'garden', 'cost': 600}",
     "Ana not betrayed: True",

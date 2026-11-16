@@ -1,7 +1,7 @@
 """The homepage receipt is engine output, not typed text.
 
 `scripts/gen-receipt.py` runs the dinner program the page prints and writes the lines and the
-transcript sha256 the page shows. These tests hold that the committed file is what the engine
+transcript sha256 the page shows, plus the parley version the hero labels the run with. These tests hold that the committed file is what the engine
 gives today, and that the check fails when the file, the hash or the page binding drifts.
 """
 import importlib.util
@@ -106,6 +106,30 @@ def test_pick_facts_refuse_a_run_where_the_rule_line_would_be_false():
     assert "shape" in _refused([garden, _entry("diner", [0.4, 0.7, 0.5], ok=False)], {"venue": "garden"})
 
 
+def test_version_is_read_from_pyproject_and_written_to_the_file():
+    version = gr.package_version()
+    with open(os.path.join(ROOT, "pyproject.toml"), encoding="utf-8") as f:
+        assert f'version = "{version}"' in f.read()
+    assert f'  version: "{version}",\n' in gr.render(*gr.generate())
+
+
+def test_a_version_that_is_not_three_numbers_is_refused(tmp_path):
+    for body, reason in (
+        ('[project]\nversion = "0.2.1"\n', ""),
+        ('[project]\nversion = "0.2"\n', "not N.N.N"),
+        ('[project]\nversion = "0.2.1rc1"\n', "not N.N.N"),
+        ('[project]\nname = "parley"\n\n[tool.x]\nversion = "0.2.1"\n', "no [project] version"),
+    ):
+        path = tmp_path / "pyproject.toml"
+        path.write_text(body, encoding="utf-8")
+        try:
+            gr.package_version(path)
+        except SystemExit as exc:
+            assert reason and reason in str(exc)
+        else:
+            assert not reason
+
+
 def test_committed_file_matches_the_generator():
     assert gr.OUT.read_text(encoding="utf-8") == gr.render(*gr.generate())
 
@@ -128,6 +152,14 @@ def test_check_fails_on_a_drifted_hash(tmp_path, monkeypatch):
 
 def test_check_fails_when_the_file_is_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(gr, "OUT", tmp_path / "absent.ts")
+    monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
+    assert gr.main() == 1
+
+
+def test_check_fails_on_a_drifted_version(tmp_path, monkeypatch):
+    stale = tmp_path / "receipt-dinner.ts"
+    stale.write_text(gr.render(*gr.generate(), version="9.9.9"), encoding="utf-8")
+    monkeypatch.setattr(gr, "OUT", stale)
     monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
     assert gr.main() == 1
 
