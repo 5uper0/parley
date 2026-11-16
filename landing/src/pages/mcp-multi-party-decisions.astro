@@ -68,8 +68,8 @@ const faqs = [
     a: "No, and the tool description says so. In MCP mode the host holds every party's spec and passes them all in one parley_decide call, so there is no privacy between parties or from the host. What still holds is what the engine enforces in code: a red line rejects an option deterministically, the max-min rule picks among options feasible for everyone, and the transcript hash makes later edits visible. For private sheets, run one process per owner over HTTP with examples/run_env.py.",
   },
   {
-    q: "What does transcript_sha256 prove?",
-    a: "Only that a transcript hashes to that value. The hash is an unsigned SHA-256 over the canonical transcript and the server does not store it. If the transcript and the hash come from the same hand, match=true proves nothing, because whoever edits the record can re-hash it. It detects tampering when the hash was kept by someone other than whoever could edit the transcript. max_min_verified does not depend on the hash: it recomputes the winner from the recorded verdicts.",
+    q: "What does transcript_sha256 show?",
+    a: "Only that a transcript hashes to that value. The hash is an unsigned SHA-256 over the canonical transcript and the server does not store it. If the transcript and the hash come from the same hand, match=true tells you nothing, because whoever edits the record can re-hash it. It detects tampering when the hash was kept by someone other than whoever could edit the transcript. max_min_verified does not depend on the hash: it recomputes the winner from the recorded verdicts.",
   },
   {
     q: "What happens when the spec is too large or malformed?",
@@ -85,7 +85,7 @@ const jsonLd = JSON.stringify({
       "@id": "https://parleyprotocol.com/mcp-multi-party-decisions/#article",
       headline: "Run Parley as an MCP server for multi-party agent decisions, self-hosted",
       description:
-        "How to install Parley's stdio MCP server, point Claude Desktop, Claude Code or Cursor at it, and call its three tools: parley_decide, parley_verify_receipt and parley_check_party. What the mode guarantees in code and what it does not.",
+        "How to install Parley's stdio MCP server, point Claude Desktop, Claude Code or Cursor at it, and call its three tools: parley_decide, parley_verify_receipt and parley_check_party. What the mode enforces in code and what it does not.",
       url: "https://parleyprotocol.com/mcp-multi-party-decisions/",
       inLanguage: "en",
       author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
@@ -313,7 +313,7 @@ parley_check_party(party=Bob, decision={"cost": 900, "venue": "rooftop"})
 
       <!-- Honesty -->
       <section class={`${wrap} mt-14`}>
-        <h2 class={sectionLabel}>What this mode guarantees, and what it does not</h2>
+        <h2 class={sectionLabel}>What this mode enforces, and what it does not</h2>
         <div class={`${card} mt-5 px-5 py-[18px]`}>
           <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
             <li>

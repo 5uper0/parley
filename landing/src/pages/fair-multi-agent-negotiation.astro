@@ -381,11 +381,11 @@ Cara not betrayed: True`}</code></pre>
           <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
             <li>
               <strong class="text-ink">The hash is unsigned by default.</strong> A SHA-256
-              digest proves the record was not edited after the digest was taken; it
-              proves nothing about who produced the record. Ed25519-signed verdicts are an
+              digest shows the record was not edited after the digest was taken; it
+              says nothing about who produced the record. Ed25519-signed verdicts are an
               optional extra (<code class={code}>pip install "parley-consensus[crypto]"</code>),
               and even then a signature binds a key to an exact option-and-verdict pair
-              without proving the key belongs to the owner. SECURITY.md calls this
+              without showing the key belongs to the owner. SECURITY.md calls this
               tamper-evidence, not authenticity.
             </li>
             <li>
@@ -396,7 +396,7 @@ Cara not betrayed: True`}</code></pre>
             <li>
               <strong class="text-ink">Privacy needs one process per owner.</strong> In the
               in-process and MCP modes, whoever calls <code class={code}>run_consensus</code>
-              holds every sheet. The masked-verdict guarantee applies when each agent runs
+              holds every sheet. The masked-verdict property holds when each agent runs
               as its own bot over HTTP.
             </li>
             <li>

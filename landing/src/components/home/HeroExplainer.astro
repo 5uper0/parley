@@ -2,8 +2,8 @@
 // The hero stage: the dinner sample drawn in three beats (tell, yes or no, check).
 // Options, costs, every yes or no and the result line are read from receipt-dinner.ts, which
 // scripts/gen-receipt.py writes from a real run; the build fails if the copy and the run disagree.
-// The rule line's tie clause, the screen-reader summary's names and the sample label's version are
-// printed only from the run's facts, never typed.
+// The rule line's tie clause and the screen-reader summary's names are printed only from the run's
+// facts, never typed. The sample label is the fixed string of DESIGN.md 3D exception condition 8.
 // The styled state is the final frame, so no JS, reduced motion and print all show the whole story.
 // Sizes are steps from docs/brand/tokens.css (type, space, radius); colours are the global tokens.
 import { explainer as x } from "../../data/home-hero";
@@ -40,9 +40,6 @@ const pick = receiptDinner.pick;
 const other = options.find((o) => o.venue === pick.runnerUp);
 if (!pick.leastHappyTie || !pick.pickedTotalHigher || pick.picked !== picked[0].venue || !other || other.picked || other.blockers.length) {
   throw new Error("the rule line says the picked option ties the other one for the least-happy owner and has the higher total; the run no longer says that");
-}
-if (!/^\d+\.\d+\.\d+$/.test(receiptDinner.version)) {
-  throw new Error(`sample label needs the parley version as N.N.N; receipt-dinner.ts has "${receiptDinner.version}"`);
 }
 const list = (names: string[]) => `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 const aria = x.stageAria(list(owners), x.plain, picked[0].name);
@@ -140,7 +137,7 @@ const tag = (o: (typeof options)[number]) =>
 
   <button type="button" class="replay" data-replay hidden>{x.replay}</button>
 </div>
-<p class="sample" data-sample-label>{x.sampleLabel(receiptDinner.version)}</p>
+<p class="sample" data-sample-label>{x.sampleLabel}</p>
 
 <script is:inline>
   (function () {

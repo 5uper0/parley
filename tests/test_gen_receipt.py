@@ -1,7 +1,7 @@
 """The homepage receipt is engine output, not typed text.
 
 `scripts/gen-receipt.py` runs the dinner program and writes the lines and the transcript sha256
-the page shows, plus the parley version the hero labels the run with. These tests hold that the
+the page shows, plus the parley version the hero status line states. These tests hold that the
 committed file is what the engine gives today, and that the check fails when the file, the hash,
 the page binding or a hand-typed version or run fact in the hero copy drifts.
 """
@@ -155,7 +155,7 @@ def _tamper(path, old, new):
 
 
 def test_hero_copy_as_committed_has_no_typed_version_or_run_fact():
-    # F8: the screen-reader summary and both version strings come from the run.
+    # F8: the screen-reader summary and the version strings come from the run.
     assert gr.copy_problem(_words()) == ""
     assert _words() == ["Ana", "Bob", "Cara", "rooftop", "garden", "diner", "900", "600", "300"]
 
@@ -211,7 +211,7 @@ def test_hero_copy_wording_is_the_approved_text():
         'rule: "Rule: the option best for the least-happy owner wins.",',
         "`${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`",
         'reveal: "The group sees yes or no and a score, never the limit itself. Many yeses and noes can still narrow it down.",',
-        "`Illustration of a real run of the dinner example, parley ${version}.`",
+        'sampleLabel: "Illustration of a recorded sample run.",',
         "envelope: (owner: string) => `${owner}'s sheet`,",
         "\"Each person's agent holds a private sheet of wishes and limits, sealed.\"",
         '"Each owner checks the pick against their own sheet, on their own computer. Compare the sha256 to confirm it is the same receipt."',

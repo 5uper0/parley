@@ -1,7 +1,7 @@
 """Generate landing/src/data/tape.ts from a real parley run.
 
 The Receipt Tape on the landing page must not show invented digests: the site's
-whole pitch is "provable, not hoped". So the tape is produced by running the real
+whole pitch is "checkable, not hoped". So the tape is produced by running the real
 engine (`run_consensus`) over a fixed five-owner scenario and reading every
 number off the real `Transcript`. Each `sha256` line is `Transcript.hash()`
 taken right after that round's `record()`; the closing one is the hash after
@@ -154,12 +154,12 @@ def tape_lines(rounds, result, final_digest, final_held, n_owners):
         if r["feasible"]:
             lines.append((f"max-min so far, option {r['leader']}", "indigo"))
             lines.append((f"sha256 {short(r['digest'])}", "dim"))
-            lines.append((f"✓ red lines hold on {r['held']}/{n_owners} sheets", "verify"))
+            lines.append((f"✓ red lines hold on {r['held']}/{n_owners} sheets", "indigo"))
         else:
             lines.append((f"option {r['option']['id']} infeasible", "dim"))
     lines.append((f"max-min, option {result.decision['id']} · {result.status}", "indigo"))
     lines.append((f"sha256 {short(final_digest)}", "dim"))
-    lines.append((f"✓ {final_held}/{n_owners} sheets replayed, no red line crossed", "verify"))
+    lines.append((f"✓ {final_held}/{n_owners} sheets replayed, no red line crossed", "indigo"))
     # The tape loops; it wraps into the replay's first round mid-flight. Only
     # verdicts the run actually produced are shown — the rest are "awaiting".
     first = rounds[0]
@@ -194,7 +194,7 @@ def tape_snippet(rounds, n_owners):
         (f"{ok_in_passed} verdict: ok", "muted"),
         (f"max-min so far, option {pr['leader']}", "indigo"),
         (f"sha256 {short(pr['digest'])}", "dim"),
-        (f"✓ red lines hold on {pr['held']}/{n_owners} sheets", "verify"),
+        (f"✓ red lines hold on {pr['held']}/{n_owners} sheets", "indigo"),
         (f"round {fi} · option {following['option']['id']} proposed", "dim"),
         (f"awaiting {', '.join(o for o, _ in following['verdicts'][1:3])}…", "masked"),
     ]
@@ -247,7 +247,7 @@ def render(rounds, result, final_digest, final_held, agents) -> str:
  * (parley/agent.py) — "masked" describes the PROPERTY that a reason never
  * names the constraint, it is never itself a verdict value. Don't add a
  * third literal verdict here; that would misrepresent the real product on
- * the one page whose whole pitch is "provable, not hoped". */
+ * the one page whose whole pitch is "checkable, not hoped". */
 
 export type TapeColor = "dim" | "muted" | "redline" | "indigo" | "verify" | "masked";
 

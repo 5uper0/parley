@@ -1,6 +1,6 @@
 // Homepage hero, explainer stage and receipt copy. Each line is owner-approved through copy
 // change requests; new text needs one too. Costs, each yes or no, the names in the tie clause and
-// in the screen-reader summary, and the parley version are not typed here: they come from
+// in the screen-reader summary, and the parley version in the status line are not typed here: they come from
 // receipt-dinner.ts, which scripts/gen-receipt.py writes from a real run.
 
 export const hero = {
@@ -40,7 +40,7 @@ export const explainer = {
     header: "Receipt: every yes and no",
     line: "Each owner checks the pick against their own sheet, on their own computer. Compare the sha256 to confirm it is the same receipt.",
   },
-  sampleLabel: (version: string) => `Illustration of a real run of the dinner example, parley ${version}.`,
+  sampleLabel: "Illustration of a recorded sample run.",
   stageAria: (owners: string, plain: string, picked: string) =>
     `Sample run: ${owners}'s agents pick a dinner. Each sheet stays sealed. ${plain} ${picked} is picked. Each owner checks the pick against their own sheet.`,
   replay: "Play again",

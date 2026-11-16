@@ -8,7 +8,7 @@ The hero draws the option cards and a yes/no grid, so the options and each trans
 are written too. A verdict is owner, option and `acceptable` only: scores and reasons stay out
 of the file. The hero also says why garden beats diner (they suit the least-happy owner equally,
 garden has the higher total); `pick_facts` reads that off the transcript and refuses to write the
-file when it stops being true. The hero labels the run with the parley version, read from
+file when it stops being true. The hero status line states the parley version, read from
 pyproject.toml and never typed; `copy_problem` fails the check when a version or the screen-reader
 summary's run facts are typed into the hero copy by hand. The receipt is the same for any Bob limit
 from 600 to 899; both ends are run and a difference is an error.
@@ -38,7 +38,6 @@ HERO_COPY = REPO_ROOT / "landing" / "src" / "data" / "home-hero.ts"
 VERSION_READERS = (
     REPO_ROOT / "landing" / "src" / "components" / "home" / "Hero.astro",
     REPO_ROOT / "landing" / "src" / "components" / "home" / "Status.astro",
-    REPO_ROOT / "landing" / "src" / "components" / "home" / "HeroExplainer.astro",
 )
 TYPED_VERSION = re.compile(r"(?<![\d.])\d+\.\d+\.\d+(?!\.?\d)")
 REGEN = ".venv/bin/python scripts/gen-receipt.py"
@@ -127,7 +126,7 @@ def package_version(pyproject_path: Path = PYPROJECT) -> str:
     if not match:
         raise SystemExit(f"no [project] version in {pyproject_path}")
     if not re.fullmatch(r"\d+\.\d+\.\d+", match.group(1)):
-        raise SystemExit(f"version {match.group(1)!r} in {pyproject_path} is not N.N.N; the hero sample label would be wrong")
+        raise SystemExit(f"version {match.group(1)!r} in {pyproject_path} is not N.N.N; the hero status line would be wrong")
     return match.group(1)
 
 

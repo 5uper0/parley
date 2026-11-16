@@ -451,7 +451,7 @@ Receipt written to receipt-deadlock.json`}</code></pre>
           rebuilds the hash, recomputes the winner from the recorded verdicts and checks that
           every acceptance is bound to exactly this hash and this decision. Its output on the
           first run. The script ends every run with a list of what it checked and what it
-          does not prove; that list is cut here to two of its lines:
+          does not show; that list is cut here to two of its lines:
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the pick-a-date receipt, scrollable code"><code>{`$ python scripts/verify-receipt.py receipt.json
 Parley receipt check: Which weekend do we actually go?
@@ -484,7 +484,7 @@ What this does NOT prove
           really is the max-min pick over the recorded verdicts and that all three acceptances
           are bound to this exact record, but not that Ana, Bob and Cara gave them: every field
           of an unsigned acceptance is public, so that tier authenticates nobody. What each
-          check proves and what it does not is the subject of the{" "}
+          check shows and what it does not is the subject of the{" "}
           <a href="/verify-ai-agent-decision/" class={link}>verification guide</a>.
         </p>
       </section>
@@ -537,7 +537,7 @@ What this does NOT prove
               edit visible to anyone who kept the hash from the ratification screen; it does not
               say who accepted. The roster is written by the same process that writes the
               record. <code class={code}>--sign</code> adds Ed25519 signatures with keys made by
-              that same process, which proves the file was not altered afterwards, not who
+              that same process, which shows the file was not altered afterwards, not who
               signed.
             </li>
             <li>
