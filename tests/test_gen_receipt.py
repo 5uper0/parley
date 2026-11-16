@@ -1,0 +1,99 @@
+"""The homepage receipt is engine output, not typed text.
+
+`scripts/gen-receipt.py` runs the dinner program the page prints and writes the lines and the
+transcript sha256 the page shows. These tests hold that the committed file is what the engine
+gives today, and that the check fails when the file, the hash or the page binding drifts.
+"""
+import importlib.util
+import os
+import subprocess
+import sys
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+SCRIPT = os.path.join(ROOT, "scripts", "gen-receipt.py")
+
+
+def _load():
+    spec = importlib.util.spec_from_file_location("gen_receipt", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+gr = _load()
+
+
+def test_sample_agrees_on_garden_and_every_owner_replays_clean():
+    lines, digest = gr.generate()
+    assert lines == [
+        "agreed {'venue': 'garden', 'cost': 600}",
+        "Ana not betrayed: True",
+        "Bob not betrayed: True",
+        "Cara not betrayed: True",
+    ]
+    assert len(digest) == 64 and int(digest, 16) >= 0
+
+
+def test_hash_is_the_transcript_hash_and_does_not_depend_on_bobs_number():
+    code = gr.sample_code()
+    low, high = (gr.run_sample(code, limit) for limit in gr.LIMITS)
+    assert low == high
+    assert "600" not in low[1] and "899" not in high[1]
+
+
+def test_a_limit_outside_the_stated_range_changes_the_receipt():
+    code = gr.sample_code()
+    assert gr.run_sample(code, 900) != gr.run_sample(code, 899)
+
+
+def test_committed_file_matches_the_generator():
+    lines, digest = gr.generate()
+    assert gr.OUT.read_text(encoding="utf-8") == gr.render(lines, digest)
+
+
+def test_check_passes_on_the_committed_tree():
+    env = dict(os.environ, PYTHONPATH=ROOT)
+    proc = subprocess.run([sys.executable, SCRIPT, "--check"], capture_output=True, text=True, env=env)
+    assert proc.returncode == 0, proc.stderr
+    assert "transcript sha256: " in proc.stdout
+
+
+def test_check_fails_on_a_drifted_hash(tmp_path, monkeypatch):
+    lines, digest = gr.generate()
+    stale = tmp_path / "receipt-dinner.ts"
+    stale.write_text(gr.render(lines, "0" * 64), encoding="utf-8")
+    monkeypatch.setattr(gr, "OUT", stale)
+    monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
+    assert gr.main() == 1
+
+
+def test_check_fails_when_the_file_is_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(gr, "OUT", tmp_path / "absent.ts")
+    monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
+    assert gr.main() == 1
+
+
+def test_page_must_render_the_generated_hash(tmp_path):
+    assert gr.page_problem() == ""
+    assert "missing" in gr.page_problem(tmp_path / "Receipt.astro")
+    unbound = tmp_path / "unbound.astro"
+    unbound.write_text("<p>sha256 abc</p>", encoding="utf-8")
+    assert "does not render" in gr.page_problem(unbound)
+    typed = tmp_path / "typed.astro"
+    typed.write_text(
+        'import { receiptDinner } from "../../data/receipt-dinner";\n'
+        "{receiptDinner.sha256} " + "a" * 64,
+        encoding="utf-8",
+    )
+    assert "hardcodes" in gr.page_problem(typed)
+
+
+def test_a_sample_that_no_longer_runs_as_printed_is_refused(tmp_path):
+    copy = tmp_path / "film-copy.ts"
+    copy.write_text("export const codeSample = {\n  code: `print(${x})`,\n};\n", encoding="utf-8")
+    try:
+        gr.sample_code(copy)
+    except SystemExit as exc:
+        assert "runs as printed" in str(exc)
+    else:
+        raise AssertionError("an interpolated template literal was accepted")
