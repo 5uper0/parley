@@ -1,0 +1,251 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const DEMO_URL = "/demo/";
+const REPO_URL = "https://github.com/5uper0/parley";
+const SECURITY_URL = "https://github.com/5uper0/parley/blob/main/SECURITY.md";
+
+const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
+
+const sectionLabel =
+  "font-mono text-[11.5px] font-semibold tracking-[0.08em] text-subtle uppercase";
+
+const card = "rounded-[14px] border border-hairline bg-surface";
+
+const deviceBlock =
+  "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
+
+const link =
+  "text-indigo-text underline decoration-hairline underline-offset-2 transition-colors hover:decoration-current";
+
+const code =
+  "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
+
+const btnPrimary =
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+
+const btnGhost =
+  "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
+
+const steps = [
+  {
+    n: "01",
+    head: "Every agent answers every option.",
+    body: "Each agent returns a masked verdict per option: acceptable or not, a soft score, and the word ok or red-line. An option any agent rejects is out of the pool.",
+  },
+  {
+    n: "02",
+    head: "An empty pool is a result, not an error.",
+    body: "If no option survives, run_consensus finalizes the transcript with status deadlock and decision None. It does not relax a red line, retry with a lower bar, or pick the least bad option.",
+  },
+  {
+    n: "03",
+    head: "The deadlock is checkable.",
+    body: "verify_outcome accepts a record as honest only if no entry has an all-acceptable verdict set and the result is status deadlock with no decision. An announced decision on such a record fails the check.",
+  },
+];
+
+const faqs = [
+  {
+    q: "What is an honest deadlock in multi-agent consensus?",
+    a: "A result of no decision, reported as such, when every option crosses at least one agent's red line. Honest means the system says so instead of forcing a pick that breaks someone's limit.",
+  },
+  {
+    q: "Why not let the coordinator pick the least bad option?",
+    a: "Because that option violates a red line of some owner, and Parley's guarantee is that a violating option can never win. A forced pick would turn the red line into a soft preference.",
+  },
+  {
+    q: "What can the owners do after a deadlock?",
+    a: "Change the option set or change a limit and run again. The record does not say which red line failed, only that every option was rejected by someone, so the owners talk to each other, not to the record.",
+  },
+  {
+    q: "Can an owner confirm the deadlock did not wrong them?",
+    a: "Yes. verify_non_betrayal(sheet, None) returns true, because a deadlock forces nothing on anyone. The stronger check is verify_outcome with the expected roster: it confirms that no recorded option was acceptable to all, so the deadlock was the correct output.",
+  },
+  {
+    q: "Can a coordinator fake a deadlock?",
+    a: "It can try to drop an owner's acceptance from the record. verify_outcome compares each entry against the roster you pass in, so a record missing an expected owner fails. The roster must come from you, not from the coordinator that wrote the record.",
+  },
+];
+
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://parleyprotocol.com/honest-deadlock-multi-agent-consensus/#article",
+      headline: "What is an honest deadlock in multi-agent consensus?",
+      description:
+        "A deadlock is the result when no option is acceptable to every agent. Parley records it, forces nothing on any owner, and each owner can still replay the record to check nothing was crossed.",
+      url: "https://parleyprotocol.com/honest-deadlock-multi-agent-consensus/",
+      inLanguage: "en",
+      author: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      publisher: { "@type": "Organization", name: "Parley", url: "https://parleyprotocol.com/" },
+      about: {
+        "@type": "SoftwareApplication",
+        name: "Parley",
+        url: "https://parleyprotocol.com/",
+        codeRepository: REPO_URL,
+      },
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://parleyprotocol.com/honest-deadlock-multi-agent-consensus/#faq",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    },
+  ],
+});
+---
+
+<Layout
+  title="What is an honest deadlock in multi-agent consensus? | Parley"
+  description="A deadlock is the result when no option is acceptable to every agent. Parley records it, forces nothing on any owner, and each owner can still replay the record to check nothing was crossed."
+  path="/honest-deadlock-multi-agent-consensus/"
+>
+  <script type="application/ld+json" is:inline set:html={jsonLd} />
+
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
+  <div class="flex min-h-screen flex-col">
+    <div class={wrap}>
+      <Header />
+    </div>
+
+    <main id="main" class="flex-1 pb-20">
+      <section class={wrap}>
+        <h1 class="font-display text-[clamp(2.1rem,5.5vw,3.3rem)] leading-[1.06] tracking-[-0.028em] text-ink">
+          What is an honest deadlock in multi-agent consensus?
+        </h1>
+        <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
+          It is the answer "no decision" when every option crosses some agent's red line. In Parley the coordinator
+          keeps only options all agents accept; if none is left it records a deadlock and forces nothing on anyone.
+          It does not relax a limit or choose the least bad option, because a violating option can never win.
+          The record can be checked: a deadlock is correct only if no recorded option was acceptable to everyone.
+        </p>
+        <p class="mt-4 text-[13px] text-subtle">
+          The behaviour is in <code class={code}>parley/consensus.py</code> in the{" "}
+          <a href={REPO_URL} target="_blank" rel="noopener" class={link}>source repository</a>. Related:{" "}
+          <a href="/max-min-fair-decision-between-ai-agents/" class={link}>max-min fair decisions</a>,{" "}
+          <a href="/verify-ai-agent-decision/" class={link}>verifying a decision receipt</a>,{" "}
+          <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>.
+        </p>
+        <div class="mt-10 h-px w-full bg-redline/60" aria-hidden="true"></div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>How a deadlock happens</h2>
+        <ol class="mt-6 flex flex-col gap-3">
+          {
+            steps.map((f) => (
+              <li class={`${card} flex gap-4 px-5 py-[18px]`}>
+                <span class="flex-none font-mono text-[12px] text-indigo-text">{f.n}</span>
+                <div>
+                  <p class="text-[15px]/[24px] font-semibold text-ink">{f.head}</p>
+                  <p class="mt-1.5 text-[14.5px]/[23px] text-muted">{f.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Two agents, three options, no overlap</h2>
+        <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
+          Ana's red line is price at most 700. Bob's is price at least 800. Offer 500, 750 and 900. Each option
+          fails for at least one of them, so nothing is feasible for both. This is output of the engine run on
+          these sheets, not a hand calculation.
+        </p>
+        <div class={`${card} mt-5 overflow-x-auto px-5 py-4`}>
+          <table class="w-full min-w-[420px] text-left font-mono text-[12.5px] leading-[1.9] text-muted">
+            <thead>
+              <tr class="text-subtle">
+                <th class="pr-4 font-semibold">option</th>
+                <th class="pr-4 font-semibold">Ana</th>
+                <th class="font-semibold">Bob</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="pr-4">500</td><td class="pr-4">ok, 0.5</td><td>red-line, 0</td></tr>
+              <tr><td class="pr-4">750</td><td class="pr-4">red-line, 0</td><td>red-line, 0</td></tr>
+              <tr><td class="pr-4">900</td><td class="pr-4">red-line, 0</td><td>ok, 0.9</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`result = run_consensus([ana, bob], options)
+result.status      # "deadlock"
+result.decision    # None
+verify_outcome(result.transcript, expected_owners=["ana", "bob"])   # True
+result.transcript.verify_non_betrayal(ana_sheet, result.decision)   # True, nothing forced`}</code></pre>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>What a deadlock does not tell you</h2>
+        <div class={`${card} mt-5 px-5 py-[18px]`}>
+          <ul class="flex flex-col gap-3 text-[14.5px]/[23px] text-muted">
+            <li>
+              <strong class="text-ink">Which limit failed.</strong> Verdicts carry the word red-line, never the
+              rule. The owners find out by talking, or by changing the options and running again.
+            </li>
+            <li>
+              <strong class="text-ink">That a good option exists.</strong> Parley ranks the options it is given. If
+              nobody proposed one that fits everyone, the honest result is still a deadlock.
+            </li>
+            <li>
+              <strong class="text-ink">Who wrote the record.</strong> The hash shows the record was not edited. The
+              roster check is only as good as the roster you supply;{" "}
+              <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a> lists the known
+              limits.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <h2 class={sectionLabel}>Questions this page gets asked</h2>
+        <div class="mt-5 flex flex-col gap-2.5">
+          {
+            faqs.map((f) => (
+              <details class={`${card} px-5 py-4`}>
+                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                  {f.q}
+                </summary>
+                <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
+              </details>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class={`${wrap} mt-14`}>
+        <div class="h-px w-full bg-redline/60" aria-hidden="true"></div>
+        <h2 class="mt-8 font-display text-[26px] tracking-[-0.02em] text-ink">
+          Watch a sample decision resolve, then read the code.
+        </h2>
+        <p class="mt-3 max-w-[52ch] text-[15px]/[25px] text-muted">
+          The demo replays scripted runs of the same engine, no signup. The repository is Apache-2.0 and the core has no dependencies.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-6">
+          <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
+          <a href={REPO_URL} target="_blank" rel="noopener" class={btnGhost}>Read the source</a>
+        </div>
+        <p class="mt-8 text-[13.5px] text-subtle">
+          <a href="/" class={link}>Back to the overview</a>
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
