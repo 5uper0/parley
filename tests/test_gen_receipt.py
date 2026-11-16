@@ -136,8 +136,8 @@ def test_hero_copy_takes_names_and_version_from_the_run_not_from_typing():
     assert 'rule: "Rule: the option best for the least-happy owner wins.",' in hero
     assert "`${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`" in hero
     assert (
-        "`The group learns only yes or no for each option. ${owner}'s no on ${option} shows it is over his limit, "
-        "not what his limit is.`"
+        "`The group sees yes or no and a score, never a limit. ${owner}'s no on ${option} shows it is over "
+        "the limit, not by how much.`"
     ) in hero
     assert "`Illustration of a real run of the dinner example, parley ${version}.`" in hero
     explainer = hero[hero.index("export const explainer") : hero.index("export const receipt")]

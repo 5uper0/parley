@@ -36,7 +36,7 @@ export const explainer = {
   tie: (picked: string, other: string) =>
     `${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`,
   reveal: (owner: string, option: string) =>
-    `The group learns only yes or no for each option. ${owner}'s no on ${option} shows it is over his limit, not what his limit is.`,
+    `The group sees yes or no and a score, never a limit. ${owner}'s no on ${option} shows it is over the limit, not by how much.`,
   engine: "The pick is plain code, not a language model.",
   receipt: {
     header: "Receipt: every yes and no",
