@@ -199,7 +199,7 @@ export const tapeLines: TapeLine[] = [
   { text: "max-min so far, option P", color: "indigo" },
   { text: "sha256 02f11e58…3556432e", color: "dim" },
   { text: "✓ red lines hold for 5/5 owners", color: "verify" },
-  { text: "max-min → option P · agreed", color: "indigo" },
+  { text: "max-min, option P · agreed", color: "indigo" },
   { text: "sha256 4622d0a7…154a0d25", color: "dim" },
   { text: "✓ verified by 5/5 owners", color: "verify" },
   { text: "round 1 · option A proposed", color: "dim" },

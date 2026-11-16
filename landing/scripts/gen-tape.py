@@ -150,14 +150,14 @@ def tape_lines(rounds, result, final_digest, final_held, n_owners):
     for i, r in enumerate(rounds, start=1):
         lines.append((f"round {i} · option {r['option']['id']} proposed", "dim"))
         for owner, reason in r["verdicts"]:
-            lines.append((f"{owner} → verdict: {reason}", "muted" if reason == "ok" else "redline"))
+            lines.append((f"{owner} verdict: {reason}", "muted" if reason == "ok" else "redline"))
         if r["feasible"]:
-            lines.append((f"max-min so far → option {r['leader']}", "indigo"))
+            lines.append((f"max-min so far, option {r['leader']}", "indigo"))
             lines.append((f"sha256 {short(r['digest'])}", "dim"))
             lines.append((f"✓ red lines hold for {r['held']}/{n_owners} owners", "verify"))
         else:
             lines.append((f"option {r['option']['id']} infeasible", "dim"))
-    lines.append((f"max-min → option {result.decision['id']} · {result.status}", "indigo"))
+    lines.append((f"max-min, option {result.decision['id']} · {result.status}", "indigo"))
     lines.append((f"sha256 {short(final_digest)}", "dim"))
     lines.append((f"✓ verified by {final_held}/{n_owners} owners", "verify"))
     # The tape loops; it wraps into the replay's first round mid-flight. Only
@@ -165,7 +165,7 @@ def tape_lines(rounds, result, final_digest, final_held, n_owners):
     first = rounds[0]
     lines.append((f"round 1 · option {first['option']['id']} proposed", "dim"))
     for owner, reason in first["verdicts"][:2]:
-        lines.append((f"{owner} → verdict: {reason}", "muted" if reason == "ok" else "redline"))
+        lines.append((f"{owner} verdict: {reason}", "muted" if reason == "ok" else "redline"))
     pending = ", ".join(o for o, _ in first["verdicts"][2:])
     lines.append((f"awaiting {pending}…", "masked"))
     return lines
@@ -183,7 +183,7 @@ def tape_snippet(rounds, n_owners):
     following = rounds[pi]  # the round after `passed`, shown still in flight
     fi = pi + 1
     blocked_lines = [
-        (f"{br['verdicts'][i][0]} → verdict: {br['verdicts'][i][1]}", "muted" if br["verdicts"][i][1] == "ok" else "redline")
+        (f"{br['verdicts'][i][0]} verdict: {br['verdicts'][i][1]}", "muted" if br["verdicts"][i][1] == "ok" else "redline")
         for i in sorted((first_ok, first_red))
     ]
     return [
@@ -191,8 +191,8 @@ def tape_snippet(rounds, n_owners):
         *blocked_lines,
         (f"option {br['option']['id']} infeasible", "dim"),
         (f"round {pi} · option {pr['option']['id']} proposed", "dim"),
-        (f"{ok_in_passed} → verdict: ok", "muted"),
-        (f"max-min so far → option {pr['leader']}", "indigo"),
+        (f"{ok_in_passed} verdict: ok", "muted"),
+        (f"max-min so far, option {pr['leader']}", "indigo"),
         (f"sha256 {short(pr['digest'])}", "dim"),
         (f"✓ red lines hold for {pr['held']}/{n_owners} owners", "verify"),
         (f"round {fi} · option {following['option']['id']} proposed", "dim"),
