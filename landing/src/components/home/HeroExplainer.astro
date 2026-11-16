@@ -2,7 +2,8 @@
 // The hero stage: the dinner sample drawn in three beats (tell, yes or no, check).
 // Options, costs, every yes or no and the result line are read from receipt-dinner.ts, which
 // scripts/gen-receipt.py writes from a real run; the build fails if the copy and the run disagree.
-// The rule line's tie clause is printed only from the run's pick facts, never typed.
+// The rule line's tie clause, the reveal line's names and the sample label's version are printed
+// only from the run's facts, never typed.
 // The styled state is the final frame, so no JS, reduced motion and print all show the whole story.
 // Sizes are steps from docs/brand/tokens.css (type, space, radius); colours are the global tokens.
 import { explainer as x } from "../../data/home-hero";
@@ -39,6 +40,9 @@ const pick = receiptDinner.pick;
 const other = options.find((o) => o.venue === pick.runnerUp);
 if (!pick.leastHappyTie || !pick.pickedTotalHigher || pick.picked !== picked[0].venue || !other || other.picked || other.blockers.length) {
   throw new Error("the rule line says the picked option ties the other one for the least-happy owner and has the higher total; the run no longer says that");
+}
+if (!/^\d+\.\d+\.\d+$/.test(receiptDinner.version)) {
+  throw new Error(`sample label needs the parley version as N.N.N; receipt-dinner.ts has "${receiptDinner.version}"`);
 }
 const chipFrom = owners.indexOf(stop.blockers[0]) - options.indexOf(stop);
 const tag = (o: (typeof options)[number]) =>
@@ -99,6 +103,7 @@ const tag = (o: (typeof options)[number]) =>
     </ul>
     <p class="plain">{x.plain}</p>
     <p class="rule" data-rule>{x.rule} <span data-tie>{x.tie(picked[0].name, other.name)}</span></p>
+    <p class="reveal" data-reveal>{x.reveal(stop.blockers[0], stop.name)}</p>
     <p class="engine">{x.engine}</p>
   </div>
 
@@ -133,7 +138,7 @@ const tag = (o: (typeof options)[number]) =>
 
   <button type="button" class="replay" data-replay hidden>{x.replay}</button>
 </div>
-<p class="sample" data-sample-label>{x.sampleLabel}</p>
+<p class="sample" data-sample-label>{x.sampleLabel(receiptDinner.version)}</p>
 
 <script is:inline>
   (function () {
@@ -162,7 +167,7 @@ const tag = (o: (typeof options)[number]) =>
     container-type: inline-size;
     display: grid;
     gap: 0.25rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem;
     border: 1px solid var(--hairline);
     border-radius: 0.75rem;
     background: var(--surface);
@@ -336,6 +341,7 @@ const tag = (o: (typeof options)[number]) =>
   }
   .plain {
     color: var(--ink);
+    font-size: 0.75rem;
   }
   .rule {
     color: var(--ink);
@@ -345,7 +351,14 @@ const tag = (o: (typeof options)[number]) =>
   .rule span {
     color: var(--muted);
   }
+  .reveal {
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.15;
+  }
+  /* Phones: dropped, the reveal line has priority for the first screen. */
   .engine {
+    display: none;
     padding-left: 0.5rem;
     border-left: 1px solid var(--indigo);
     line-height: 1.15;
@@ -365,6 +378,7 @@ const tag = (o: (typeof options)[number]) =>
   }
   table {
     border-collapse: collapse;
+    font-size: 0.75rem;
     line-height: 1.15;
   }
   th,
@@ -469,10 +483,12 @@ const tag = (o: (typeof options)[number]) =>
       line-height: 1.55;
     }
     .rule,
+    .reveal,
     .engine {
       line-height: 1.35;
     }
     .engine {
+      display: block;
       padding-left: 0.75rem;
     }
     .receipt {
@@ -480,6 +496,7 @@ const tag = (o: (typeof options)[number]) =>
       padding: 1rem;
     }
     table {
+      font-size: 0.875rem;
       line-height: 1.35;
     }
     th,
@@ -563,6 +580,7 @@ const tag = (o: (typeof options)[number]) =>
   [data-picked] .card::after,
   li:not([data-blocked]) > .tag,
   .rule,
+  .reveal,
   .engine {
     animation: fade 400ms linear 3200ms both;
   }
@@ -572,7 +590,7 @@ const tag = (o: (typeof options)[number]) =>
   .row {
     animation: fade 240ms linear calc(4400ms + var(--i) * 60ms) both;
   }
-  .rewind :is(.envelope, .seal, .options > li, .stamp, .opt-name, .opt-cost, .tag, .plain, .rule, .engine, .receipt, .row),
+  .rewind :is(.envelope, .seal, .options > li, .stamp, .opt-name, .opt-cost, .tag, .plain, .rule, .reveal, .engine, .receipt, .row),
   .rewind .card::after {
     animation: none;
   }

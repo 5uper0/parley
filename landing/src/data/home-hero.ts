@@ -1,7 +1,8 @@
 // Homepage hero, explainer stage and receipt copy. Source: docs/_drafts/hero-2d-spec-2026-11-16.md
 // (sections 2 and 3, Concept A) and landing-v3-copy-2026-11-16.md (section 2), verbatim.
-// New text is a copy change request. Numbers and each yes or no are not here: they come from
-// receipt-dinner.ts, which scripts/gen-receipt.py writes from a real run.
+// New text is a copy change request. Numbers, names in the rule and reveal lines, each yes or no
+// and the parley version are not here: they come from receipt-dinner.ts, which
+// scripts/gen-receipt.py writes from a real run.
 
 export const hero = {
   headline: "Pick together without saying your limit out loud.",
@@ -31,15 +32,17 @@ export const explainer = {
   yes: "yes",
   no: "no",
   plain: "Rooftop costs 900. Bob's agent says no, so it cannot win.",
-  rule: "Rule: the option best for the least-happy owner wins; a tie goes to the higher total.",
+  rule: "Rule: the option best for the least-happy owner wins.",
   tie: (picked: string, other: string) =>
-    `${picked} and ${other} tie for the least-happy owner. ${picked} has the higher total.`,
+    `${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`,
+  reveal: (owner: string, option: string) =>
+    `The group learns only yes or no for each option. ${owner}'s no on ${option} shows it is over his limit, not what his limit is.`,
   engine: "The pick is plain code, not a language model.",
   receipt: {
     header: "Receipt: every yes and no",
     line: "Same receipt for all three. Each replays it against their own limit, on their own computer.",
   },
-  sampleLabel: "Illustration of a recorded sample run.",
+  sampleLabel: (version: string) => `Illustration of a real run of the dinner example, parley ${version}.`,
   stageAria:
     "Sample run: Ana, Bob and Cara's agents pick a dinner. Each limit stays sealed. Rooftop costs 900. Bob's agent says no, so it cannot win. Garden is picked. All three get the same receipt.",
   replay: "Play again",

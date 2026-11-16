@@ -130,6 +130,21 @@ def test_a_version_that_is_not_three_numbers_is_refused(tmp_path):
             assert not reason
 
 
+def test_hero_copy_takes_names_and_version_from_the_run_not_from_typing():
+    with open(os.path.join(ROOT, "landing", "src", "data", "home-hero.ts"), encoding="utf-8") as f:
+        hero = f.read()
+    assert 'rule: "Rule: the option best for the least-happy owner wins.",' in hero
+    assert "`${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`" in hero
+    assert (
+        "`The group learns only yes or no for each option. ${owner}'s no on ${option} shows it is over his limit, "
+        "not what his limit is.`"
+    ) in hero
+    assert "`Illustration of a real run of the dinner example, parley ${version}.`" in hero
+    explainer = hero[hero.index("export const explainer") : hero.index("export const receipt")]
+    rule_to_label = explainer[explainer.index("  rule:") : explainer.index("  stageAria:")]
+    assert not any(word in rule_to_label for word in ("Garden", "Diner", gr.package_version()))
+
+
 def test_committed_file_matches_the_generator():
     assert gr.OUT.read_text(encoding="utf-8") == gr.render(*gr.generate())
 
