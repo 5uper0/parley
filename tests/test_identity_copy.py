@@ -34,14 +34,12 @@ INSTALL = "pip install parley-consensus"
 SAMPLE_LABEL = "Illustration of a recorded sample run."
 
 BANNED = re.compile(
-    r"\b(secure|securely|trustless|proves?|proving|proven|guarantees?|trust layer|agent economy|"
+    r"\b(secure|securely|trustless|prov(?:e|es|ed|en|ing|able|ably)|guarantees?|trust layer|agent economy|"
     r"kyc|aml|sanctions?|real decision)\b",
     re.IGNORECASE,
 )
 ASSISTANT = re.compile(r"\bassistants?\b", re.IGNORECASE)
 TEXT_SUFFIXES = {".astro", ".ts", ".tsx", ".js", ".mjs", ".md", ".json", ".html"}
-# The home page is rewritten by its own change; until it lands, its checks are expected to fail.
-# Remove this marker with that change.
 
 
 def _rel(path: Path) -> str:
@@ -144,4 +142,14 @@ def test_ac7_readme_carries_the_one_liner_once_byte_for_byte():
 
 
 def test_ac7_home_h1_source_carries_the_same_bytes():
-    assert HOME.read_bytes().count(S.encode("utf-8")) >= 1
+    home = HOME.read_text(encoding="utf-8")
+    assert f'const HEADLINE = "{S}";' in home
+    assert "headline={HEADLINE}" in home
+
+
+def test_ac2_home_scope_caption_is_the_spec_caption_with_the_generated_version():
+    home = HOME.read_text(encoding="utf-8")
+    start = home.index("const SCOPE =") + len("const SCOPE =")
+    end = home.index(";\n", start)
+    literal = home[start:end].strip().strip("`")
+    assert literal.replace("${receiptDinner.version}", _version()) == CAPTION.format(version=_version())

@@ -1,7 +1,7 @@
 """Generate landing/src/data/tape.ts from a real parley run.
 
 The Receipt Tape on the landing page must not show invented digests: the site's
-whole pitch is "provable, not hoped". So the tape is produced by running the real
+whole pitch is "checkable, not hoped". So the tape is produced by running the real
 engine (`run_consensus`) over a fixed five-owner scenario and reading every
 number off the real `Transcript`. Each `sha256` line is `Transcript.hash()`
 taken right after that round's `record()`; the closing one is the hash after
@@ -247,7 +247,7 @@ def render(rounds, result, final_digest, final_held, agents) -> str:
  * (parley/agent.py) — "masked" describes the PROPERTY that a reason never
  * names the constraint, it is never itself a verdict value. Don't add a
  * third literal verdict here; that would misrepresent the real product on
- * the one page whose whole pitch is "provable, not hoped". */
+ * the one page whose whole pitch is "checkable, not hoped". */
 
 export type TapeColor = "dim" | "muted" | "redline" | "indigo" | "verify" | "masked";
 

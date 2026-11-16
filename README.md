@@ -12,6 +12,8 @@ pip install parley-consensus
 
 Early, version 0.2.1, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat.
 
+Privacy holds when each owner's agent runs as its own process. One process that holds every sheet sees them all.
+
 Red lines are code, not prompts · multilateral (N&gt;2) · non-crypto · self-hosted · zero-dependency Python · Apache-2.0.
 
 [![ci](https://github.com/5uper0/parley/actions/workflows/ci.yml/badge.svg)](https://github.com/5uper0/parley/actions/workflows/ci.yml)
@@ -193,7 +195,7 @@ two agents serve **different** owners, "did my agent sell me out?" stops being p
 real question. The crypto answer to agent-trust (put it on a chain, add a token) collapsed 89–99.7%;
 the durable need is the **trust primitive itself**, decoupled from tokens.
 
-> **AI that can't lie, and you can check.** The 2026 agent-hype cycle proved virality can be
+> **Agents you can check.** The 2026 agent-hype cycle showed virality can be
 > fully decoupled from truth. Parley is the checkable version: every verdict in a parley is a
 > re-hashable receipt, and each owner replays their own private sheet to check that none of their
 > red lines was crossed.
@@ -267,7 +269,7 @@ and holds the irreversible gates (going public, outreach), the fleet does the en
 change clears the same gate you can run yourself: `scripts/ship-gate.sh`, tests green,
 zero-dependency core, examples run, under conventional-commit discipline.
 
-## Security (v0.1)
+## Security
 
 The net layer is hardened against the obvious attacks (see `tests/test_redteam.py`):
 
@@ -289,7 +291,7 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
   `expected_owners=` the roster you expect, or a coordinator that drops one owner from every entry
   still passes. (`verify_non_betrayal` still only checks your *own* red lines.)
 
-Not yet (v0.1 honest limits, do not rely on it against owners who try to cheat):
+Not yet (honest limits, do not rely on it against owners who try to cheat):
 - **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster
   (above); the roster-pinned check (verify against the key from each bot's discovery Agent Card) is v0.2.
   Today only the coordinator's own side pins it: the client checks that a signature is present

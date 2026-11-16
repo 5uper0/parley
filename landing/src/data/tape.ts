@@ -43,7 +43,7 @@
  * (parley/agent.py) — "masked" describes the PROPERTY that a reason never
  * names the constraint, it is never itself a verdict value. Don't add a
  * third literal verdict here; that would misrepresent the real product on
- * the one page whose whole pitch is "provable, not hoped". */
+ * the one page whose whole pitch is "checkable, not hoped". */
 
 export type TapeColor = "dim" | "muted" | "redline" | "indigo" | "verify" | "masked";
 
