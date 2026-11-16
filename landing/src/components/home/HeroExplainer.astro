@@ -2,8 +2,8 @@
 // The hero stage: the dinner sample drawn in three beats (tell, yes or no, check).
 // Options, costs, every yes or no and the result line are read from receipt-dinner.ts, which
 // scripts/gen-receipt.py writes from a real run; the build fails if the copy and the run disagree.
-// The rule line's tie clause, the reveal line's names and the sample label's version are printed
-// only from the run's facts, never typed.
+// The rule line's tie clause, the screen-reader summary's names and the sample label's version are
+// printed only from the run's facts, never typed.
 // The styled state is the final frame, so no JS, reduced motion and print all show the whole story.
 // Sizes are steps from docs/brand/tokens.css (type, space, radius); colours are the global tokens.
 import { explainer as x } from "../../data/home-hero";
@@ -44,13 +44,15 @@ if (!pick.leastHappyTie || !pick.pickedTotalHigher || pick.picked !== picked[0].
 if (!/^\d+\.\d+\.\d+$/.test(receiptDinner.version)) {
   throw new Error(`sample label needs the parley version as N.N.N; receipt-dinner.ts has "${receiptDinner.version}"`);
 }
+const list = (names: string[]) => `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+const aria = x.stageAria(list(owners), x.plain, picked[0].name);
 const chipFrom = owners.indexOf(stop.blockers[0]) - options.indexOf(stop);
 const tag = (o: (typeof options)[number]) =>
   o.blockers.length ? x.tags.blocked : o.picked ? x.tags.picked : x.tags.feasible;
 ---
 
 <div class="stage" data-stage>
-  <p class="sr-only">{x.stageAria}</p>
+  <p class="sr-only">{aria}</p>
 
   <div class="beat" data-beat="1">
     <div class="head">
@@ -103,7 +105,7 @@ const tag = (o: (typeof options)[number]) =>
     </ul>
     <p class="plain">{x.plain}</p>
     <p class="rule" data-rule>{x.rule} <span data-tie>{x.tie(picked[0].name, other.name)}</span></p>
-    <p class="reveal" data-reveal>{x.reveal(stop.blockers[0], stop.name)}</p>
+    <p class="reveal" data-reveal>{x.reveal}</p>
     <p class="engine">{x.engine}</p>
   </div>
 
@@ -368,7 +370,7 @@ const tag = (o: (typeof options)[number]) =>
   .receipt {
     display: grid;
     gap: 0.25rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.25rem 0.75rem;
     border: 1px solid var(--hairline);
     border-radius: 0.75rem;
     background: var(--bg);
@@ -400,11 +402,13 @@ const tag = (o: (typeof options)[number]) =>
     font-family: var(--font-mono);
     font-size: 0.75rem;
     font-variant-ligatures: none;
+    line-height: 1.15;
     white-space: nowrap;
   }
   .r-line {
     color: var(--ink);
     font-size: 0.75rem;
+    line-height: 1.15;
   }
 
   .replay {
@@ -484,7 +488,8 @@ const tag = (o: (typeof options)[number]) =>
     }
     .rule,
     .reveal,
-    .engine {
+    .engine,
+    .r-result {
       line-height: 1.35;
     }
     .engine {

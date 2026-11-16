@@ -1,9 +1,11 @@
 ---
 // Section 5 (#status). Copy: landing-v3-copy 3.5, verbatim.
-// Carries the page's single red rule (hard limits).
+// Carries the page's single red rule (hard limits). The version is the generated one.
+import { receiptDinner } from "../../data/receipt-dinner";
+
 const title = "What it does not do yet";
 const lines = [
-  "Early stage, version 0.2.1. No outside users yet.",
+  `Early stage, version ${receiptDinner.version}. No outside users yet.`,
   "Not ready for parties actively trying to cheat each other.",
   "Each yes or no carries a score, so whoever runs the round can guess the order of your preferences and roughly where a limit sits. It still never sees the limit or the reason.",
   "The receipt shows later edits only if someone other than the editor keeps its fingerprint.",

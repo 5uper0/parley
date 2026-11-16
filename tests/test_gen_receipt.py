@@ -1,11 +1,14 @@
 """The homepage receipt is engine output, not typed text.
 
-`scripts/gen-receipt.py` runs the dinner program the page prints and writes the lines and the
-transcript sha256 the page shows, plus the parley version the hero labels the run with. These tests hold that the committed file is what the engine
-gives today, and that the check fails when the file, the hash or the page binding drifts.
+`scripts/gen-receipt.py` runs the dinner program and writes the lines and the transcript sha256
+the page shows, plus the parley version the hero labels the run with. These tests hold that the
+committed file is what the engine gives today, and that the check fails when the file, the hash,
+the page binding or a hand-typed version or run fact in the hero copy drifts.
 """
 import importlib.util
 import os
+import re
+import shutil
 import subprocess
 import sys
 
@@ -31,14 +34,13 @@ def test_sample_agrees_on_garden_and_every_owner_replays_clean():
         "Bob not betrayed: True",
         "Cara not betrayed: True",
     ]
-    assert len(digest) == 64 and int(digest, 16) >= 0
+    assert re.fullmatch(r"[0-9a-f]{64}", digest)
 
 
-def test_hash_is_the_transcript_hash_and_does_not_depend_on_bobs_number():
+def test_receipt_is_the_same_at_both_ends_of_bobs_stated_range():
     code = gr.sample_code()
     low, high = (gr.run_sample(code, limit) for limit in gr.LIMITS)
     assert low == high
-    assert "600" not in low[1] and "899" not in high[1]
 
 
 def test_a_limit_outside_the_stated_range_is_refused():
@@ -130,19 +132,102 @@ def test_a_version_that_is_not_three_numbers_is_refused(tmp_path):
             assert not reason
 
 
-def test_hero_copy_takes_names_and_version_from_the_run_not_from_typing():
-    with open(os.path.join(ROOT, "landing", "src", "data", "home-hero.ts"), encoding="utf-8") as f:
-        hero = f.read()
-    assert 'rule: "Rule: the option best for the least-happy owner wins.",' in hero
-    assert "`${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`" in hero
-    assert (
-        "`The group sees yes or no and a score, never a limit. ${owner}'s no on ${option} shows it is over "
-        "the limit, not by how much.`"
-    ) in hero
-    assert "`Illustration of a real run of the dinner example, parley ${version}.`" in hero
-    explainer = hero[hero.index("export const explainer") : hero.index("export const receipt")]
-    rule_to_label = explainer[explainer.index("  rule:") : explainer.index("  stageAria:")]
-    assert not any(word in rule_to_label for word in ("Garden", "Diner", gr.package_version()))
+def _hero_tree(tmp_path):
+    """A copy of the hero copy file and the files that print the version, safe to tamper with."""
+    hero = tmp_path / gr.HERO_COPY.name
+    shutil.copy(gr.HERO_COPY, hero)
+    readers = []
+    for path in gr.VERSION_READERS:
+        readers.append(tmp_path / path.name)
+        shutil.copy(path, readers[-1])
+    return hero, tuple(readers)
+
+
+def _words():
+    _, _, options, verdicts, _ = gr.generate()
+    return gr.run_words(options, verdicts)
+
+
+def _tamper(path, old, new):
+    text = path.read_text(encoding="utf-8")
+    assert old in text, f"{old!r} is no longer in {path.name}; update this test"
+    path.write_text(text.replace(old, new), encoding="utf-8")
+
+
+def test_hero_copy_as_committed_has_no_typed_version_or_run_fact():
+    # F8: the screen-reader summary and both version strings come from the run.
+    assert gr.copy_problem(_words()) == ""
+    assert _words() == ["Ana", "Bob", "Cara", "rooftop", "garden", "diner", "900", "600", "300"]
+
+
+def test_a_typed_version_in_the_hero_status_fails_the_check(tmp_path):
+    # F8: hero.status "v0.9.9" used to pass --check.
+    hero, readers = _hero_tree(tmp_path)
+    _tamper(hero, "`v${version}, early.", "`v0.9.9, early.")
+    assert "types the version 0.9.9" in gr.copy_problem(_words(), hero, readers)
+
+
+def test_a_typed_version_in_the_status_section_fails_the_check(tmp_path):
+    # F8: Status.astro "version 0.7.0" used to pass --check.
+    hero, readers = _hero_tree(tmp_path)
+    status = next(p for p in readers if p.name == "Status.astro")
+    _tamper(status, "version ${receiptDinner.version}.", "version 0.7.0.")
+    assert "types the version 0.7.0" in gr.copy_problem(_words(), hero, readers)
+
+
+def test_a_version_that_is_not_read_from_the_run_fails_the_check(tmp_path):
+    # F8: dropping the generated version without typing a new one is still drift.
+    hero, readers = _hero_tree(tmp_path)
+    for path in readers:
+        _tamper(path, "receiptDinner.version", "receiptDinner.sha256")
+    assert "does not read receiptDinner.version" in gr.copy_problem(_words(), hero, readers)
+
+
+def test_a_hand_typed_screen_reader_summary_fails_the_check(tmp_path):
+    # F8: stageAria "Rooftop costs 500 ... Diner is picked" used to pass --check.
+    hero, readers = _hero_tree(tmp_path)
+    _tamper(hero, "${plain} ${picked} is picked.", "${plain} Diner is picked.")
+    assert "types 'diner'" in gr.copy_problem(_words(), hero, readers)
+    hero, readers = _hero_tree(tmp_path)
+    _tamper(hero, "stageAria: (owners: string, plain: string, picked: string) =>\n    `", 'stageAria:\n    "')
+    assert "not a template filled from the run" in gr.copy_problem(_words(), hero, readers)
+
+
+def test_check_fails_on_tampered_hero_copy(tmp_path, monkeypatch):
+    # F8, end to end: --check itself exits 1, not only the helper.
+    hero, readers = _hero_tree(tmp_path)
+    _tamper(hero, "`v${version}, early.", "`v0.9.9, early.")
+    monkeypatch.setattr(gr, "HERO_COPY", hero)
+    monkeypatch.setattr(gr, "VERSION_READERS", readers)
+    monkeypatch.setattr(gr.copy_problem, "__defaults__", (hero, readers))
+    monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
+    assert gr.main() == 1
+
+
+def test_hero_copy_wording_is_the_approved_text():
+    # F1 to F3, F5, F6: the truth fixes stay in the copy file.
+    hero = gr.HERO_COPY.read_text(encoding="utf-8")
+    for line in (
+        'rule: "Rule: the option best for the least-happy owner wins.",',
+        "`${picked} and ${other} suit that owner equally, so the higher total wins: ${picked}.`",
+        'reveal: "The group sees yes or no and a score, never the limit itself. Many yeses and noes can still narrow it down.",',
+        "`Illustration of a real run of the dinner example, parley ${version}.`",
+        "envelope: (owner: string) => `${owner}'s sheet`,",
+        "\"Each person's agent holds a private sheet of wishes and limits, sealed.\"",
+        '"Each owner checks the pick against their own sheet, on their own computer. Compare the sha256 to confirm it is the same receipt."',
+        '"For developers building agents that act for different people."',
+        "software acting for them",
+    ):
+        assert line in hero, line
+    for gone in ("own limit", "Same receipt", "same receipt for", "AI assistant", "proves", "docs/_drafts"):
+        assert gone not in hero, gone
+
+
+def test_install_section_prints_no_number_for_bobs_limit():
+    # F4: the page whose hero says the limit stays sealed must not print it.
+    install = (gr.PAGE.parent / "Install.astro").read_text(encoding="utf-8")
+    assert 'o["cost"] <= limit)' in install
+    assert not re.search(r"<= *\d", install)
 
 
 def test_committed_file_matches_the_generator():

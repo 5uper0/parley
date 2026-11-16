@@ -4,6 +4,7 @@
 // then the stage. Sizes are steps from docs/brand/tokens.css.
 import { DEMO_URL } from "../../data/film-copy";
 import { hero } from "../../data/home-hero";
+import { receiptDinner } from "../../data/receipt-dinner";
 import HeroExplainer from "./HeroExplainer.astro";
 ---
 
@@ -20,7 +21,7 @@ import HeroExplainer from "./HeroExplainer.astro";
       <p>{hero.installLabel}</p>
       <pre tabindex="0" class="select-all whitespace-nowrap" aria-label={hero.installAria} data-install>{hero.install}</pre>
     </div>
-    <p class="status" data-hero-status>{hero.status}</p>
+    <p class="status" data-hero-status>{hero.status(receiptDinner.version)}</p>
     <div class="explainer"><HeroExplainer /></div>
   </div>
 </section>

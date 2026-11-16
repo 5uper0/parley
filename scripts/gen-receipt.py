@@ -1,7 +1,7 @@
 """Generate landing/src/data/receipt-dinner.ts from a real run of the dinner sample.
 
 The homepage shows a receipt next to the dinner scene. Its lines and its sha256 must be what
-the engine prints, not text someone typed, so this script takes the exact code the page shows
+the engine prints, not text someone typed, so this script takes the dinner program
 (`codeSample.code` in landing/src/data/film-copy.ts), runs it against this tree's `parley`
 package and reads the decision, each owner's replay and `Transcript.hash()` off the result.
 The hero draws the option cards and a yes/no grid, so the options and each transcript verdict
@@ -9,8 +9,9 @@ are written too. A verdict is owner, option and `acceptable` only: scores and re
 of the file. The hero also says why garden beats diner (they suit the least-happy owner equally,
 garden has the higher total); `pick_facts` reads that off the transcript and refuses to write the
 file when it stops being true. The hero labels the run with the parley version, read from
-pyproject.toml and never typed. The page promises the same output for any Bob limit from 600 to 899; both ends are run and a
-difference is an error, so that promise is checked too.
+pyproject.toml and never typed; `copy_problem` fails the check when a version or the screen-reader
+summary's run facts are typed into the hero copy by hand. The receipt is the same for any Bob limit
+from 600 to 899; both ends are run and a difference is an error.
 
     .venv/bin/python scripts/gen-receipt.py           # rewrite receipt-dinner.ts, print the sha256
     .venv/bin/python scripts/gen-receipt.py --check   # exit 1 if the file or the page is stale
@@ -32,6 +33,14 @@ COPY = REPO_ROOT / "landing" / "src" / "data" / "film-copy.ts"
 OUT = REPO_ROOT / "landing" / "src" / "data" / "receipt-dinner.ts"
 PYPROJECT = REPO_ROOT / "pyproject.toml"
 PAGE = REPO_ROOT / "landing" / "src" / "components" / "home" / "Receipt.astro"
+HERO_COPY = REPO_ROOT / "landing" / "src" / "data" / "home-hero.ts"
+# Files that print the parley version; each must read it from receipt-dinner.ts.
+VERSION_READERS = (
+    REPO_ROOT / "landing" / "src" / "components" / "home" / "Hero.astro",
+    REPO_ROOT / "landing" / "src" / "components" / "home" / "Status.astro",
+    REPO_ROOT / "landing" / "src" / "components" / "home" / "HeroExplainer.astro",
+)
+TYPED_VERSION = re.compile(r"(?<![\d.])\d+\.\d+\.\d+(?!\.?\d)")
 REGEN = ".venv/bin/python scripts/gen-receipt.py"
 LIMITS = (600, 899)
 OWNERS = ("ana", "bob", "cara")
@@ -41,7 +50,7 @@ Run = Tuple[List[str], str, Rows, Rows, Dict[str, object]]
 
 
 def sample_code(copy_path: Path = COPY) -> str:
-    """The dinner program exactly as the page prints it."""
+    """The dinner program exactly as film-copy.ts holds it."""
     text = copy_path.read_text(encoding="utf-8")
     block = re.search(r"export const codeSample\b.*?\n};", text, re.DOTALL)
     match = block and re.search(r"\n  code: `(.*?)`,\n", block.group(0), re.DOTALL)
@@ -175,6 +184,36 @@ def page_problem(page_path: Path = PAGE) -> str:
     return ""
 
 
+def copy_problem(run_words: List[str], hero_copy: Path = HERO_COPY, readers: Tuple[Path, ...] = VERSION_READERS) -> str:
+    """Why the hero copy could say something the run does not, or '' when it cannot.
+
+    `run_words` are the owners, venues and costs of the run. The screen-reader summary must be
+    a template the page fills from the run, so none of them may be typed into it, and no file
+    may carry a typed version.
+    """
+    for path in (hero_copy, *readers):
+        if not path.exists():
+            return f"{path} is missing, so its version and run facts cannot be checked"
+        typed = TYPED_VERSION.search(path.read_text(encoding="utf-8"))
+        if typed:
+            return f"{path} types the version {typed.group(0)} instead of reading receiptDinner.version"
+    for path in readers:
+        if "receiptDinner.version" not in path.read_text(encoding="utf-8"):
+            return f"{path} does not read receiptDinner.version from receipt-dinner.ts"
+    aria = re.search(r"\n  stageAria: \(owners: string, plain: string, picked: string\) =>\n    `([^`]*)`,\n", hero_copy.read_text(encoding="utf-8"))
+    if not aria:
+        return f"stageAria in {hero_copy} is not a template filled from the run"
+    for word in run_words:
+        if re.search(rf"\b{re.escape(word)}\b", aria.group(1), re.IGNORECASE):
+            return f"stageAria in {hero_copy} types {word!r} instead of taking it from the run"
+    return ""
+
+
+def run_words(options: Rows, verdicts: Rows) -> List[str]:
+    owners = sorted({str(v["owner"]) for v in verdicts})
+    return owners + [str(o["venue"]) for o in options] + [str(o["cost"]) for o in options]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="don't write; fail if the receipt is stale")
@@ -188,7 +227,7 @@ def main() -> int:
         if current != ts:
             print(f"STALE: {OUT} differs from generator output", file=sys.stderr)
             return 1
-        problem = page_problem()
+        problem = page_problem() or copy_problem(run_words(options, verdicts))
         if problem:
             print(f"STALE: {problem}", file=sys.stderr)
             return 1

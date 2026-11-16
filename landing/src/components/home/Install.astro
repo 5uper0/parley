@@ -9,7 +9,7 @@ const who = "People building agents that act for several people who want differe
 
 const title = "For developers";
 const command = "pip install parley-consensus";
-const code = `bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= 700)], ...)
+const code = `bob = PreferenceSheet("Bob", hard=[HardConstraint("budget", lambda o: o["cost"] <= limit)], ...)
 result = run_consensus(agents, options)
 print(result.status, result.decision)   # agreed {'venue': 'garden', 'cost': 600}`;
 const under = "Open-source Python library. Python 3.10 or newer. Zero-dependency core. Apache-2.0. Also runs as an MCP server: ";
