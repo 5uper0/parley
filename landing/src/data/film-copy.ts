@@ -21,17 +21,6 @@ export const menu: MenuItem[] = [
 
 export const menuButton = "Menu";
 
-export const hero = {
-  headline: "Agents decide together. No red line crossed.",
-  sub: "An open-source Python library: red lines are code, the group never sees your limit, every owner checks the receipt.",
-  button: "Try the demo",
-  captions: [
-    "Three agents. Three owners. Each has a limit it keeps private.",
-    "The favorite crosses Bob's limit. It cannot win.",
-    "Garden. Every owner can check the receipt.",
-  ],
-} as const;
-
 export interface Step {
   id: string;
   label: string;
@@ -44,12 +33,12 @@ export const howItWorks: { title: string; steps: Step[] } = {
     {
       id: "how-1",
       label: "Tell.",
-      body: "Each owner gives their own agent what they like and a hard limit. Limits stay private.",
+      body: "You tell your own agent what you like and the limits you won't cross. That limit stays with your agent.",
     },
     {
       id: "how-2",
       label: "Yes or no.",
-      body: "Every agent answers yes or no to each option. An option that crosses a limit cannot win. The group sees the yes or no, never the limit (a soft score is shared). Among the options nobody blocks, it picks the one that helps the least-happy owner most; ties go to the higher total score. No language model decides: the check is plain code.",
+      body: "Every agent answers yes or no to each option. An option that crosses a limit cannot win. The group sees each yes or no and a score, not the limit sheet. Many yeses and noes can still narrow a limit down. Among the options nobody blocks, it picks the one that helps the least-happy owner most; ties go to the higher total score. No language model decides: the check is plain code.",
     },
     {
       id: "how-3",

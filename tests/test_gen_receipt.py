@@ -163,7 +163,7 @@ def test_hero_copy_as_committed_has_no_typed_version_or_run_fact():
 def test_a_typed_version_in_the_hero_status_fails_the_check(tmp_path):
     # F8: hero.status "v0.9.9" used to pass --check.
     hero, readers = _hero_tree(tmp_path)
-    _tamper(hero, "`v${version}, early.", "`v0.9.9, early.")
+    _tamper(hero, "`Early, version ${version},", "`Early, version 0.9.9,")
     assert "types the version 0.9.9" in gr.copy_problem(_words(), hero, readers)
 
 
@@ -196,7 +196,7 @@ def test_a_hand_typed_screen_reader_summary_fails_the_check(tmp_path):
 def test_check_fails_on_tampered_hero_copy(tmp_path, monkeypatch):
     # F8, end to end: --check itself exits 1, not only the helper.
     hero, readers = _hero_tree(tmp_path)
-    _tamper(hero, "`v${version}, early.", "`v0.9.9, early.")
+    _tamper(hero, "`Early, version ${version},", "`Early, version 0.9.9,")
     monkeypatch.setattr(gr, "HERO_COPY", hero)
     monkeypatch.setattr(gr, "VERSION_READERS", readers)
     monkeypatch.setattr(gr.copy_problem, "__defaults__", (hero, readers))
@@ -216,7 +216,7 @@ def test_hero_copy_wording_is_the_approved_text():
         "\"Each person's agent holds a private sheet of wishes and limits, sealed.\"",
         '"Each owner checks the pick against their own sheet, on their own computer. Compare the sha256 to confirm it is the same receipt."',
         '"For developers building agents that act for different people."',
-        "software acting for them",
+        "nobody hands over their limit sheet",
     ):
         assert line in hero, line
     for gone in ("own limit", "Same receipt", "same receipt for", "AI assistant", "proves", "docs/_drafts"):
