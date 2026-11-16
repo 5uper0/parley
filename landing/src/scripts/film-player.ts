@@ -39,7 +39,7 @@ function setup(el: HTMLElement): void {
     setToggle(true);
     if (!announced) {
       announced = true;
-      // Hook for the room (R-12): load it only after the film has started.
+      // Hook for the room: load it only after the film has started.
       document.dispatchEvent(new CustomEvent("film:started"));
     }
   });

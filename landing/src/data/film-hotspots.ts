@@ -1,4 +1,4 @@
-// Room hotspots for /film/ (frozen spec R-17). x and y are percentages of the
+// Room hotspots for /film/. x and y are percentages of the
 // full source image: 1920x1080 for landscape, 1080x1920 for portrait. The phone
 // crop math and the pairwise distances are in components/film/ROOM-GEOMETRY.md.
 

@@ -59,6 +59,7 @@ const item =
     });
     header.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && nav.dataset.open === "true") {
+        e.preventDefault();
         set(false);
         btn.focus();
       }

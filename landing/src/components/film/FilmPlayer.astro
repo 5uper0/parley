@@ -17,7 +17,6 @@ const ALT = "A table at night with three sealed notes, one for each owner";
 
   <div class="film-frame">
     <picture>
-      <source media="(max-width: 719px)" srcset="/film/poster-port.jpg" width="1080" height="1920" />
       <img
         src="/film/poster-land.jpg"
         width="1600"
@@ -27,7 +26,7 @@ const ALT = "A table at night with three sealed notes, one for each owner";
         decoding="async"
       />
     </picture>
-    <video src="/film/animatic.mp4" muted playsinline preload="metadata" poster="" aria-hidden="true" tabindex="-1"
+    <video src="/film/animatic.mp4" muted playsinline preload="none" poster="" aria-hidden="true" tabindex="-1"
     ></video>
     <ol class="film-captions">
       {
@@ -155,9 +154,4 @@ const ALT = "A table at night with three sealed notes, one for each owner";
     font-size: 13px;
   }
 
-  @media (max-width: 719px) {
-    .film-frame {
-      aspect-ratio: 9 / 16;
-    }
-  }
 </style>

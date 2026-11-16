@@ -1,5 +1,4 @@
-// Approved copy for /film/, verbatim from research/plans/parley-3d/g2b-page-copy.md.
-// Change text only via the frozen spec's change control (spec v1, section 6).
+// Approved copy for /film/, verbatim. Change text only through the copy change-control process.
 
 export const DEMO_URL = "/demo/";
 export const REPO_URL = "https://github.com/5uper0/parley";
