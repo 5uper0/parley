@@ -6,7 +6,9 @@ the engine prints, not text someone typed, so this script takes the exact code t
 package and reads the decision, each owner's replay and `Transcript.hash()` off the result.
 The hero draws the option cards and a yes/no grid, so the options and each transcript verdict
 are written too. A verdict is owner, option and `acceptable` only: scores and reasons stay out
-of the file. The page promises the same output for any Bob limit from 600 to 899; both ends are run and a
+of the file. The hero also says why garden beats diner (they tie for the least-happy owner, garden
+has the higher total); `pick_facts` reads that off the transcript and refuses to write the file
+when it stops being true. The page promises the same output for any Bob limit from 600 to 899; both ends are run and a
 difference is an error, so that promise is checked too.
 
     .venv/bin/python scripts/gen-receipt.py           # rewrite receipt-dinner.ts, print the sha256
@@ -33,7 +35,7 @@ LIMITS = (600, 899)
 OWNERS = ("ana", "bob", "cara")
 
 Rows = List[Dict[str, object]]
-Run = Tuple[List[str], str, Rows, Rows]
+Run = Tuple[List[str], str, Rows, Rows, Dict[str, object]]
 
 
 def sample_code(copy_path: Path = COPY) -> str:
@@ -53,7 +55,7 @@ def run_sample(code: str, limit: int) -> Run:
     """Run the program with Bob's limit in bob_limit.txt.
 
     Returns (printed lines, transcript sha256, options as recorded, every verdict as option,
-    owner, acceptable).
+    owner, acceptable, and the pick facts).
     """
     scope: dict = {"__name__": "__dinner__"}
     stdout = io.StringIO()
@@ -78,7 +80,32 @@ def run_sample(code: str, limit: int) -> Run:
         for v in entry["verdicts"]
     ]
     options = [dict(entry["option"]) for entry in result.transcript.entries]
-    return lines, result.transcript.hash(), options, verdicts
+    return lines, result.transcript.hash(), options, verdicts, pick_facts(result.transcript.entries, result.decision)
+
+
+def pick_facts(entries: Rows, decision: Dict[str, object]) -> Dict[str, object]:
+    """Why the picked option beat the other one everyone accepted, as two facts and no numbers.
+
+    The hero prints "tie for the least-happy owner, higher total". That is only true while exactly
+    two options are feasible, their lowest scores are equal and the picked one has the larger sum.
+    """
+    feasible = [e for e in entries if all(v["acceptable"] for v in e["verdicts"])]
+    if len(feasible) != 2 or decision not in [e["option"] for e in feasible]:
+        raise SystemExit("the hero explains a pick between two feasible options; the run no longer has that shape")
+    won = next(e for e in feasible if e["option"] == decision)
+    lost = next(e for e in feasible if e["option"] != decision)
+    floor = lambda e: min(v["score"] for v in e["verdicts"])
+    total = lambda e: sum(v["score"] for v in e["verdicts"])
+    if floor(won) != floor(lost):
+        raise SystemExit("the picked option and the runner-up no longer tie for the least-happy owner; the hero rule line is wrong")
+    if not total(won) > total(lost):
+        raise SystemExit("the picked option no longer has the higher total; the hero rule line is wrong")
+    return {
+        "picked": won["option"]["venue"],
+        "runnerUp": lost["option"]["venue"],
+        "leastHappyTie": True,
+        "pickedTotalHigher": True,
+    }
 
 
 def generate(copy_path: Path = COPY) -> Run:
@@ -93,7 +120,7 @@ def ts_string(s: str) -> str:
     return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def render(lines: List[str], digest: str, options: Rows, verdicts: Rows) -> str:
+def render(lines: List[str], digest: str, options: Rows, verdicts: Rows, pick: Dict[str, object]) -> str:
     body = "\n".join(f"    {ts_string(line)}," for line in lines)
     cards = "\n".join(
         f"    {{ venue: {ts_string(o['venue'])}, cost: {int(o['cost'])} }}," for o in options
@@ -113,6 +140,9 @@ def render(lines: List[str], digest: str, options: Rows, verdicts: Rows) -> str:
         f"  sha256: {ts_string(digest)},\n"
         f"  options: [\n{cards}\n  ],\n"
         f"  verdicts: [\n{grid}\n  ],\n"
+        f"  pick: {{ picked: {ts_string(pick['picked'])}, runnerUp: {ts_string(pick['runnerUp'])}, "
+        f"leastHappyTie: {'true' if pick['leastHappyTie'] else 'false'}, "
+        f"pickedTotalHigher: {'true' if pick['pickedTotalHigher'] else 'false'} }},\n"
         f"}} as const;\n"
     )
 
@@ -134,8 +164,8 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="don't write; fail if the receipt is stale")
     args = parser.parse_args()
 
-    lines, digest, options, verdicts = generate()
-    ts = render(lines, digest, options, verdicts)
+    lines, digest, options, verdicts, pick = generate()
+    ts = render(lines, digest, options, verdicts, pick)
 
     if args.check:
         current = OUT.read_text(encoding="utf-8") if OUT.exists() else ""

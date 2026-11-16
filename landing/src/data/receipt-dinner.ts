@@ -26,4 +26,5 @@ export const receiptDinner = {
     { option: "diner", owner: "Bob", acceptable: true },
     { option: "diner", owner: "Cara", acceptable: true },
   ],
+  pick: { picked: "garden", runnerUp: "diner", leastHappyTie: true, pickedTotalHigher: true },
 } as const;
