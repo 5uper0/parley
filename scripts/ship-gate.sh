@@ -62,9 +62,12 @@ echo "▸ 4/6 homepage tape matches a real engine run"
 echo "  tape hashes come from a live run"
 
 echo "▸ 5/6 homepage receipt matches a real run of the dinner sample"
-"$PY" scripts/gen-receipt.py --check >/dev/null \
-  || fail "the dinner receipt is stale or not rendered from landing/src/data/receipt-dinner.ts — regenerate with: $PY scripts/gen-receipt.py"
-echo "  receipt sha256 comes from a live run"
+# Print what the checker returned, not a sentence written here.
+receipt_rc=0
+receipt_out="$("$PY" scripts/gen-receipt.py --check 2>&1)" || receipt_rc=$?
+printf '%s\n' "$receipt_out" | sed 's/^/  /'
+[ "$receipt_rc" -eq 0 ] \
+  || fail "the dinner receipt or the hero copy bound to it is stale; regenerate with: $PY scripts/gen-receipt.py"
 
 echo "▸ 6/6 published test-count claims are current"
 # Report what the checker actually found, rather than a sentence written here. The two trees
