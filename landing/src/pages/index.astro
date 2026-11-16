@@ -1,10 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import Hero from "../components/identity/Hero.astro";
+import Steps from "../components/identity/Steps.astro";
 import { tapeSnippet, tapeColorClass } from "../data/tape";
+import { receiptDinner } from "../data/receipt-dinner";
 
 const DEMO_URL = "/demo/";
+
+// Identity spec 2026-11-17 (WI-261116-134): final wording, change only with a new copy test.
+const HEADLINE = "Agents that act for different people can agree without anyone handing over their limit.";
+const SUB =
+  "Parley is an open-source Python library. Each person's hard limits run as code: an option over anyone's limit cannot win, nobody hands over their limit sheet, and every result leaves a record anyone can check.";
+const INSTALL = "pip install parley-consensus";
+const SCOPE =
+  "Early, version 0.2.1, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat.";
 
 const wrap = "mx-auto w-full max-w-[1372px] px-6 md:px-16 lg:px-24";
 
@@ -43,7 +53,7 @@ const faqs = [
     guide: "Fair multi-agent negotiation for rival owners",
   },
   {
-    q: "What can I check afterwards, and what does the receipt not prove?",
+    q: "What can I check afterwards, and what does the receipt not show?",
     a: "You can re-hash the transcript (SHA-256 over its canonical JSON), recompute the max-min winner from the recorded verdicts, and replay your own private sheet against the decision with verify_non_betrayal, all on your own machine and without showing the sheet to anyone. The hash is unsigned, so it catches a later edit only when someone other than the editor kept the hash; verdicts are unsigned unless the run signed them, and a signed verdict is checked against the key carried in the same record, with no trusted owner-to-key roster yet. The participants list is written by the coordinator, scores are public and leak preference ordering, and every limit is self-reported.",
     href: "/verify-ai-agent-decision/",
     guide: "Verify an AI-agent decision without trusting the coordinator",
@@ -86,9 +96,17 @@ const jsonLd = JSON.stringify({
 ---
 
 <Layout
-  title="Parley: AI assistants agree, limits stay private"
-  description="A way for several people's AI assistants to agree on one option without anyone revealing their private limits. Red lines enforced in code, each owner checks the result on their own machine. Open source, no crypto, self-hosted."
+  title="Parley: agents that act for different people can agree"
+  description={SUB}
 >
+  <!-- Home is light unless the visitor picked dark with the header toggle. -->
+  <script is:inline>
+    try {
+      if (localStorage.getItem("parley-theme") !== "dark") document.documentElement.dataset.theme = "light";
+    } catch (e) {
+      document.documentElement.dataset.theme = "light";
+    }
+  </script>
   <script type="application/ld+json" is:inline set:html={jsonLd} />
 
   <a
@@ -99,188 +117,111 @@ const jsonLd = JSON.stringify({
   </a>
 
   <main id="main">
-    <!-- Hero -->
-    <section class="pb-14 lg:pb-20">
-      <div class={wrap}>
-        <Header large padded={false} />
-        <div
-          class="mt-12 grid gap-11 lg:mt-16 lg:grid-cols-[1.08fr_.92fr] lg:items-center lg:gap-14"
-        >
-          <div>
-            <h1
-              class="font-display text-[clamp(2.5rem,7vw,4.4rem)] leading-[1.04] tracking-[-0.028em]"
-            >
-              <span class="block text-ink">AI assistants agree,</span>
-              <span class="block text-indigo">limits stay private.</span>
-            </h1>
-            <p class="mt-6 max-w-[52ch] text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.55] text-muted">
-              Each person tells only their own assistant what they will not
-              accept. The assistants pick an option that crosses nobody's limit,
-              and nobody has to say what their limit was. Afterwards, each
-              person can check on their own computer that it held.
-            </p>
-            <div class="mt-8 flex flex-wrap items-center gap-6">
-              <a href={DEMO_URL} class={btnPrimary}>Open the demo</a>
-              <a href="#how-it-works" class={btnGhost}>
-                Read the 3 steps
-              </a>
-            </div>
-          </div>
+    <Hero
+      wrap={wrap}
+      headline={HEADLINE}
+      sub={SUB}
+      install={INSTALL}
+      scope={SCOPE}
+      demoUrl={DEMO_URL}
+      stepsHref="#how-it-works"
+    />
 
-          <!-- Hero device: convergence mark + verdict-shaped receipt -->
-          <div
-            class="overflow-hidden rounded-2xl border border-hairline bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,.03),0_20px_44px_-28px_rgba(0,0,0,.5)]"
-          >
-            <div
-              class="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3 font-mono text-xs text-muted"
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <Steps id="how-it-works" wrap={wrap}>
+      <div
+        class="overflow-hidden rounded-2xl border border-hairline bg-surface"
+        data-transcript-card
+      >
+        <div
+          class="flex items-center justify-between gap-3 border-b border-hairline px-5 py-3 font-mono text-xs text-muted"
+        >
+          <span>parley &middot; replay 4622d0a7&hellip;</span>
+          <span>transcript</span>
+        </div>
+        <p class="px-6 pt-3 pb-4 text-[12.5px] leading-[1.5] text-muted">
+          Five people, five private lists of limits. For option A, three of
+          the five answers are shown. One shared decision,{" "}
+          <b class="font-semibold text-ink">checked by every owner</b>, no
+          list handed over.
+        </p>
+        <div
+          class="flex flex-col gap-3.5 border-t border-hairline p-5 font-mono text-[13px] leading-[1.5]"
+        >
+          <div class="flex items-center justify-between gap-2.5">
+            <span class="flex-none font-medium text-ink">bob</span>
+            <span class="flex-none text-xs whitespace-nowrap text-muted"
+              >score 0.30</span
             >
-              <span>parley &middot; replay 4622d0a7&hellip;</span>
-              <span>transcript</span>
-            </div>
-            <div class="px-6 pt-6 pb-1.5">
+            <span
+              class="inline-flex items-center rounded-full border border-hairline bg-bg px-3.5 py-1.5 text-xs font-medium text-ink"
+              >acceptable</span
+            >
+          </div>
+          <div class="flex items-center justify-between gap-2.5">
+            <span class="flex-none font-medium text-ink">cara</span>
+            <span class="flex-none text-xs whitespace-nowrap text-muted"
+              >score 0.70</span
+            >
+            <span
+              class="inline-flex items-center rounded-full border border-hairline bg-bg px-3.5 py-1.5 text-xs font-medium text-ink"
+              >acceptable</span
+            >
+          </div>
+          <div class="flex items-center justify-between gap-2.5">
+            <span class="flex-none font-medium text-ink">ana</span>
+            <span
+              class="inline-flex flex-none items-center gap-1 text-xs whitespace-nowrap text-masked"
+            >
               <svg
-                viewBox="0 0 340 146"
-                role="img"
-                aria-label="Diagram: five owner delegates a through e each send a private verdict into one shared enforcement gate; only the agreed line passes through, on one line to a verified seal"
-                class="h-auto w-full"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                aria-hidden="true"
+                class="flex-none"
               >
-                <g class="fill-muted font-mono text-[10.5px]" text-anchor="end">
-                  <text x="13" y="17">a</text><text x="13" y="41">b</text><text
-                    x="13"
-                    y="77">c</text>
-                  <text x="13" y="105">d</text><text x="13" y="129">e</text>
-                </g>
-                <g
-                  class="stroke-muted"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  opacity="0.5"
-                >
-                  <line x1="20" y1="13" x2="174" y2="73"></line>
-                  <line x1="20" y1="37" x2="174" y2="73"></line>
-                  <line x1="20" y1="73" x2="174" y2="73"></line>
-                  <line x1="20" y1="101" x2="174" y2="73"></line>
-                  <line x1="20" y1="125" x2="174" y2="73"></line>
-                </g>
-                <g class="fill-indigo">
-                  <circle cx="20" cy="13" r="3.5"></circle>
-                  <circle cx="20" cy="37" r="3.5"></circle>
-                  <circle cx="20" cy="73" r="3.5"></circle>
-                  <circle cx="20" cy="101" r="3.5"></circle>
-                  <circle cx="20" cy="125" r="3.5"></circle>
-                </g>
-                <polygon
-                  points="174,60 183,73 174,86 165,73"
-                  class="fill-none stroke-redline"
-                  stroke-width="2.2"
-                  stroke-linejoin="round"></polygon>
-                <line
-                  x1="174"
-                  y1="73"
-                  x2="287"
-                  y2="73"
-                  class="stroke-redline"
-                  stroke-width="3"
-                  stroke-linecap="round"></line>
-                <circle
-                  cx="300"
-                  cy="73"
-                  r="13"
-                  class="fill-verify/10 stroke-verify"
-                  stroke-width="1.6"></circle>
-                <path
-                  d="M295 73.5l3.4 3.4L305 70"
+                <rect
+                  x="1.5"
+                  y="4.5"
+                  width="7"
+                  height="5"
+                  rx="1"
                   fill="none"
-                  class="stroke-verify"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"></path>
+                  stroke="currentColor"
+                  stroke-width="1.3"></rect>
+                <path
+                  d="M3 4.5V3a2 2 0 0 1 4 0v1.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.3"></path>
               </svg>
-            </div>
-            <p class="px-6 pt-3 pb-4 text-[12.5px] leading-[1.5] text-muted">
-              Five people, five private lists of limits. For option A, three of
-              the five answers are shown. One shared decision,
-              <b class="font-semibold text-ink">checked by every owner</b>, no
-              list revealed.
-            </p>
-            <div
-              class="flex flex-col gap-3.5 border-t border-hairline p-5 font-mono text-[13px] leading-[1.5]"
+              [masked]
+            </span>
+            <span
+              class="inline-flex items-center rounded-full border border-redline/30 bg-redline/10 px-3.5 py-1.5 text-xs font-medium text-redline-text"
+              >red-line</span
             >
-              <div class="flex items-center justify-between gap-2.5">
-                <span class="flex-none font-medium text-ink">bob</span>
-                <span class="flex-none text-xs whitespace-nowrap text-muted"
-                  >score 0.30</span
-                >
-                <span
-                  class="inline-flex items-center rounded-full border border-verify/30 bg-verify/10 px-3.5 py-1.5 text-[11.5px] font-medium text-verify"
-                  >acceptable</span
-                >
-              </div>
-              <div class="flex items-center justify-between gap-2.5">
-                <span class="flex-none font-medium text-ink">cara</span>
-                <span class="flex-none text-xs whitespace-nowrap text-muted"
-                  >score 0.70</span
-                >
-                <span
-                  class="inline-flex items-center rounded-full border border-verify/30 bg-verify/10 px-3.5 py-1.5 text-[11.5px] font-medium text-verify"
-                  >acceptable</span
-                >
-              </div>
-              <div class="flex items-center justify-between gap-2.5">
-                <span class="flex-none font-medium text-ink">ana</span>
-                <span
-                  class="inline-flex flex-none items-center gap-1 text-xs whitespace-nowrap text-masked"
-                >
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 10 10"
-                    aria-hidden="true"
-                    class="flex-none"
-                  >
-                    <rect
-                      x="1.5"
-                      y="4.5"
-                      width="7"
-                      height="5"
-                      rx="1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.3"></rect>
-                    <path
-                      d="M3 4.5V3a2 2 0 0 1 4 0v1.5"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.3"></path>
-                  </svg>
-                  [masked]
-                </span>
-                <span
-                  class="inline-flex items-center rounded-full border border-redline/30 bg-redline/10 px-3.5 py-1.5 text-[11.5px] font-medium text-redline-text"
-                  >red-line</span
-                >
-              </div>
-              <hr class="my-2.5 border-0 border-t border-dashed border-hairline" />
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <span class="font-semibold text-indigo-text"
-                  >max-min picks option P</span
-                >
-                <span
-                  class="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-verify"
-                  >&#10003; recorded sample run, red lines held 5/5</span
-                >
-              </div>
-            </div>
-            <div
-              class="border-t border-hairline bg-bg px-5 py-3 font-mono text-[11.5px] leading-[1.6] text-muted"
+          </div>
+          <hr class="my-2.5 border-0 border-t border-dashed border-hairline" />
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="font-semibold text-indigo-text"
+              >max-min picks option P</span
             >
-              ana's reason stays private. only the verdict "red-line" ever
-              leaves her agent.
-            </div>
+            <span
+              class="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted"
+              >recorded sample run, red lines held 5/5</span
+            >
           </div>
         </div>
+        <div
+          class="border-t border-hairline bg-bg px-5 py-3 font-mono text-xs leading-[1.6] text-muted"
+        >
+          ana's reason stays private. only the verdict "red-line" ever
+          leaves her agent.
+        </div>
       </div>
-    </section>
+    </Steps>
 
     <hr class="h-px w-full border-0 bg-hairline" />
 
@@ -296,11 +237,11 @@ const jsonLd = JSON.stringify({
         <p
           class="mt-7 max-w-[52ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
         >
-          Parley is a way for several people's AI assistants to agree on one
-          option, without anyone having to reveal their private limits.
+          Parley is a way for several people's AI agents to agree on one
+          option, without anyone having to hand over their private limits.
         </p>
 
-        <div class="mt-10 grid gap-5 lg:grid-cols-[1fr_1fr] lg:gap-8">
+        <div class="mt-10 max-w-[44rem]">
           <article class={`${propBase} border-b-indigo border-l-indigo p-7 md:p-8`}>
             <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
               For example
@@ -312,77 +253,22 @@ const jsonLd = JSON.stringify({
               Friday evening. Cara will not share a room.
             </p>
             <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
-              Each one tells only their own assistant. The assistants go through
+              Each one tells only their own agent. The agents go through
               the options together. Any option that crosses one friend's limit
               is out, no matter how much the other two like it.
             </p>
             <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
               Among the options left, the winner is the one that leaves the
               least happy friend as well off as possible. The others see that an
-              assistant said no to an option, never why.
+              agent said no to an option, never why.
             </p>
           </article>
 
-          <article class={`${propBase} border-b-verify border-l-verify p-7 md:p-8`}>
-            <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
-              How it goes
-            </h3>
-            <ol class="mt-4 grid gap-5">
-              <li class="grid grid-cols-[2rem_1fr] gap-3">
-                <span
-                  class="font-display text-[1.6rem] leading-none text-indigo-text"
-                  aria-hidden="true">1</span
-                >
-                <div>
-                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
-                    Tell your own assistant your limits, in private.
-                  </p>
-                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
-                    A limit is a rule your assistant applies to each option. The
-                    list stays with your assistant and is not handed to the
-                    group.
-                  </p>
-                </div>
-              </li>
-              <li class="grid grid-cols-[2rem_1fr] gap-3">
-                <span
-                  class="font-display text-[1.6rem] leading-none text-indigo-text"
-                  aria-hidden="true">2</span
-                >
-                <div>
-                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
-                    For each option, the assistants say only ok or no, plus a
-                    score.
-                  </p>
-                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
-                    An assistant never says which limit was behind a no. The
-                    score is visible to the others, so it can hint at what you
-                    prefer.
-                  </p>
-                </div>
-              </li>
-              <li class="grid grid-cols-[2rem_1fr] gap-3">
-                <span
-                  class="font-display text-[1.6rem] leading-none text-indigo-text"
-                  aria-hidden="true">3</span
-                >
-                <div>
-                  <p class="text-[15px] font-semibold leading-[1.5] text-ink">
-                    Afterwards, check on your own computer that your limit held.
-                  </p>
-                  <p class="mt-1 max-w-[44ch] text-[14.5px] leading-[1.6] text-muted">
-                    You replay your own list against the final choice. Nobody
-                    else needs to see the list.
-                  </p>
-                </div>
-              </li>
-            </ol>
-          </article>
         </div>
 
         <p class="mt-8 max-w-[76ch] text-[14.5px] leading-[1.65] text-muted">
           <b class="font-semibold text-ink">Where this stands:</b> Parley is
-          early, version 0.2, alpha. It is open source under Apache-2.0. The
+          early, version {receiptDinner.version}, alpha. It is open source under Apache-2.0. The
           demo on this site replays runs computed in advance with the same
           engine. It does not yet protect against people who misreport their
           own scores or team up against the rest.
@@ -426,7 +312,7 @@ const jsonLd = JSON.stringify({
     <hr class="h-px w-full border-0 bg-hairline" />
 
     <!-- How it works -->
-    <section id="how-it-works" class="py-14 lg:py-20" aria-labelledby="how-head">
+    <section id="properties" class="py-14 lg:py-20" aria-labelledby="how-head">
       <div class={wrap}>
         <h2
           id="how-head"
@@ -448,7 +334,7 @@ const jsonLd = JSON.stringify({
                 utility.
               </p>
               <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted"
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
                 >preferences.py</span
               >
             </div>
@@ -475,7 +361,7 @@ const jsonLd = JSON.stringify({
                 constraint was crossed.
               </p>
               <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted"
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
                 >agent.py</span
               >
             </div>
@@ -502,7 +388,7 @@ const jsonLd = JSON.stringify({
                 means an honest deadlock, never a forced decision.
               </p>
               <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted"
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
                 >consensus.py</span
               >
             </article>
@@ -516,7 +402,7 @@ const jsonLd = JSON.stringify({
                 was crossed, without revealing it.
               </p>
               <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted"
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
                 >transcript.py</span
               >
             </article>
