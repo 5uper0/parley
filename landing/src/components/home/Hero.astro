@@ -1,0 +1,151 @@
+---
+// Section 1. Text sits on a solid --bg band; the scene runs edge to edge below it and carries
+// no text except the phone CTA, which is a solid button on the dark table.
+import { DEMO_URL } from "../../data/film-copy";
+import { hero } from "../../data/home-hero";
+import { heroSources, PORTRAIT_MEDIA, SIZES } from "./hero-image";
+
+const { landscape, portrait } = await heroSources();
+
+const primary =
+  "min-h-12 items-center justify-center rounded-full bg-indigo px-7 py-3 text-base font-semibold text-bg";
+---
+
+<section class="hero bg-bg" aria-labelledby="hero-h">
+  <div
+    class="mx-auto grid w-full max-w-[75rem] gap-x-8 gap-y-4 px-5 pt-6 pb-4 min-[721px]:gap-y-6 min-[721px]:px-10 min-[721px]:pt-12 min-[721px]:pb-8 lg:grid-cols-12"
+  >
+    <h1
+      id="hero-h"
+      class="font-display text-[2rem] leading-[1.08] tracking-[-0.028em] text-balance text-ink min-[721px]:text-5xl min-[721px]:leading-[1.05] lg:col-span-7 lg:text-6xl"
+    >
+      {hero.headline}
+    </h1>
+    <div class="lg:col-span-5 lg:self-end">
+      <p class="max-w-[44ch] text-base/6 text-muted min-[721px]:text-lg/7">{hero.sub}</p>
+      <p class="mt-2 flex flex-wrap items-center gap-x-6 min-[721px]:mt-6">
+        <a href={DEMO_URL} class={`hidden min-[721px]:inline-flex ${primary}`}>{hero.primary}</a>
+        <a href="#how" class="inline-flex min-h-11 items-center text-base text-ink underline-offset-4 hover:underline">
+          {hero.secondary}
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="scene">
+    <picture>
+      <source
+        media={PORTRAIT_MEDIA}
+        type="image/avif"
+        srcset={portrait.avif}
+        sizes={SIZES}
+        width={portrait.width}
+        height={portrait.height}
+      />
+      <source
+        media={PORTRAIT_MEDIA}
+        type="image/webp"
+        srcset={portrait.webp}
+        sizes={SIZES}
+        width={portrait.width}
+        height={portrait.height}
+      />
+      <source
+        media={PORTRAIT_MEDIA}
+        type="image/jpeg"
+        srcset={portrait.jpeg}
+        sizes={SIZES}
+        width={portrait.width}
+        height={portrait.height}
+      />
+      <source type="image/avif" srcset={landscape.avif} sizes={SIZES} />
+      <source type="image/webp" srcset={landscape.webp} sizes={SIZES} />
+      <img
+        src={landscape.fallback}
+        srcset={landscape.jpeg}
+        sizes={SIZES}
+        width={landscape.width}
+        height={landscape.height}
+        alt={hero.sceneAlt}
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
+      />
+    </picture>
+    <a href={DEMO_URL} class={`scene-cta flex min-[721px]:hidden ${primary}`}>{hero.primary}</a>
+  </div>
+</section>
+
+<style>
+  /* --band is the header plus the text band above the scene, so the scene ends at the fold. */
+  .scene {
+    --band: 21rem;
+    --fade: 4rem;
+    position: relative;
+    overflow: hidden;
+    height: clamp(26rem, calc(100svh - var(--band)), 40rem);
+    background: var(--bg);
+  }
+  .scene img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 85%;
+    animation: scene-settle 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .scene::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 1;
+    height: var(--fade);
+    background: linear-gradient(var(--bg), transparent);
+    pointer-events: none;
+  }
+  /* Phone only: keeps the button edge clean on the table. */
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 7.5rem;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 60%, transparent));
+    pointer-events: none;
+  }
+  .scene-cta {
+    position: absolute;
+    right: 1.25rem;
+    bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    left: 1.25rem;
+    z-index: 2;
+  }
+  @keyframes scene-settle {
+    from {
+      transform: scale(1.03);
+    }
+  }
+  @media (min-width: 721px) {
+    .scene {
+      --band: 24rem;
+      --fade: 6rem;
+      height: clamp(30rem, calc(100svh - var(--band)), 37.5rem);
+    }
+    .scene img {
+      object-position: 50% 90%;
+    }
+    .scene::after {
+      content: none;
+    }
+  }
+  @media (min-width: 1024px) {
+    .scene {
+      --band: 20.5rem;
+      height: clamp(32.5rem, calc(100svh - var(--band)), 47.5rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scene img {
+      animation: none;
+    }
+  }
+</style>
