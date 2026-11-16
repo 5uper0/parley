@@ -1,0 +1,49 @@
+---
+// The three steps as plain text. Step wording is the reviewed copy of components/home/How.astro
+// (landing-v3-copy 3.1). The default slot takes the recorded transcript card.
+interface Props {
+  id: string;
+  wrap: string;
+}
+const { id, wrap } = Astro.props;
+
+const title = "How it works";
+const footnote = "The checks are plain code, not a language model.";
+const steps = [
+  {
+    label: "Tell.",
+    body: "You tell your own agent what you like and the one thing you won't go above. That limit stays with your agent. (Developers call it a red line.)",
+  },
+  {
+    label: "Yes or no.",
+    body: "Every agent answers yes or no to each option. An option above anyone's limit cannot win. Among the rest, Parley picks the one that helps the least-happy person most. If nothing fits everyone, it says so instead of forcing a pick.",
+  },
+  {
+    label: "Check.",
+    body: "Everyone gets one pick and the receipt. You check the pick against your own sheet, on your own computer.",
+  },
+];
+---
+
+<section id={id} class="scroll-mt-6 py-12 md:py-20" aria-labelledby={`${id}-h`} data-steps>
+  <div class={`${wrap} grid gap-10 lg:grid-cols-2 lg:gap-16`}>
+    <div>
+      <h2 id={`${id}-h`} class="font-display text-3xl leading-tight tracking-tight text-ink">{title}</h2>
+      <ol class="mt-8 grid list-none gap-8 p-0">
+        {
+          steps.map((s, i) => (
+            <li class="border-t border-hairline pt-4">
+              <h3 class="font-display text-xl tracking-tight text-ink">
+                <span class="mr-2 text-muted">{i + 1}</span>
+                {s.label}
+              </h3>
+              <p class="mt-2 max-w-[64ch] text-base leading-relaxed text-muted">{s.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="mt-8 max-w-[64ch] text-sm leading-relaxed text-muted">{footnote}</p>
+    </div>
+    <div class="min-w-0 lg:pt-2"><slot /></div>
+  </div>
+</section>
