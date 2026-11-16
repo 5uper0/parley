@@ -2,6 +2,7 @@
 // The hero stage: the dinner sample drawn in three beats (tell, yes or no, check).
 // Options, costs, every yes or no and the result line are read from receipt-dinner.ts, which
 // scripts/gen-receipt.py writes from a real run; the build fails if the copy and the run disagree.
+// The rule line's tie clause is printed only from the run's pick facts, never typed.
 // The styled state is the final frame, so no JS, reduced motion and print all show the whole story.
 // Sizes are steps from docs/brand/tokens.css (type, space, radius); colours are the global tokens.
 import { explainer as x } from "../../data/home-hero";
@@ -33,6 +34,11 @@ if (stop.blockers.length !== 1 || !x.stamp.includes(stop.blockers[0])) {
 }
 if (!x.plain.includes(stop.name) || !x.plain.includes(String(stop.cost))) {
   throw new Error(`plain sentence does not match the blocked option in the run (${stop.name}, ${stop.cost})`);
+}
+const pick = receiptDinner.pick;
+const other = options.find((o) => o.venue === pick.runnerUp);
+if (!pick.leastHappyTie || !pick.pickedTotalHigher || pick.picked !== picked[0].venue || !other || other.picked || other.blockers.length) {
+  throw new Error("the rule line says the picked option ties the other one for the least-happy owner and has the higher total; the run no longer says that");
 }
 const chipFrom = owners.indexOf(stop.blockers[0]) - options.indexOf(stop);
 const tag = (o: (typeof options)[number]) =>
@@ -92,6 +98,7 @@ const tag = (o: (typeof options)[number]) =>
       <li class="chip" data-chip aria-hidden="true" style={`--at:${options.indexOf(stop)};--from:${chipFrom}`}>{x.no}</li>
     </ul>
     <p class="plain">{x.plain}</p>
+    <p class="rule" data-rule>{x.rule} <span data-tie>{x.tie(picked[0].name, other.name)}</span></p>
     <p class="engine">{x.engine}</p>
   </div>
 
@@ -146,7 +153,7 @@ const tag = (o: (typeof options)[number]) =>
   .stage {
     --gap: 0.5rem;
     --env-h: 2rem;
-    --card-h: 4.5rem;
+    --card-h: 3.75rem;
     /* Where the chip starts, measured from where it lands: up to Bob's envelope (--rise) and
        in from the card's edge to the envelope's (--nudge). */
     --rise: 3.5rem;
@@ -330,6 +337,14 @@ const tag = (o: (typeof options)[number]) =>
   .plain {
     color: var(--ink);
   }
+  .rule {
+    color: var(--ink);
+    font-size: 0.75rem;
+    line-height: 1.15;
+  }
+  .rule span {
+    color: var(--muted);
+  }
   .engine {
     padding-left: 0.5rem;
     border-left: 1px solid var(--indigo);
@@ -431,6 +446,7 @@ const tag = (o: (typeof options)[number]) =>
     .stamp,
     .tag,
     .chip,
+    .rule,
     .r-result {
       font-size: 0.875rem;
     }
@@ -452,9 +468,12 @@ const tag = (o: (typeof options)[number]) =>
       font-size: 1rem;
       line-height: 1.55;
     }
+    .rule,
+    .engine {
+      line-height: 1.35;
+    }
     .engine {
       padding-left: 0.75rem;
-      line-height: 1.35;
     }
     .receipt {
       gap: 0.5rem;
@@ -543,6 +562,7 @@ const tag = (o: (typeof options)[number]) =>
   }
   [data-picked] .card::after,
   li:not([data-blocked]) > .tag,
+  .rule,
   .engine {
     animation: fade 400ms linear 3200ms both;
   }
@@ -552,7 +572,7 @@ const tag = (o: (typeof options)[number]) =>
   .row {
     animation: fade 240ms linear calc(4400ms + var(--i) * 60ms) both;
   }
-  .rewind :is(.envelope, .seal, .options > li, .stamp, .opt-name, .opt-cost, .tag, .plain, .engine, .receipt, .row),
+  .rewind :is(.envelope, .seal, .options > li, .stamp, .opt-name, .opt-cost, .tag, .plain, .rule, .engine, .receipt, .row),
   .rewind .card::after {
     animation: none;
   }

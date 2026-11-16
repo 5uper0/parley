@@ -6,6 +6,7 @@
 export const hero = {
   headline: "Pick together without saying your limit out loud.",
   sub: "Parley lets each person's agent, an AI assistant acting for them, say yes or no. Options over anyone's limit cannot win.",
+  useCase: "For any group decision where each side has a private limit.",
   primary: "Try the demo",
   secondary: "See how it works",
   installLabel: "For developers",
@@ -21,15 +22,18 @@ export const explainer = {
   envelope: (owner: string) => `${owner}'s limit`,
   agent: (owner: string) => `${owner}'s agent`,
   cost: (cost: number) => `costs ${cost}`,
-  stamp: "Over Bob's limit",
+  stamp: "Bob said no",
   tags: {
     blocked: "Cannot win",
-    picked: "Picked. Everyone said yes.",
-    feasible: "Everyone said yes.",
+    picked: "Picked",
+    feasible: "Not picked",
   },
   yes: "yes",
   no: "no",
-  plain: "Rooftop costs 900. That is over Bob's limit, so it cannot win.",
+  plain: "Rooftop costs 900. Bob's agent says no, so it cannot win.",
+  rule: "Rule: the option best for the least-happy owner wins; a tie goes to the higher total.",
+  tie: (picked: string, other: string) =>
+    `${picked} and ${other} tie for the least-happy owner. ${picked} has the higher total.`,
   engine: "The pick is plain code, not a language model.",
   receipt: {
     header: "Receipt: every yes and no",
@@ -37,7 +41,7 @@ export const explainer = {
   },
   sampleLabel: "Illustration of a recorded sample run.",
   stageAria:
-    "Sample run: Ana, Bob and Cara's agents pick a dinner. Each limit stays sealed. Rooftop costs 900, over Bob's limit, so it cannot win. Garden is picked. All three get the same receipt.",
+    "Sample run: Ana, Bob and Cara's agents pick a dinner. Each limit stays sealed. Rooftop costs 900. Bob's agent says no, so it cannot win. Garden is picked. All three get the same receipt.",
   replay: "Play again",
 } as const;
 
