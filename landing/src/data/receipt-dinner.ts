@@ -10,4 +10,20 @@ export const receiptDinner = {
     "Cara not betrayed: True",
   ],
   sha256: "30483303e4d94e22833161d9bb8c292c0effff88c3303d7e195e57d49c88f516",
+  options: [
+    { venue: "rooftop", cost: 900 },
+    { venue: "garden", cost: 600 },
+    { venue: "diner", cost: 300 },
+  ],
+  verdicts: [
+    { option: "rooftop", owner: "Ana", acceptable: true },
+    { option: "rooftop", owner: "Bob", acceptable: false },
+    { option: "rooftop", owner: "Cara", acceptable: true },
+    { option: "garden", owner: "Ana", acceptable: true },
+    { option: "garden", owner: "Bob", acceptable: true },
+    { option: "garden", owner: "Cara", acceptable: true },
+    { option: "diner", owner: "Ana", acceptable: true },
+    { option: "diner", owner: "Bob", acceptable: true },
+    { option: "diner", owner: "Cara", acceptable: true },
+  ],
 } as const;

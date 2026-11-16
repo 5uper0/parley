@@ -24,7 +24,7 @@ gr = _load()
 
 
 def test_sample_agrees_on_garden_and_every_owner_replays_clean():
-    lines, digest = gr.generate()
+    lines, digest, _, _ = gr.generate()
     assert lines == [
         "agreed {'venue': 'garden', 'cost': 600}",
         "Ana not betrayed: True",
@@ -46,9 +46,29 @@ def test_a_limit_outside_the_stated_range_changes_the_receipt():
     assert gr.run_sample(code, 900) != gr.run_sample(code, 899)
 
 
+def test_verdict_grid_is_read_off_the_transcript():
+    _, _, options, verdicts = gr.generate()
+    assert options == [
+        {"venue": "rooftop", "cost": 900},
+        {"venue": "garden", "cost": 600},
+        {"venue": "diner", "cost": 300},
+    ]
+    said_no = [(v["owner"], v["option"]) for v in verdicts if not v["acceptable"]]
+    assert said_no == [("Bob", "rooftop")]
+    assert len(verdicts) == 9
+    assert {(v["owner"], v["option"]) for v in verdicts} == {
+        (o, v) for o in ("Ana", "Bob", "Cara") for v in ("rooftop", "garden", "diner")
+    }
+
+
+def test_generated_file_carries_no_score_or_reason():
+    text = gr.render(*gr.generate())
+    assert "score" not in text and "reason" not in text and "red-line" not in text
+    assert all(set(v) == {"option", "owner", "acceptable"} for v in gr.generate()[3])
+
+
 def test_committed_file_matches_the_generator():
-    lines, digest = gr.generate()
-    assert gr.OUT.read_text(encoding="utf-8") == gr.render(lines, digest)
+    assert gr.OUT.read_text(encoding="utf-8") == gr.render(*gr.generate())
 
 
 def test_check_passes_on_the_committed_tree():
@@ -59,9 +79,9 @@ def test_check_passes_on_the_committed_tree():
 
 
 def test_check_fails_on_a_drifted_hash(tmp_path, monkeypatch):
-    lines, digest = gr.generate()
+    lines, _, options, verdicts = gr.generate()
     stale = tmp_path / "receipt-dinner.ts"
-    stale.write_text(gr.render(lines, "0" * 64), encoding="utf-8")
+    stale.write_text(gr.render(lines, "0" * 64, options, verdicts), encoding="utf-8")
     monkeypatch.setattr(gr, "OUT", stale)
     monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
     assert gr.main() == 1
@@ -69,6 +89,16 @@ def test_check_fails_on_a_drifted_hash(tmp_path, monkeypatch):
 
 def test_check_fails_when_the_file_is_missing(tmp_path, monkeypatch):
     monkeypatch.setattr(gr, "OUT", tmp_path / "absent.ts")
+    monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
+    assert gr.main() == 1
+
+
+def test_check_fails_on_a_flipped_verdict(tmp_path, monkeypatch):
+    lines, digest, options, verdicts = gr.generate()
+    flipped = [dict(v, acceptable=True) for v in verdicts]
+    stale = tmp_path / "receipt-dinner.ts"
+    stale.write_text(gr.render(lines, digest, options, flipped), encoding="utf-8")
+    monkeypatch.setattr(gr, "OUT", stale)
     monkeypatch.setattr(sys, "argv", ["gen-receipt.py", "--check"])
     assert gr.main() == 1
 
