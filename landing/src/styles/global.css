@@ -12,6 +12,7 @@
   --color-subtle: var(--subtle);
   --color-hairline: var(--hairline);
   --color-indigo: var(--indigo);
+  --color-indigo-solid: var(--indigo-solid);
   --color-verify: var(--verify);
   --color-redline: var(--redline);
   --color-masked: var(--masked);
@@ -38,6 +39,8 @@
   --subtle: #7a8394;
   --hairline: rgba(255, 255, 255, 0.08);
   --indigo: #6675d3;
+  /* Fill behind white labels: #6675d3 gives 4.16:1, this gives 7.90:1 (design-dept contrast table). */
+  --indigo-solid: #3a45b0;
   --verify: #14a473;
   --redline: #d93a3a;
   --masked: #d9971c;
@@ -70,6 +73,7 @@
   --subtle: #6c727f;
   --hairline: #e3e6ef;
   --indigo: #3a45b0;
+  --indigo-solid: #3a45b0;
   --verify: #0d825a;
   --redline: #c42121;
   --masked: #996711;

@@ -28,6 +28,6 @@
       "grab":     {"plain": "One heir grabs 90/10, title left unclear", "tempting": true}
     },
     "attrs": [{"key": "heir1", "label": "heir 1 gets"}, {"key": "heir2", "label": "heir 2 gets"}],
-    "outcome": "The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. No family fight, and a record everyone can check."
+    "outcome": "The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. Everyone gets a record they can check."
   }
 }

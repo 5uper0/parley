@@ -23,6 +23,6 @@
       "vendor-lockin":   {"plain": "Lock-in, weak uptime, data sent offshore", "tempting": true}
     },
     "attrs": [{"key": "sla", "label": "uptime %"}, {"key": "liability_cap", "label": "liability cap"}],
-    "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor, with a receipt."
+    "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side handing over its floor, and both get a record to check."
   }
 }
