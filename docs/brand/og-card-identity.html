@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!--
+  Parley share card, 1200x630, identity of 2026-11-17 (WI-261116-134): light, plain words, no metaphor,
+  no green (no signed run), no claims beyond the README one-liner. Render:
+    chrome --headless --screenshot=og-card.png --window-size=1200,630 og-card-identity.html
+-->
+<style>
+  :root{--ink:#14161B;--muted:#4A5160;--bg:#F6F7FB;--indigo:#3A45B0;--red:#C42121;--hair:#D9DCE6;
+    --sans:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;--mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace}
+  *{margin:0;box-sizing:border-box}
+  body{background:var(--bg);font-family:var(--sans)}
+  .frame{width:1200px;height:630px;padding:64px 84px;display:flex;flex-direction:column;justify-content:space-between;color:var(--ink)}
+  .logo{font-size:44px;font-weight:600;letter-spacing:-.03em}.logo .d{color:var(--red)}
+  h1{font-size:52px;line-height:1.07;font-weight:600;letter-spacing:-.025em;max-width:24ch}
+  p.sub{margin-top:20px;font-size:23px;line-height:1.4;color:var(--muted);max-width:42ch}
+  .foot{display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .install{font-family:var(--mono);font-size:26px;border:2px solid var(--ink);border-radius:12px;padding:14px 22px;background:#fff}
+  .note{font-size:20px;color:var(--muted);max-width:30ch;text-align:right}
+</style>
+</head>
+<body>
+  <div class="frame">
+    <div class="logo">parley<span class="d">.</span></div>
+    <div>
+      <h1>Agents that act for different people can agree without anyone handing over their limit.</h1>
+      <p class="sub">An open-source Python library. Each person's hard limits run as code, and every result leaves a record anyone can check.</p>
+    </div>
+    <div class="foot">
+      <span class="install">pip install parley-consensus</span>
+      <span class="note">Early, version 0.2.1, no outside users yet.</span>
+    </div>
+  </div>
+</body>
+</html>
