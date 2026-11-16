@@ -51,5 +51,5 @@ export const receipt = {
   body: "The receipt is the same record of every yes and no for everyone, and you replay your own limit against it on your own computer, so nobody else has to see it.",
   label: "Recorded sample run. Not a live result, not real people.",
   caption:
-    "This is what the dinner code prints. Rooftop was Ana's favorite and lost: it is over Bob's limit. Each of the three replayed their own limit against the receipt and it held. Run it yourself and you get the same lines.",
+    "This is what the dinner code prints. Rooftop was Ana's favorite and lost: Bob's agent said no. Each of the three replayed their own limit against the receipt and it held. Run it yourself and you get the same lines.",
 } as const;
