@@ -258,10 +258,10 @@ landlord side is inferred, not ratified). The screenshot-native proof card is `e
 docker build -t parley . && docker run --rm -p 8080:8080 parley
 ```
 
-**Try it in the browser: [parleyprotocol.com/demo](https://parleyprotocol.com/demo/)** replays sample
-decisions that the engine computed when the site was built. No install, nothing to sign up for. To run
-the engine on your own options, `pip install parley-consensus` or start `examples/demo/server.py`; the
-repo also ships a `Dockerfile`.
+**Try it in the browser: [parleyprotocol.com/demo](https://parleyprotocol.com/demo/)**
+replays sample decisions that the engine computed when the site was built.
+No install, nothing to sign up for. To run the engine on your own options,
+`pip install parley-consensus` or start `examples/demo/server.py`; the repo also ships a `Dockerfile`.
 
 ## Built by an agent fleet
 
