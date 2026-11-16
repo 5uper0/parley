@@ -99,6 +99,10 @@ const pageLinks: { href: string; label: string; lang?: string; external?: boolea
 </div>
 
 <style>
+  /* System font: the one Cyrillic label must not pull the Inter cyrillic file on first load. */
+  footer a[lang="uk"] {
+    font-family: system-ui, sans-serif;
+  }
   .film-credit {
     --credit-opacity: 0.75;
     display: flex;
