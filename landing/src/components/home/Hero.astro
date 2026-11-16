@@ -1,151 +1,176 @@
 ---
-// Section 1. Text sits on a solid --bg band; the scene runs edge to edge below it and carries
-// no text except the phone CTA, which is a solid button on the dark table.
+// Section 1. Text on the left, the drawn dinner sample on the right; one column on phones with
+// the stage between the sub and the buttons. Source order is the tab order: links, install line,
+// then the stage. Sizes are steps from docs/brand/tokens.css.
 import { DEMO_URL } from "../../data/film-copy";
 import { hero } from "../../data/home-hero";
-import { heroSources, PORTRAIT_MEDIA, SIZES } from "./hero-image";
-
-const { landscape, portrait } = await heroSources();
-
-const primary =
-  "min-h-12 items-center justify-center rounded-full bg-indigo px-7 py-3 text-base font-semibold text-bg";
+import HeroExplainer from "./HeroExplainer.astro";
 ---
 
-<section class="hero bg-bg" aria-labelledby="hero-h">
-  <div
-    class="mx-auto grid w-full max-w-[75rem] gap-x-8 gap-y-4 px-5 pt-6 pb-4 min-[721px]:gap-y-6 min-[721px]:px-10 min-[721px]:pt-12 min-[721px]:pb-8 lg:grid-cols-12"
-  >
-    <h1
-      id="hero-h"
-      class="font-display text-[2rem] leading-[1.08] tracking-[-0.028em] text-balance text-ink min-[721px]:text-5xl min-[721px]:leading-[1.05] lg:col-span-7 lg:text-6xl"
-    >
-      {hero.headline}
-    </h1>
-    <div class="lg:col-span-5 lg:self-end">
-      <p class="max-w-[44ch] text-base/6 text-muted min-[721px]:text-lg/7">{hero.sub}</p>
-      <p class="mt-2 flex flex-wrap items-center gap-x-6 min-[721px]:mt-6">
-        <a href={DEMO_URL} class={`hidden min-[721px]:inline-flex ${primary}`}>{hero.primary}</a>
-        <a href="#how" class="inline-flex min-h-11 items-center text-base text-ink underline-offset-4 hover:underline">
-          {hero.secondary}
-        </a>
-      </p>
+<section class="hero" aria-labelledby="hero-h">
+  <div class="home-wrap wrap">
+    <h1 id="hero-h">{hero.headline}</h1>
+    <p class="sub">{hero.sub}</p>
+    <p class="cta">
+      <a href={DEMO_URL} class="primary" data-hero-cta>{hero.primary}</a>
+      <a href="#how" class="more">{hero.secondary}</a>
+    </p>
+    <div class="dev">
+      <p>{hero.installLabel}</p>
+      <pre tabindex="0" class="select-all whitespace-nowrap" aria-label={hero.installAria} data-install>{hero.install}</pre>
     </div>
-  </div>
-
-  <div class="scene">
-    <picture>
-      <source
-        media={PORTRAIT_MEDIA}
-        type="image/avif"
-        srcset={portrait.avif}
-        sizes={SIZES}
-        width={portrait.width}
-        height={portrait.height}
-      />
-      <source
-        media={PORTRAIT_MEDIA}
-        type="image/webp"
-        srcset={portrait.webp}
-        sizes={SIZES}
-        width={portrait.width}
-        height={portrait.height}
-      />
-      <source
-        media={PORTRAIT_MEDIA}
-        type="image/jpeg"
-        srcset={portrait.jpeg}
-        sizes={SIZES}
-        width={portrait.width}
-        height={portrait.height}
-      />
-      <source type="image/avif" srcset={landscape.avif} sizes={SIZES} />
-      <source type="image/webp" srcset={landscape.webp} sizes={SIZES} />
-      <img
-        src={landscape.fallback}
-        srcset={landscape.jpeg}
-        sizes={SIZES}
-        width={landscape.width}
-        height={landscape.height}
-        alt={hero.sceneAlt}
-        fetchpriority="high"
-        loading="eager"
-        decoding="async"
-      />
-    </picture>
-    <a href={DEMO_URL} class={`scene-cta flex min-[721px]:hidden ${primary}`}>{hero.primary}</a>
+    <p class="status" data-hero-status>{hero.status}</p>
+    <div class="explainer"><HeroExplainer /></div>
   </div>
 </section>
 
 <style>
-  /* --band is the header plus the text band above the scene, so the scene ends at the fold. */
-  .scene {
-    --band: 21rem;
-    --fade: 4rem;
-    position: relative;
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.75rem;
+    padding-bottom: 2rem;
+  }
+  h1 {
+    order: 1;
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.875rem;
+    font-weight: var(--font-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .sub {
+    order: 2;
+    max-width: 40ch;
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  .explainer {
+    order: 3;
+    margin-top: 0.75rem;
+  }
+  .cta {
+    order: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.5rem;
+    margin: 0.25rem 0 0;
+  }
+  .primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 1.5rem;
+    border-radius: 0.5rem;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--ink);
+    font-size: 1rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+  }
+  /* Phones: label and command share one row, so the command stays above the fold. */
+  .dev {
+    order: 5;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .dev p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+  pre {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    flex: none;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0 0.5rem;
     overflow: hidden;
-    height: clamp(26rem, calc(100svh - var(--band)), 40rem);
-    background: var(--bg);
+    border: 1px solid var(--hairline);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-variant-ligatures: none;
   }
-  .scene img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 85%;
-    animation: scene-settle 1200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  .status {
+    order: 6;
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.35;
   }
-  .scene::before {
-    content: "";
-    position: absolute;
-    inset: 0 0 auto;
-    z-index: 1;
-    height: var(--fade);
-    background: linear-gradient(var(--bg), transparent);
-    pointer-events: none;
-  }
-  /* Phone only: keeps the button edge clean on the table. */
-  .scene::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 0;
-    height: 7.5rem;
-    background: linear-gradient(transparent, color-mix(in srgb, var(--bg) 60%, transparent));
-    pointer-events: none;
-  }
-  .scene-cta {
-    position: absolute;
-    right: 1.25rem;
-    bottom: calc(4.5rem + env(safe-area-inset-bottom));
-    left: 1.25rem;
-    z-index: 2;
-  }
-  @keyframes scene-settle {
-    from {
-      transform: scale(1.03);
-    }
-  }
+
   @media (min-width: 721px) {
-    .scene {
-      --band: 24rem;
-      --fade: 6rem;
-      height: clamp(30rem, calc(100svh - var(--band)), 37.5rem);
+    .wrap {
+      padding-top: 2.5rem;
     }
-    .scene img {
-      object-position: 50% 90%;
+    h1 {
+      font-size: 3rem;
     }
-    .scene::after {
-      content: none;
+    .sub {
+      margin-top: 1rem;
+      font-size: 1.125rem;
+      line-height: 1.55;
+    }
+    .explainer {
+      width: 100%;
+      max-width: 42.5rem;
+      margin: 1.5rem auto 0;
+    }
+    .cta {
+      margin-top: 1.5rem;
+    }
+    .dev {
+      display: block;
+      margin-top: 1.5rem;
+    }
+    .dev p {
+      font-size: 0.875rem;
+    }
+    pre {
+      margin-top: 0.5rem;
+      padding: 0 0.75rem;
+      font-size: 1rem;
     }
   }
+
   @media (min-width: 1024px) {
-    .scene {
-      --band: 20.5rem;
-      height: clamp(32.5rem, calc(100svh - var(--band)), 47.5rem);
+    .wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: repeat(5, auto) 1fr;
+      column-gap: 3rem;
     }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .scene img {
-      animation: none;
+    .wrap > * {
+      grid-column: 1;
+    }
+    .wrap > .explainer {
+      grid-row: 1 / span 6;
+      grid-column: 2;
+      max-width: none;
+      margin: 0;
     }
   }
 </style>

@@ -5,9 +5,9 @@ import { receipt } from "../../data/home-hero";
 import { receiptDinner } from "../../data/receipt-dinner";
 ---
 
-<section id="receipt" class="scroll-mt-24 pb-16 lg:pb-24" aria-labelledby="receipt-h">
-  <div class="mx-auto grid w-full max-w-[75rem] gap-x-8 gap-y-10 px-5 min-[721px]:px-10 lg:grid-cols-12">
-    <figure class="relative z-10 -mt-8 lg:order-2 lg:col-span-5 lg:col-start-8 lg:-mt-30 lg:w-100 lg:justify-self-end">
+<section id="receipt" class="scroll-mt-24 py-12 md:py-20" aria-labelledby="receipt-h">
+  <div class="home-wrap grid gap-x-8 gap-y-10 lg:grid-cols-12">
+    <figure class="lg:order-2 lg:col-span-5 lg:col-start-8 lg:w-100 lg:justify-self-end">
       <div class="card rounded-xl border border-hairline bg-surface p-5 min-[721px]:p-6" data-receipt>
         <svg class="flap" viewBox="0 0 400 40" preserveAspectRatio="none" aria-hidden="true">
           <polygon points="0,0 400,0 200,40" vector-effect="non-scaling-stroke"></polygon>
@@ -23,7 +23,7 @@ import { receiptDinner } from "../../data/receipt-dinner";
       <figcaption class="mt-4 text-sm/6 text-muted">{receipt.caption}</figcaption>
     </figure>
 
-    <div class="lg:order-1 lg:col-span-6 lg:pt-12">
+    <div class="lg:order-1 lg:col-span-6">
       <p class="max-w-prose text-lg/7 text-ink">{receipt.fold}</p>
       <h2 id="receipt-h" class="mt-8 font-display text-3xl leading-tight tracking-tight text-ink">{receipt.title}</h2>
       <p class="mt-4 max-w-prose text-base/7 text-muted">{receipt.body}</p>
