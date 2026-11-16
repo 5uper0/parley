@@ -121,7 +121,7 @@ export const status = {
     "Early stage, v0.2.1.",
     "Open source.",
     "0 outside users.",
-    "Not production-secure for adversarial principals.",
+    "Not built for owners who try to cheat.",
     "When no option fits everyone, it reports an honest deadlock, not a forced pick.",
   ],
 } as const;

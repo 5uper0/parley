@@ -119,7 +119,7 @@ const assets = [
 
 const palette = [
   { hex: "#3A45B0", name: "Parley indigo", meaning: "the engine" },
-  { hex: "#0E8F63", name: "Verify green", meaning: "a proven verdict" },
+  { hex: "#0E8F63", name: "Verify green", meaning: "a verdict that passed its check" },
   { hex: "#C42121", name: "Red-line red", meaning: "a deterministic block, never decorative" },
   { hex: "#B87C15", name: "Masked amber", meaning: "a hidden verdict" },
 ];
@@ -131,7 +131,7 @@ const faqs = [
   },
   {
     q: "What stops the coordinator from cheating?",
-    a: "Structurally, it never learns enough to cheat usefully: it sees a masked verdict, never the reason and never the sheet. On top of that, verify_outcome lets anyone replay the public record and confirm the announced decision really is the max-min one, so a coordinator cannot quietly finalise some other feasible option. What signing does not yet do, and we would rather say so than be caught saying otherwise: an Ed25519 signature binds a key to an exact option and verdict pair, which stops a signed verdict being altered or moved to another option, but it does not prove who signed. There is no trusted owner-to-key roster yet, so a coordinator holding any key could sign a fabricated verdict under its own key, and a genuine signed verdict carries no nonce, so it can be replayed into another parley that reuses the same option. Today the guarantee is tamper-evidence, not authenticity. The roster pin and replay binding are the v0.2 work, and both limits are listed in SECURITY.md.",
+    a: "Structurally, it never learns enough to cheat usefully: it sees a masked verdict, never the reason and never the sheet. On top of that, verify_outcome lets anyone replay the public record and confirm the announced decision really is the max-min one, so a coordinator cannot quietly finalise some other feasible option. What signing does not yet do, and we would rather say so than be caught saying otherwise: an Ed25519 signature binds a key to an exact option and verdict pair, which stops a signed verdict being altered or moved to another option, but it does not show who signed. There is no trusted owner-to-key roster yet, so a coordinator holding any key could sign a fabricated verdict under its own key, and a genuine signed verdict carries no nonce, so it can be replayed into another parley that reuses the same option. Today what you get is tamper-evidence, not authenticity. The roster pin and replay binding are the v0.2 work, and both limits are listed in SECURITY.md.",
   },
   {
     q: "What happens when there is no acceptable option?",
@@ -295,7 +295,7 @@ const jsonLd = JSON.stringify({
           adversarial question. If your agent and my agent are negotiating a delivery
           window, a contract clause or a shared budget, both of us are trusting a language
           model to hold a line it was merely told to hold. There is no artifact afterwards
-          that proves it did.
+          that shows it did.
         </p>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Three failure modes follow, and Parley closes each one in code.
@@ -333,7 +333,7 @@ const jsonLd = JSON.stringify({
           contact, and organisations willing to put those agents in front of
           counterparties. The referee layer is the piece that did not arrive with them.
           The comparable moment is payments before settlement rails, where the messaging
-          worked long before anyone could prove what had been agreed.
+          worked long before anyone could check what had been agreed.
         </p>
       </section>
 
