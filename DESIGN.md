@@ -1,6 +1,8 @@
 # DESIGN.md: Parley (landing, demo, proof cards)
 
-Read before changing any page, component or copy. Brand rationale and canonical tokens already exist: `docs/brand/brand.md`, `docs/brand/tokens.css`, `docs/brand/calibration-linear.md`. This file adds the site-level rules and anti-slop gate; it does not replace them. Site code: `landing/src` (Astro; `styles/global.css`, `components/`, `layouts/Layout.astro`). Verified in `landing/src/styles/global.css`. Owner: design-dept; the project session merges.
+
+Parley is a Python library for developers: say that first.
+Read before changing any page, component or copy. Brand rationale and canonical tokens already exist: `docs/brand/brand.md`, `docs/brand/tokens.css`, `docs/brand/calibration-linear.md`. This file adds the site-level rules and anti-slop gate; it does not replace them. Site code: `landing/src` (Astro; `styles/global.css`, `components/`, `layouts/Layout.astro`).
 
 ## 1. Colour (semantic: colour carries product meaning)
 | Token | Dark | Light | Meaning |
@@ -36,11 +38,11 @@ Use the scale in `tokens.css`; do not invent radii or spacing steps. Hairline bo
 ## 5. Imagery
 Product output only: real transcripts, proof cards, verification pages. No stock illustrations, 3D blobs, robot or sparkle symbols, no AI-generated faces. Proof cards and OG images are built from `docs/brand/*.html` templates.
 
-## 6. Anti-slop rules (design-dept gate, WI-261105-056)
+## 6. Anti-slop rules
 Blockers:
 1. No claim that someone uses Parley in a setting where nobody does (KYC/AML, enterprise negotiation, inheritance). Scenarios on `/demo` are labelled sample runs.
 2. "Real decision" never describes scripted engine runs. Say "sample decision".
-3. No invented number or testimonial. State the version (v0.2.0) and that it is early where the page makes capability claims.
+3. No invented number or testimonial. State the current version and that it is early where the page makes capability claims.
 4. The page never contradicts itself (what is verified, what is private, what the coordinator sees).
 5. Product shown working or plainly labelled as not live.
 Copy and layout:
@@ -52,7 +54,7 @@ Copy and layout:
 11. Contrast 4.5:1 for all small text on dark, focus visible, reduced motion respected.
 
 ## 7. Copy
-Plain, exact, limits first: say what the product does not give you. Languages en, es, uk change together; keep each claim identical. Run the global `anti-slop` skill on every UI or copy change; a FAIL on a blocker item stops the PR. For prose also run `stop-slop` (global `~/.claude/skills/stop-slop/`).
+Plain, exact, limits first: say what the product does not give you. Languages en, es, uk change together; keep each claim identical. Check every UI or copy change against these rules; a failed blocker item stops the PR. For prose also run `stop-slop`.
 
 ## 8. Review
-New or changed hero, proof card, OG card, logo or media template goes to design-dept (`wi.py new --owner design-dept`). Routine guide posts from an approved template skip it.
+New or changed hero, proof card, OG card, logo or media template needs a design review before it ships. Routine guide posts from an approved template skip it.
