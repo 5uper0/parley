@@ -19,7 +19,7 @@ def test_footer_links_to_the_privacy_page():
     index = os.path.join(_ROOT, "examples", "demo", "index.html")
     with open(index, encoding="utf-8") as fh:
         html = fh.read()
-    assert 'href="/privacy"' in html
+    assert 'href="/privacy/"' in html
 
 
 def test_root_only_files_are_not_duplicated_under_the_demo_build():
