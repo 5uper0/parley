@@ -35,7 +35,7 @@ const boilerplates = [
     id: "bp-medium",
     label: "Medium",
     meta: "100 words",
-    text: `Parley is an open-source Python library. It lets agents that act for different owners agree on one option without anyone handing over their limits. Each owner writes hard limits as code, so an option that crosses any owner's limit cannot win. Each agent returns only a masked verdict: acceptable or not, a soft score, and the reason “ok” or “red-line”. The rule is max-min: the least-happy owner is lifted, not outvoted. Every run writes a hash-chained record that each owner checks against their own private sheet. Status: alpha ${VERSION}, demo runs scripted, no outside users yet.`,
+    text: `Parley is an open-source Python library. It lets agents that act for different owners agree on one option without anyone handing over their limits. Each owner writes hard limits as code, so an option that crosses any owner's limit cannot win. Each agent returns only a masked verdict: acceptable or not, a soft score, and the reason “ok” or “red-line”. The rule is max-min: the least-happy owner is lifted, not outvoted. Every run writes a SHA-256-hashed record that each owner checks against their own private sheet. Status: alpha ${VERSION}, demo runs scripted, no outside users yet.`,
   },
 ];
 
@@ -51,7 +51,7 @@ const facts = [
   ["Runtime", "Python 3.11 through 3.14"],
   ["Dependencies", "None in the core, standard library only. Ed25519 signing is the one optional extra"],
   ["Tests", "Full suite green across Python 3.11-3.14, including a red-team suite for preference-extraction attacks"],
-  ["External contributors", "None yet"],
+  ["External contributors", "1 merged pull request from outside the project"],
   ["Self-hosting", "docker run one-liner; nothing calls home"],
   ["Business model", "Open core. The engine is Apache-2.0. A paid hosted layer is planned, not built"],
 ];
