@@ -195,7 +195,7 @@ const jsonLd = JSON.stringify({
           <hr class="my-2.5 border-0 border-t border-dashed border-hairline" />
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="font-semibold text-indigo-text"
-              >max-min picks option P</span
+              >max-min picks option P (thu 14:00)</span
             >
             <span
               class="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-muted"
@@ -211,198 +211,6 @@ const jsonLd = JSON.stringify({
         </div>
       </div>
     </Hero>
-
-    <hr class="h-px w-full border-0 bg-hairline" />
-
-    <Steps id="how-it-works" wrap={wrap} />
-
-    <hr class="h-px w-full border-0 bg-hairline" />
-
-    <!-- Plain words: the layperson block. Keep it jargon-free; the technical sections follow. -->
-    <section id="plain-words" class="py-14 lg:py-20" aria-labelledby="plain-head">
-      <div class={wrap}>
-        <h2
-          id="plain-head"
-          class="text-sm font-semibold text-muted"
-        >
-          In plain words
-        </h2>
-        <p
-          class="mt-7 max-w-[52ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
-        >
-          Parley is a way for several people's AI agents to agree on one
-          option, without anyone having to hand over their private limits.
-        </p>
-
-        <div class="mt-10 max-w-[44rem]">
-          <article class={`${propBase} p-7 md:p-8`}>
-            <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
-              For example
-            </h3>
-            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
-              Three friends are picking the dates for a weekend trip and
-              splitting the cost. Each has a limit they would rather not say out
-              loud. Ana cannot spend more than 200. Bob cannot leave before
-              Friday evening. Cara will not share a room.
-            </p>
-            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
-              Each one tells only their own agent. The agents go through
-              the options together. Any option that crosses one friend's limit
-              is out, no matter how much the other two like it.
-            </p>
-            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
-              Among the options left, the winner is the one that leaves the
-              least happy friend as well off as possible. The others see that an
-              agent said no to an option, never why.
-            </p>
-          </article>
-
-        </div>
-
-        <p class="mt-8 max-w-[76ch] text-[14.5px] leading-[1.65] text-muted">
-          <b class="font-semibold text-ink">Where this stands:</b> Parley is
-          early, version {receiptDinner.version}, alpha. It is open source under Apache-2.0. The
-          demo on this site replays runs computed in advance with the same
-          engine. It does not yet protect against people who misreport their
-          own scores or team up against the rest.
-        </p>
-      </div>
-    </section>
-
-    <hr class="h-px w-full border-0 bg-hairline" />
-
-    <!-- Problem -->
-    <section class="py-14 lg:py-20" aria-labelledby="problem-head">
-      <div class={wrap}>
-        <h2
-          id="problem-head"
-          class="text-sm font-semibold text-muted"
-        >
-          The gap nobody productised
-        </h2>
-        <div class="mt-7 grid gap-5 md:grid-cols-2 md:items-start md:gap-12">
-          <p
-            class="max-w-[44ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] text-muted"
-          >
-            Most agent tooling solves transport (A2A, MCP), one-to-one agentic
-            commerce, or cooperative debate between agents that already share
-            one owner.
-          </p>
-          <p
-            class="max-w-[44ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
-          >
-            Parley solves a different gap: delegates of different, conflicting,
-            private owners reaching a decision{" "}
-            <span
-              class="bg-[linear-gradient(to_top,var(--redline)_0_2px,transparent_2px)] pb-0.5"
-              >that crosses no owner's red line</span
-            >, and each owner can check it.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <hr class="h-px w-full border-0 bg-hairline" />
-
-    <!-- How it works -->
-    <section id="properties" class="py-14 lg:py-20" aria-labelledby="how-head">
-      <div class={wrap}>
-        <h2
-          id="how-head"
-          class="mb-9 max-w-[26ch] font-display text-[clamp(1.7rem,3.4vw,2.4rem)] leading-[1.12] tracking-[-0.026em] text-ink"
-        >
-          Four properties, enforced in code, not left to a model's discretion.
-        </h2>
-        <div class="grid gap-5">
-          <article
-            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
-          >
-            <div>
-              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
-                Red lines
-              </h3>
-              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
-                Hard constraints written as code predicates. A crossed red line
-                rejects an option outright. It is never negotiated away as soft
-                utility.
-              </p>
-              <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
-                >preferences.py</span
-              >
-            </div>
-            <div class={deviceBlock} aria-label="Example: a red line rejecting an option">
-              <span class="text-muted">round 1 &middot; option A proposed</span
-              ><br />
-              ana verdict: ok<br />
-              <span class="text-redline-text">cara verdict: red-line</span
-              ><br />
-              <span class="text-ink">option A rejected</span>
-            </div>
-          </article>
-
-          <article
-            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
-          >
-            <div>
-              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
-                Masked verdicts
-              </h3>
-              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
-                The coordinator sees only an acceptable or red-line verdict and
-                a soft score. Never the private sheet, and never which
-                constraint was crossed.
-              </p>
-              <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
-                >agent.py</span
-              >
-            </div>
-            <div
-              class={deviceBlock}
-              aria-label="Example: what leaves the agent versus what stays private"
-            >
-              <span class="text-muted">leaves the agent:</span><br />
-              <span class="text-ink">acceptable</span> &middot; score 0.71 &middot;
-              reason "ok"<br />
-              <span class="text-muted">stays private:</span><br />
-              <span class="text-masked">the sheet, and which line was crossed</span>
-            </div>
-          </article>
-
-          <div class="grid gap-5 md:grid-cols-2">
-            <article class={`${propBase} p-7`}>
-              <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
-                Max-min consensus
-              </h3>
-              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
-                Among options feasible for everyone, lift the least-happy
-                participant, tie-broken by total welfare. No feasible option
-                means an honest deadlock, never a forced decision.
-              </p>
-              <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
-                >consensus.py</span
-              >
-            </article>
-            <article class={`${propBase} p-7`}>
-              <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
-                Verifiable transcript
-              </h3>
-              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
-                A SHA-256 hash over the canonical, masked record. Each owner
-                replays their own private sheet locally to confirm no red line
-                was crossed, without handing it over.
-              </p>
-              <span
-                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
-                >transcript.py</span
-              >
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <hr class="h-px w-full border-0 bg-hairline" />
 
@@ -476,44 +284,185 @@ const jsonLd = JSON.stringify({
             </div>
           </div>
         </div>
-        <div
-          class="mt-8 flex flex-col items-start gap-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-8"
+      </div>
+    </section>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <!-- How it works -->
+    <section id="properties" class="py-14 lg:py-20" aria-labelledby="how-head">
+      <div class={wrap}>
+        <h2
+          id="how-head"
+          class="mb-9 max-w-[26ch] font-display text-[clamp(1.7rem,3.4vw,2.4rem)] leading-[1.12] tracking-[-0.026em] text-ink"
         >
-          <div class="grid grid-cols-2 gap-x-8 gap-y-5 sm:flex sm:gap-10">
+          Four properties, enforced in code.
+        </h2>
+        <div class="grid gap-5">
+          <article
+            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
+          >
             <div>
-              <div
-                class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-ink"
+              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
+                Red lines
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
+                Hard constraints written as code predicates. A crossed red line
+                rejects an option outright. It is never negotiated away as soft
+                utility.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
+                >preferences.py</span
               >
-                5/5
-              </div>
-              <div class="mt-1 max-w-[18ch] text-[12.5px] text-muted">
-                scripted sheets replayed in a recorded run
-              </div>
             </div>
+            <div class={deviceBlock} aria-label="Illustrative example: a red line rejecting an option">
+              <span class="text-muted">illustrative &middot; option A proposed</span
+              ><br />
+              ana verdict: ok<br />
+              <span class="text-redline-text">cara verdict: red-line</span
+              ><br />
+              <span class="text-ink">option A rejected</span>
+            </div>
+          </article>
+
+          <article
+            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
+          >
             <div>
-              <div
-                class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-ink"
+              <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
+                Masked verdicts
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
+                The coordinator sees only an acceptable or red-line verdict and
+                a soft score. Never the private sheet, and never which
+                constraint was crossed. A score can still hint at a range; see
+                Where this stands.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
+                >agent.py</span
               >
-                256-bit
-              </div>
-              <div class="mt-1 max-w-[18ch] text-[12.5px] text-muted">
-                hash over the canonical record
-              </div>
             </div>
-            <div>
-              <div
-                class="font-display text-[2rem] tracking-[-0.02em] whitespace-nowrap text-indigo"
+            <div
+              class={deviceBlock}
+              aria-label="Illustrative example: what leaves the agent versus what stays private"
+            >
+              <span class="text-muted">illustrative &middot; leaves the agent:</span><br />
+              <span class="text-ink">acceptable</span> &middot; score 0.71 &middot;
+              reason "ok"<br />
+              <span class="text-muted">stays private:</span><br />
+              <span class="text-masked">the sheet, and which line was crossed</span>
+            </div>
+          </article>
+
+          <div class="grid gap-5 md:grid-cols-2">
+            <article class={`${propBase} p-7`}>
+              <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
+                Max-min consensus
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
+                Among options feasible for everyone, lift the least-happy
+                participant, tie-broken by total welfare. No feasible option
+                means an honest deadlock, never a forced decision.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
+                >consensus.py</span
               >
-                0
-              </div>
-              <div class="mt-1 max-w-[18ch] text-[12.5px] text-muted">
-                red lines crossed in that recorded run
-              </div>
-            </div>
+            </article>
+            <article class={`${propBase} p-7`}>
+              <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
+                Verifiable transcript
+              </h3>
+              <p class="mt-2.5 max-w-[48ch] text-[14.5px] leading-[1.6] text-muted">
+                A SHA-256 hash over the canonical, masked record. Each owner
+                replays their own private sheet locally to confirm no red line
+                was crossed, without handing it over.
+              </p>
+              <span
+                class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-xs text-muted"
+                >transcript.py</span
+              >
+            </article>
           </div>
-          <a href={DEMO_URL} class={btnGhost}>
-            Open the demo
-          </a>
+        </div>
+      </div>
+    </section>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <Steps id="how-it-works" wrap={wrap} />
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <!-- Plain words: the layperson block. Keep it jargon-free; the technical sections follow. -->
+    <section id="plain-words" class="py-14 lg:py-20" aria-labelledby="plain-head">
+      <div class={wrap}>
+        <h2 id="plain-head" class="text-sm font-semibold text-muted">
+          For example
+        </h2>
+        <div class="mt-7 max-w-[44rem]">
+          <article class={`${propBase} p-7 md:p-8`}>
+            <p class="max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Three friends are picking the dates for a weekend trip and
+              splitting the cost. Each has a limit they would rather not say out
+              loud. Ana cannot spend more than 200. Bob cannot leave before
+              Friday evening. Cara will not share a room.
+            </p>
+            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Each one tells only their own agent. The agents go through
+              the options together. Any option that crosses one friend's limit
+              is out, no matter how much the other two like it.
+            </p>
+            <p class="mt-3 max-w-[48ch] text-[15px] leading-[1.65] text-muted">
+              Among the options left, the winner is the one that leaves the
+              least happy friend as well off as possible. The others see that an
+              agent said no to an option, never why.
+            </p>
+          </article>
+
+        </div>
+
+        <p class="mt-8 max-w-[76ch] text-[14.5px] leading-[1.65] text-muted">
+          <b class="font-semibold text-ink">Where this stands:</b> Parley is
+          early, version {receiptDinner.version}, alpha. It is open source under Apache-2.0. The
+          demo on this site replays runs computed in advance with the same
+          engine. It does not yet protect against people who misreport their
+          own scores or team up against the rest.
+        </p>
+      </div>
+    </section>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <!-- Problem -->
+    <section class="py-14 lg:py-20" aria-labelledby="problem-head">
+      <div class={wrap}>
+        <h2
+          id="problem-head"
+          class="text-sm font-semibold text-muted"
+        >
+          Where Parley sits
+        </h2>
+        <div class="mt-7 grid gap-5 md:grid-cols-2 md:items-start md:gap-12">
+          <p
+            class="max-w-[44ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] text-muted"
+          >
+            Agent protocols cover transport (A2A, MCP), one-to-one commerce, or
+            debate between agents of one owner.
+          </p>
+          <p
+            class="max-w-[44ch] text-[clamp(1.15rem,2vw,1.45rem)] leading-[1.42] tracking-[-0.01em] font-medium text-ink"
+          >
+            Parley covers a different case: agents of different owners picking
+            one option, with each owner able to check the result. It never
+            picks an option that{" "}
+            <span
+              class="bg-[linear-gradient(to_top,var(--redline)_0_2px,transparent_2px)] pb-0.5"
+              >crosses an owner's red line</span
+            >.
+          </p>
         </div>
       </div>
     </section>
