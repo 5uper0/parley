@@ -1,7 +1,12 @@
 ---
+import { receiptDinner } from "../data/receipt-dinner";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+
+const VERSION = receiptDinner.version;
+const BUILD_DATE = new Date().toISOString().slice(0, 10);
+const STATUS = `Status: alpha ${VERSION}. Scores still show some of each owner's range. Not built for owners who try to cheat.`;
 
 const wrap = "mx-auto w-full max-w-[880px] px-6 md:px-10";
 
@@ -18,19 +23,19 @@ const boilerplates = [
     id: "bp-line",
     label: "One line",
     meta: "under 100 characters",
-    text: "Parley is the neutral referee for AI agents that represent people with conflicting interests.",
+    text: "Parley is an open-source Python library for group decisions between agents, with private limits.",
   },
   {
     id: "bp-short",
     label: "Short",
     meta: "50 words",
-    text: "Parley is an open-source consensus layer for AI agents that act on behalf of different owners. Each owner's red lines are enforced as code, not as a model's good intentions. Agents exchange masked verdicts, a max-min rule picks the option that lifts the least-happy party, and every decision leaves a transcript each owner can verify alone.",
+    text: `Parley is an open-source Python library for decisions between agents of different owners. Each owner's hard limits run as code, so an option over anyone's limit cannot win. Agents send masked verdicts, the least-happy owner is lifted first, and every result leaves a record each owner can check. Alpha ${VERSION}.`,
   },
   {
     id: "bp-medium",
     label: "Medium",
     meta: "100 words",
-    text: "When two organisations both put an AI agent in the room, someone has to referee. Parley is the open-source layer that does it. Owners write private preference sheets whose hard constraints are executable predicates, so a violating option cannot win regardless of what any model argues. Agents reveal only a masked verdict: acceptable or not, a soft score, and a reason reduced to “ok” or “red-line”. Consensus is max-min, so the least satisfied participant is lifted rather than outvoted. Every run produces a hash-chained transcript with optional Ed25519 signatures that each owner replays against their own private sheet. Multilateral, non-crypto, self-hosted.",
+    text: `Parley is an open-source Python library. It lets agents that act for different owners agree on one option without anyone handing over their limits. Each owner writes hard limits as code, so an option that crosses any owner's limit cannot win. Each agent returns only a masked verdict: acceptable or not, a soft score, and the reason “ok” or “red-line”. The rule is max-min: the least-happy owner is lifted, not outvoted. Every run writes a SHA-256-hashed record that each owner checks against their own private sheet. Status: alpha ${VERSION}, demo runs scripted, no outside users yet.`,
   },
 ];
 
@@ -48,7 +53,7 @@ const facts = [
   ["Tests", "Full suite green across Python 3.11-3.14, including a red-team suite for preference-extraction attacks"],
   ["External contributors", "1 merged pull request from outside the project"],
   ["Self-hosting", "docker run one-liner; nothing calls home"],
-  ["Business model", "Open core. The consensus engine is Apache-2.0; the hosted broker is commercial"],
+  ["Business model", "Open core. The engine is Apache-2.0. A paid hosted layer is planned, not built"],
 ];
 
 const failureModes = [
@@ -65,7 +70,7 @@ const failureModes = [
   {
     n: "03",
     head: "Nobody can audit the outcome.",
-    body: "Parley emits a hash-chained transcript of the masked verdicts. Each owner replays it against their own private sheet and confirms no red line of theirs was crossed, without revealing the sheet to anyone.",
+    body: "Parley emits a SHA-256-hashed transcript of the masked verdicts. Each owner replays it against their own private sheet and confirms no red line of theirs was crossed, without revealing the sheet to anyone.",
   },
 ];
 
@@ -127,7 +132,7 @@ const palette = [
 const faqs = [
   {
     q: "Is this a blockchain project?",
-    a: "No, and deliberately so. Verification is a local replay of a hash-chained record against your own private data. There is no chain, no token and no network to join.",
+    a: "No, and deliberately so. Verification is a local replay of a SHA-256-hashed record against your own private data. There is no chain, no token and no network to join.",
   },
   {
     q: "What stops the coordinator from cheating?",
@@ -198,12 +203,12 @@ const jsonLd = JSON.stringify({
           Everything you need to<br class="hidden sm:block" /> write about Parley.
         </h1>
         <p class="mt-6 max-w-[58ch] text-[clamp(1rem,1.5vw,1.12rem)] leading-[1.55] text-muted">
-          Parley is the neutral referee for AI agents that represent people with
-          conflicting interests. Every number on this page is checked against the
-          repository rather than the pitch. Take any of it without asking.
+          Parley is an open-source Python library. Agents that act for different
+          people can agree on one option without anyone handing over their limit.
+          Take any of this text without asking.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          Last verified 2026-09-05 ·{" "}
+          Checked against parley-consensus {VERSION} and the repository on {BUILD_DATE} ·{" "}
           <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener" class={link}>
             source repository
           </a>{" "}·{" "}
@@ -216,7 +221,7 @@ const jsonLd = JSON.stringify({
       <section class={`${wrap} mt-14`}>
         <h2 class={sectionLabel}>Boilerplate</h2>
         <p class="mt-3 max-w-[58ch] text-[15px]/[24px] text-muted">
-          Cleared for publication as written, at four lengths. Copy takes the text
+          Free to copy as written, at four lengths. Copy takes the text
           without the label.
         </p>
         <div class="mt-6 flex flex-col gap-4">
@@ -224,13 +229,13 @@ const jsonLd = JSON.stringify({
             boilerplates.map((b) => (
               <figure class={`${card} px-5 py-[18px]`}>
                 <figcaption class="mb-3 flex items-center justify-between gap-4">
-                  <span class="font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase">
+                  <span class="text-[13px] text-muted">
                     {b.label} <span class="text-hairline">/</span> {b.meta}
                   </span>
                   <button
                     type="button"
                     data-copy={b.id}
-                    class="flex-none rounded-full border border-hairline bg-bg px-3.5 py-2 font-mono text-[11.5px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
+                    class="flex-none inline-flex min-h-[44px] min-w-[58px] items-center justify-center rounded-full border border-hairline bg-bg px-3.5 font-mono text-[12px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
                   >
                     Copy
                   </button>
@@ -241,8 +246,9 @@ const jsonLd = JSON.stringify({
               </figure>
             ))
           }
+          <p class="text-[13px] text-muted">Add this line under any length: {STATUS}</p>
           <details class={`${card} px-5 py-[18px]`}>
-            <summary class="cursor-pointer font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase marker:text-hairline">
+            <summary class="-my-2 cursor-pointer py-3 text-sm font-semibold text-muted marker:text-hairline">
               Long <span class="text-hairline">/</span> 150 words
             </summary>
             <div class="mt-4 flex flex-col gap-3 text-[15px]/[25px] text-ink">
@@ -276,7 +282,7 @@ const jsonLd = JSON.stringify({
           {
             facts.map(([k, v]) => (
               <div class="grid gap-1 px-5 py-3.5 sm:grid-cols-[190px_1fr] sm:gap-6">
-                <dt class="font-mono text-[12px] tracking-[0.04em] text-subtle uppercase">
+                <dt class="text-[13px] text-muted">
                   {k}
                 </dt>
                 <dd class="text-[14.5px]/[23px] text-ink">{v}</dd>
@@ -331,9 +337,8 @@ const jsonLd = JSON.stringify({
           Three things landed within roughly a year of each other: agents that can take
           real actions on someone's behalf, a standard transport for agent-to-agent
           contact, and organisations willing to put those agents in front of
-          counterparties. The referee layer is the piece that did not arrive with them.
-          The comparable moment is payments before settlement rails, where the messaging
-          worked long before anyone could check what had been agreed.
+          counterparties. MCP and A2A carry the messages. What is missing is a check
+          each owner can run on the result.
         </p>
       </section>
 
@@ -344,7 +349,7 @@ const jsonLd = JSON.stringify({
           <table class="w-full min-w-[680px] border-collapse text-left">
             <thead>
               <tr class="border-b border-hairline">
-                <th scope="col" class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.06em] text-subtle uppercase"></th>
+                <th scope="col" class="px-5 py-3.5 text-[13px] text-muted"></th>
                 {
                   compareCols.map((c, i) => (
                     <th
@@ -366,7 +371,7 @@ const jsonLd = JSON.stringify({
                   <tr class="border-b border-hairline last:border-0">
                     <th
                       scope="row"
-                      class="px-5 py-3.5 font-mono text-[11.5px] tracking-[0.04em] text-subtle uppercase"
+                      class="px-5 py-3.5 text-[13px] text-muted"
                     >
                       {r[0]}
                     </th>
@@ -422,7 +427,7 @@ const jsonLd = JSON.stringify({
                 <button
                   type="button"
                   data-copy={`q-${i}`}
-                  class="mt-0.5 flex-none rounded-full border border-hairline bg-bg px-3.5 py-2 font-mono text-[11.5px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
+                  class="mt-0.5 flex-none inline-flex min-h-[44px] min-w-[58px] items-center justify-center rounded-full border border-hairline bg-bg px-3.5 font-mono text-[12px] text-muted transition-colors hover:border-indigo hover:text-ink focus-visible:border-indigo"
                 >
                   Copy
                 </button>
@@ -511,7 +516,7 @@ const jsonLd = JSON.stringify({
           {
             faqs.map((f) => (
               <details class={`${card} px-5 py-4`}>
-                <summary class="cursor-pointer text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
+                <summary class="-my-2 cursor-pointer py-2.5 text-[15px]/[24px] font-semibold text-ink marker:text-subtle">
                   {f.q}
                 </summary>
                 <p class="mt-3 max-w-[62ch] text-[14.5px]/[23px] text-muted">{f.a}</p>
