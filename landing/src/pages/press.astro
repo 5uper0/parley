@@ -70,7 +70,7 @@ const failureModes = [
   {
     n: "03",
     head: "Nobody can audit the outcome.",
-    body: "Parley emits a hash-chained transcript of the masked verdicts. Each owner replays it against their own private sheet and confirms no red line of theirs was crossed, without revealing the sheet to anyone.",
+    body: "Parley emits a SHA-256-hashed transcript of the masked verdicts. Each owner replays it against their own private sheet and confirms no red line of theirs was crossed, without revealing the sheet to anyone.",
   },
 ];
 
@@ -132,7 +132,7 @@ const palette = [
 const faqs = [
   {
     q: "Is this a blockchain project?",
-    a: "No, and deliberately so. Verification is a local replay of a hash-chained record against your own private data. There is no chain, no token and no network to join.",
+    a: "No, and deliberately so. Verification is a local replay of a SHA-256-hashed record against your own private data. There is no chain, no token and no network to join.",
   },
   {
     q: "What stops the coordinator from cheating?",
