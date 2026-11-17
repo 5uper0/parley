@@ -43,7 +43,7 @@
  * (parley/agent.py) — "masked" describes the PROPERTY that a reason never
  * names the constraint, it is never itself a verdict value. Don't add a
  * third literal verdict here; that would misrepresent the real product on
- * the one page whose whole pitch is "provable, not hoped". */
+ * the one page whose whole pitch is "checkable, not hoped". */
 
 export type TapeColor = "dim" | "muted" | "redline" | "indigo" | "verify" | "masked";
 
@@ -84,7 +84,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option B", color: "indigo" },
   { text: "sha256 2fe3a06e…fcab1f87", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 3 · option C proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: ok", color: "muted" },
@@ -100,7 +100,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 7b6f5724…88a1ea3c", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 5 · option E proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: red-line", color: "redline" },
@@ -123,7 +123,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 7f46807c…6706683e", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 8 · option H proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: ok", color: "muted" },
@@ -132,7 +132,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 149d2cfe…d61472f3", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 9 · option I proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: ok", color: "muted" },
@@ -148,7 +148,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 c9c22c43…c06332d4", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 11 · option K proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: ok", color: "muted" },
@@ -157,7 +157,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 e4e86837…8491ec9e", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 12 · option L proposed", color: "dim" },
   { text: "ana verdict: red-line", color: "redline" },
   { text: "bob verdict: ok", color: "muted" },
@@ -173,7 +173,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 0c0ea628…98507890", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 14 · option N proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: ok", color: "muted" },
@@ -182,7 +182,7 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option D", color: "indigo" },
   { text: "sha256 9c18525a…1dda0ac1", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 15 · option O proposed", color: "dim" },
   { text: "ana verdict: ok", color: "muted" },
   { text: "bob verdict: red-line", color: "redline" },
@@ -198,10 +198,10 @@ export const tapeLines: TapeLine[] = [
   { text: "eve verdict: ok", color: "muted" },
   { text: "max-min so far, option P", color: "indigo" },
   { text: "sha256 02f11e58…3556432e", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
-  { text: "max-min → option P · agreed", color: "indigo" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
+  { text: "max-min, option P · agreed", color: "indigo" },
   { text: "sha256 4622d0a7…154a0d25", color: "dim" },
-  { text: "✓ verified by 5/5 owners", color: "verify" },
+  { text: "✓ 5/5 sheets replayed, no red line crossed", color: "indigo" },
   { text: "round 1 · option A proposed", color: "dim" },
   { text: "ana verdict: red-line", color: "redline" },
   { text: "bob verdict: ok", color: "muted" },
@@ -218,7 +218,7 @@ export const tapeSnippet: TapeLine[] = [
   { text: "bob verdict: ok", color: "muted" },
   { text: "max-min so far, option B", color: "indigo" },
   { text: "sha256 2fe3a06e…fcab1f87", color: "dim" },
-  { text: "✓ red lines hold for 5/5 owners", color: "verify" },
+  { text: "✓ red lines hold on 5/5 sheets", color: "indigo" },
   { text: "round 3 · option C proposed", color: "dim" },
   { text: "awaiting bob, cara…", color: "masked" },
 ];

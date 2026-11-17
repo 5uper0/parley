@@ -1,0 +1,28 @@
+---
+// Section 5 (#status). Copy: landing-v3-copy 3.5, verbatim.
+// Carries the page's single red rule (hard limits). The version is the generated one.
+import { receiptDinner } from "../../data/receipt-dinner";
+
+const title = "What it does not do yet";
+const lines = [
+  `Early stage, version ${receiptDinner.version}. No outside users yet.`,
+  "Not ready for parties actively trying to cheat each other.",
+  "Each yes or no carries a score, so whoever runs the round can guess the order of your preferences and roughly where a limit sits. It still never sees the limit or the reason.",
+  "The receipt shows later edits only if someone other than the editor keeps its fingerprint.",
+  "Signatures are optional and show tampering, not who signed.",
+  "When one host runs every person's side (the MCP setup), there is no privacy between people.",
+  "If no option fits everyone, you get a deadlock, not a decision.",
+];
+---
+
+<section id="status" class="scroll-mt-24 py-12 md:py-20" aria-labelledby="status-h">
+  <div class="home-wrap">
+    <div class="md:w-1/2">
+      <div class="h-0.5 w-full bg-redline" aria-hidden="true"></div>
+      <h2 id="status-h" class="mt-6 font-display text-2xl leading-tight tracking-tight text-ink">{title}</h2>
+      <ul class="mt-6 flex list-none flex-col gap-4 p-0 text-lg leading-relaxed text-ink">
+        {lines.map((line) => <li>{line}</li>)}
+      </ul>
+    </div>
+  </div>
+</section>

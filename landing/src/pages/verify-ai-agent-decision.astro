@@ -26,7 +26,7 @@ const code =
   "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
 
 const btnPrimary =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-solid px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
 
 const btnGhost =
   "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
@@ -60,11 +60,11 @@ const exits = [
 
 const faqs = [
   {
-    q: "How can I prove my agent did not betray me without showing anyone my preferences?",
+    q: "How can I check that my agent did not betray me without showing anyone my preferences?",
     a: "Call Transcript.verify_non_betrayal(sheet, decision) with your own PreferenceSheet and the public decision. It re-evaluates your hard constraints against the decision locally and returns True only when every red line held. The sheet is an input and never leaves your process; the transcript itself holds only masked verdicts. In the real-decision flow, parley.ratify.ratify refuses an acceptance that the sheet you submit rejects. It cannot tell whether that sheet is current or complete.",
   },
   {
-    q: "What does the SHA-256 receipt hash actually prove?",
+    q: "What does the SHA-256 receipt hash actually show?",
     a: "That the transcript in front of you hashes to that value. The hash is SHA-256 over canonical JSON of the transcript (sorted keys, the six public verdict fields per party, the finalized result). It catches an edit made after the receipt was written only when the hash was kept by someone other than whoever could edit the transcript, for example each participant writing it down at ratification. It is unsigned, and the coordinator can re-hash a rewritten record.",
   },
   {
@@ -85,7 +85,7 @@ const jsonLd = JSON.stringify({
       "@id": "https://parleyprotocol.com/verify-ai-agent-decision/#article",
       headline: "Verify an AI-agent decision after the fact, without trusting the coordinator",
       description:
-        "How a Parley receipt is checked after a multi-party agent decision: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and running scripts/verify-receipt.py. What each check proves and what it does not.",
+        "How a Parley receipt is checked after a multi-party agent decision: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and running scripts/verify-receipt.py. What each check shows and what it does not.",
       url: "https://parleyprotocol.com/verify-ai-agent-decision/",
       inLanguage: "en",
       datePublished: "2026-10-09",
@@ -114,14 +114,14 @@ const jsonLd = JSON.stringify({
 
 <Layout
   title="Verify an AI-agent decision without trusting the coordinator"
-  description="Check a multi-party agent decision after the fact: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and scripts/verify-receipt.py. What each check proves and what it does not."
+  description="Check a multi-party agent decision after the fact: the SHA-256 transcript hash, replaying your own private sheet with verify_non_betrayal, and scripts/verify-receipt.py. What each check shows and what it does not."
   path="/verify-ai-agent-decision/"
 >
   <script type="application/ld+json" is:inline set:html={jsonLd} />
 
   <a
     href="#main"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo-solid focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
   >
     Skip to content
   </a>
@@ -147,7 +147,7 @@ const jsonLd = JSON.stringify({
           acceptance. This page is what you
           can re-derive from that file on your own machine, how to replay your own red
           lines against the outcome without showing them to anyone, and the list of
-          things the check does not prove.
+          things the check does not show.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
           Library calls here were checked against version 0.2.0; hashes and verdicts come from the repository's current code, which reports a red-lined verdict's score as 0 (not yet released, see CHANGELOG). The verifier,{" "}
@@ -424,7 +424,7 @@ Result: FAILED
 
       <!-- Honesty -->
       <section class={`${wrap} mt-14`}>
-        <h2 class={sectionLabel}>What the check does not prove</h2>
+        <h2 class={sectionLabel}>What the check does not show</h2>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           The verifier prints this list under every completed check, pass or fail. It is the part of
           the page to read twice.
@@ -446,7 +446,7 @@ Result: FAILED
               <strong class="text-ink">A signature does not say who signed.</strong> Each
               public key is self-attested by the record that carries it; there is no owner to
               key roster yet. A holder of any key, the coordinator included, can sign under
-              another owner's name. A verified signature proves the content was not altered
+              another owner's name. A verified signature shows the content was not altered
               after signing, not who produced it. See{" "}
               <a href={SECURITY_URL} target="_blank" rel="noopener" class={link}>SECURITY.md</a>.
             </li>

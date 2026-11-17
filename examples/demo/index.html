@@ -1,34 +1,32 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var t=localStorage.getItem("parley-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0A0B0D">
-<title>Parley: consensus for AI agents, rules enforced in code (no crypto)</title>
-<meta name="description" content="Masked-verdict, max-min consensus for AI agents with conflicting private interests. No crypto, self-hosted, open-source. Red lines enforced in code.">
+<meta name="theme-color" content="#F6F7FB">
+<title>Parley demo: replay a sample decision between agents</title>
+<meta name="description" content="Replay a recorded sample decision: agents that act for different people agree without anyone handing over their limit. An option over anyone's limit cannot win, and the result leaves a record anyone can check.">
 <link rel="canonical" href="https://parleyprotocol.com/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://parleyprotocol.com/">
 <meta property="og:site_name" content="Parley">
-<meta property="og:title" content="Parley demo: a decision where a cheating option is blocked in code, with a receipt you can check">
-<meta property="og:description" content="Several agents, opposite private interests, one decision under red lines kept in code. Watch a shortcut that would cheat someone get blocked.">
-<!-- og-card-demo.png is a screenshot of this page taken 2026-08-22. The hero copy changed
-     2026-09-06 (it used to say "Live" and "Run a live decision", which the static build does
-     not do), so that screenshot now advertises a claim this page no longer makes. Pointing at
-     the designed card until a fresh screenshot replaces it. -->
+<meta property="og:title" content="Parley demo: replay a sample decision between agents">
+<meta property="og:description" content="Agents that act for different people can agree without anyone handing over their limit. Replay a recorded sample run and check the record.">
+<!-- og-card.png is the designed brand card; the old og-card-demo.png screenshot advertised pre-2026-11-17 copy. -->
 <meta property="og:image" content="https://parleyprotocol.com/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Parley demo: a decision where a cheating option is blocked in code, with a receipt you can check">
-<meta name="twitter:description" content="Several agents, opposite private interests, one decision under rules enforced in code, with a receipt anyone can check.">
+<meta name="twitter:title" content="Parley demo: replay a sample decision between agents">
+<meta name="twitter:description" content="Agents that act for different people can agree without anyone handing over their limit. Replay a recorded sample run and check the record.">
 <meta name="twitter:image" content="https://parleyprotocol.com/og-card.png">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Parley","url":"https://parleyprotocol.com/",
-"applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Provable consensus for AI agents of rival owners: deterministic red lines, max-min consensus over masked verdicts, and a verifiable non-betrayal transcript. No cryptocurrency or blockchain; self-hosted, open-source.",
+"applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"An open-source Python library that lets agents acting for different people pick one option. An option over anyone's limit cannot win, nobody hands over their limit sheet, and every result leaves a record anyone can check. Early, no outside users yet.",
 "license":"https://github.com/5uper0/parley/blob/main/LICENSE","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
 "codeRepository":"https://github.com/5uper0/parley","sameAs":["https://github.com/5uper0/parley","https://www.linkedin.com/company/parleyprotocol"]}
 </script>
@@ -36,394 +34,203 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* Linear-calibrated (docs/brand/calibration-linear.md): deep cool-dark, line-grid, hairline+ambient,
-   refined display weights, tight radii: our signal colors + red-line/receipt/✓ signature intact.
-   The docker self-host build vendors the fonts. */
+/* Tokens follow designmd/parley.DESIGN.md (same values as landing/src/styles/global.css).
+   Green is not used here: nothing on this page is a signed verdict. Mono is for the receipt only. */
 :root{
-  --indigo:#6675D3; --indigo-dim:#4A57C0; --verify:#14A473; --red:#D93A3A; --amber:#D9971C;
-  --verify-bg:rgba(20,164,115,.09); --verify-hair:rgba(20,164,115,.24);
-  --red-bg:rgba(217,58,58,.08); --red-hair:rgba(217,58,58,.26);
-  --bg:#0A0B0D; --surface:#121316; --surface-top:#16181C; --sunken:#0C0D10;
-  --ink:#F4F6F7; --muted:#9AA0A9; --dim:#7E848E; --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.14);
+  --bg:#0A0B0D; --surface:#121316; --sunken:#0C0D10; --ink:#F4F6F7; --muted:#99A1B3; --subtle:#7A8394;
+  --hair:rgba(255,255,255,.08); --hair2:rgba(255,255,255,.14);
+  --indigo:#6675D3; --indigo-solid:#3A45B0; --indigo-text:#8E9BE1; --red:#D93A3A; --red-text:#EC8A8A;
+  --red-bg:rgba(217,58,58,.08); --red-hair:rgba(217,58,58,.26); --indigo-bg:rgba(102,117,211,.10);
   --sans:"Inter",system-ui,-apple-system,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
-  --r:10px; --r-lg:14px; --r-full:9999px; --ease:cubic-bezier(.16,1,.3,1);
-  --ambient:inset 0 1px 0 rgba(255,255,255,.03);
-  --indigo-bg:rgba(102,117,211,.10); --indigo-hair:rgba(102,117,211,.28);
-  --band-bg:rgba(255,255,255,.014);
+  --r:10px; --r-lg:14px; --ease:cubic-bezier(.16,1,.3,1);
 }
 :root[data-theme="light"]{
-  --indigo:#3A45B0; --indigo-dim:#8E9BE1; --verify:#0E8F63; --red:#C42121; --amber:#B87C15;
-  --verify-bg:#E7F6EF; --verify-hair:#BFE6D6; --red-bg:#FCEAEA; --red-hair:#F2CFCF;
-  --bg:#F6F7FB; --surface:#FFFFFF; --surface-top:#FFFFFF; --sunken:#EEF0F5;
-  --ink:#12151C; --muted:#535A68; --dim:#6B717D; --hair:#E3E6EF; --hair2:#D3D7E1;
-  --ambient:inset 0 1px 0 rgba(255,255,255,.4);
-  --indigo-bg:rgba(58,69,176,.07); --indigo-hair:rgba(58,69,176,.24);
-  --band-bg:rgba(18,21,28,.022);
+  --bg:#F6F7FB; --surface:#FFFFFF; --sunken:#EEF0F5; --ink:#12151C; --muted:#535A68; --subtle:#6C727F;
+  --hair:#E3E6EF; --hair2:#D3D7E1;
+  --indigo:#3A45B0; --indigo-solid:#3A45B0; --indigo-text:#3A45B0; --red:#C42121; --red-text:#C42121;
+  --red-bg:#FCEAEA; --red-hair:#F2CFCF; --indigo-bg:rgba(58,69,176,.07);
 }
 *{box-sizing:border-box;margin:0}
-button,.toggle,.btn,.vbtn,.seg b{-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
-a{-webkit-tap-highlight-color:transparent}
+button,.btn,.vbtn,.seg b{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 :focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:var(--r)}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;transition:background .25s var(--ease),color .25s var(--ease);
-  overflow-x:hidden}
-.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:44px 24px 80px}
-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.brand{display:flex;flex-direction:column;gap:3px}
-.logo{display:inline-flex;align-items:center;margin:-8px 0;padding:8px 0;font-size:27px;font-weight:560;letter-spacing:-.025em;color:inherit;text-decoration:none}.logo .d{color:var(--red)}
-.tag{color:var(--dim);font-size:13.5px;letter-spacing:.01em}
-.toggle{border:1px solid var(--hair2);background:var(--surface);color:var(--muted);border-radius:var(--r-full);
-  padding:13px 15px;font:inherit;font-size:12.5px;cursor:pointer;transition:.2s var(--ease)}
-.toggle:hover{color:var(--ink);border-color:var(--indigo)}
-.hdr-nav{display:flex;align-items:center;gap:4px}
-.hdr-nav a{display:inline-flex;align-items:center;padding:12px;color:var(--muted);font-size:13px;text-decoration:none;transition:.2s var(--ease)}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.skip{position:absolute;left:12px;top:-60px;background:var(--indigo-solid);color:#fff;padding:12px 18px;border-radius:var(--r);z-index:10}
+.skip:focus{top:12px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:28px 0 8px}
+.logo{display:inline-flex;align-items:center;min-height:44px;font-size:27px;font-weight:560;letter-spacing:-.025em;color:inherit;text-decoration:none}
+.logo .d{color:var(--red)}
+.hdr-nav{display:flex;align-items:center;gap:2px}
+.hdr-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--muted);font-size:14px;text-decoration:none}
 .hdr-nav a:hover{color:var(--ink)}
-.hdr-nav .toggle{margin-left:8px}
-.toggle:active{transform:scale(.97)}
-.redrule{border:none;border-top:2px solid var(--red);margin:20px 0 24px;opacity:.9}
-/* controls */
-.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}
-.seg{display:flex;flex-wrap:wrap;gap:6px;background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-lg);padding:4px}
-.seg b{font-weight:540;font-size:13px;color:var(--muted);padding:12px 14px;border-radius:var(--r-full);cursor:pointer;transition:.2s var(--ease)}
+.toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;margin-left:4px;padding:0 12px;
+  border:1px solid var(--hair2);background:var(--surface);color:var(--muted);border-radius:9999px;font:inherit;font-size:13px;cursor:pointer}
+.toggle:hover{color:var(--ink);border-color:var(--indigo)}
+.hide-sm,.hdr-nav a.hide-sm{display:none}
+@media (min-width:640px){.hide-sm{display:inline}.hdr-nav a.hide-sm{display:inline-flex}}
+.hero{padding:40px 0 32px;border-bottom:1px solid var(--hair)}
+.hero h1{font-size:clamp(30px,5.4vw,48px);line-height:1.1;letter-spacing:-.025em;font-weight:560;max-width:22ch;text-wrap:balance}
+.hero .sub{margin-top:18px;font-size:clamp(16px,2.4vw,18px);line-height:1.55;color:var(--muted);max-width:62ch}
+.install{display:inline-block;margin-top:18px;max-width:100%;overflow-x:auto;white-space:nowrap;font-family:var(--mono);font-size:14px;
+  background:var(--surface);border:1px solid var(--hair);border-radius:var(--r);padding:10px 16px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;margin-top:22px}
+.cta,.btn{border:none;border-radius:var(--r);padding:0 24px;min-height:48px;font:inherit;font-weight:600;font-size:16px;cursor:pointer;
+  background:var(--indigo-solid);color:#fff}
+.cta:hover,.btn:hover{filter:brightness(1.1)}
+.textlink{display:inline-flex;align-items:center;min-height:44px;color:var(--ink);text-underline-offset:4px;font-size:16px}
+.scope{margin-top:18px;max-width:64ch;font-size:15px;line-height:1.5;color:var(--muted)}
+h2{font-size:20px;font-weight:600;letter-spacing:-.01em;margin:40px 0 14px}
+.step-n{color:var(--muted);margin-right:8px;font-weight:500}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:20px 0}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-lg);padding:4px}
+.seg b{display:inline-flex;align-items:center;min-height:44px;font-weight:540;font-size:14px;color:var(--muted);padding:0 14px;border-radius:var(--r);cursor:pointer}
 .seg b:hover{color:var(--ink)}
-.seg b.on{background:var(--indigo);color:#fff}
-.plainck{display:inline-flex;align-items:center;gap:8px;padding:12px 4px;margin:-12px -4px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
-.plainck input{accent-color:var(--indigo);width:16px;height:16px}
+.seg b.on{background:var(--indigo-solid);color:#fff}
+.plainck{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-size:14px;color:var(--muted);cursor:pointer}
+.plainck input{accent-color:var(--indigo-solid);width:20px;height:20px}
 .plainck.act{color:var(--ink)}
-.situation{font-size:17px;color:var(--ink);font-weight:500;max-width:66ch;line-height:1.5;margin-bottom:4px}
-.situation.tech{font-size:15px;color:var(--muted);font-weight:400}
-h2{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
-  margin:44px 0 16px;display:flex;align-items:center;gap:10px}
-h2::after{content:"";flex:1;height:1px;background:var(--hair)}
+.situation{font-size:18px;color:var(--ink);font-weight:500;max-width:66ch;line-height:1.5}
+.situation.tech{font-size:16px;color:var(--muted);font-weight:400}
+.samplenote{margin-top:6px;font-size:14px;color:var(--muted)}
 .grid{display:grid;gap:14px}.cards{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.party{background:var(--surface-top);border:1px solid var(--hair);
-  border-radius:var(--r-lg);padding:18px 19px;box-shadow:var(--ambient)}
-.party .who{font-weight:560;font-size:15.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.party .blurb{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.45}
-.party .sub{font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;margin-top:12px}
-.party ul{list-style:none;padding:0;margin:6px 0 0;font-size:13px;color:var(--muted)}
+.party{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);padding:18px 19px}
+.party .who{font-weight:600;font-size:16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.party .blurb{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.45}
+.party .sub{font-size:13px;font-weight:600;color:var(--muted);margin-top:12px}
+.party ul{list-style:none;padding:0;margin:6px 0 0;font-size:14px;color:var(--muted)}
 .party li{padding:2.5px 0;display:flex;gap:9px;align-items:flex-start}
-.party li.red::before{content:"";width:15px;height:2px;background:var(--red);flex:none;border-radius:2px;margin-top:8px}
-.party li.none{color:var(--dim);font-style:italic}
-.btn{border:none;border-radius:var(--r-full);padding:12px 24px;font:inherit;font-weight:560;font-size:14.5px;cursor:pointer;
-  background:var(--indigo);color:#fff;transition:.2s var(--ease);box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
-.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.btn:active{transform:translateY(0) scale(.985);filter:brightness(1.02)}
-.opt{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);padding:15px 17px;margin:12px 0;transition:.25s var(--ease)}
-.opt:not(.blocked):not(.winner):hover{border-color:var(--hair2)}
+.party li.red::before{content:"";width:15px;height:2px;background:var(--red);flex:none;border-radius:2px;margin-top:10px}
+.party li.none{font-style:italic}
+.opt{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);padding:15px 17px;margin:12px 0}
 .opt .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.opt .name{font-weight:540;font-size:15px}
-.opt .attrs{color:var(--muted);font-size:13px;font-weight:400;font-family:var(--mono)}
+.opt .name{font-weight:560;font-size:16px}
+.opt .attrs{color:var(--muted);font-size:14px;font-weight:400;font-family:var(--mono)}
 .opt.blocked{border-color:var(--red-hair);background:var(--red-bg)}
+.opt.blocked .name{text-decoration:line-through;text-decoration-color:var(--red-hair)}
 .opt.winner{border-color:var(--indigo);box-shadow:0 0 0 1px var(--indigo)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font-family:var(--mono);font-size:11px;font-weight:500;border-radius:var(--r-full);padding:5px 12px;
-  display:inline-flex;gap:5px;align-items:center;background:var(--sunken);color:var(--muted);border:1px solid var(--hair)}
-.chip.ok{background:var(--verify-bg);color:var(--verify);border-color:var(--verify-hair)}
-.chip.no{background:var(--red-bg);color:var(--red);border-color:var(--red-hair)}
-.tagline-sm{font-size:12.5px;margin-top:8px;color:var(--dim)}
-.tagline-sm.block{color:var(--red);font-weight:500}
-.tagline-sm.win{color:var(--indigo);font-weight:560}
-.muted{color:var(--muted);font-size:13px}
+.chip{font-family:var(--mono);font-size:12px;font-weight:500;border-radius:9999px;padding:5px 12px;display:inline-flex;gap:5px;align-items:center;
+  background:var(--sunken);color:var(--muted);border:1px solid var(--hair)}
+.chip.ok{color:var(--ink)}
+.chip.no{background:var(--red-bg);color:var(--red-text);border-color:var(--red-hair)}
+.tagline-sm{font-size:14px;margin-top:8px;color:var(--muted)}
+.tagline-sm.block{color:var(--red-text);font-weight:500}
+.tagline-sm.win{color:var(--indigo-text);font-weight:600}
+.muted{color:var(--muted);font-size:14px}
 .bar{display:grid;grid-template-columns:170px 1fr 70px;align-items:center;gap:14px;margin:8px 0}
-.bar .lbl{font-size:13px;color:var(--muted)}
-.track{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-full);height:14px;overflow:hidden}
-.fill{height:100%;background:var(--indigo);border-radius:var(--r-full);transition:width .6s var(--ease)}
-.bar.win .fill{background:var(--indigo)}
-.bar .v{font-family:var(--mono);font-size:12px;color:var(--dim);text-align:right}
-.outcome{background:var(--verify-bg);border:1px solid var(--verify-hair);border-radius:var(--r);padding:15px 18px;
-  margin:16px 0 0;font-size:15px;color:var(--ink);line-height:1.5;display:none}
+.bar .lbl{font-size:14px;color:var(--muted)}
+.track{background:var(--sunken);border:1px solid var(--hair);border-radius:9999px;height:14px;overflow:hidden}
+.fill{height:100%;background:var(--indigo);border-radius:9999px;transition:width .6s var(--ease)}
+.bar .v{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.outcome{background:var(--surface);border:1px solid var(--indigo);border-radius:var(--r);padding:15px 18px;margin:16px 0 0;font-size:16px;line-height:1.5;display:none}
 .outcome.show{display:block}
-.outcome .seal{font-family:var(--mono);font-weight:700;color:var(--verify)}
 .receipt{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r);padding:16px 18px;
-  font-family:var(--mono);font-size:12.5px;color:var(--muted);line-height:1.75;overflow-x:auto;box-shadow:var(--ambient);
-  overflow-wrap:anywhere}
-.receipt .k{color:var(--dim)}
+  font-family:var(--mono);font-size:13px;color:var(--muted);line-height:1.75;overflow-x:auto;overflow-wrap:anywhere}
+.receipt .k{color:var(--muted)}
 .verify{margin-top:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-.vbtn{border:1px solid var(--hair2);background:var(--surface);color:var(--ink);border-radius:var(--r-full);
-  padding:9px 16px;font:inherit;font-size:13px;cursor:pointer;transition:.2s var(--ease)}
-.vbtn:hover{border-color:var(--verify);color:var(--verify)}
-.vbtn:active{transform:scale(.97)}
-.vok{color:var(--verify);font-weight:540;font-size:13.5px;display:none;align-items:center;gap:8px;max-width:62ch;line-height:1.5}
-.seal{font-family:var(--mono);font-weight:700}
-.techonly{display:block}
-
-/* ─── candy layer: hero, cinematic reveal, celebration ─────────────────────────── */
-
-/* hero */
-.hero{margin:24px 0 8px;position:relative}
-.hero h1{font-size:clamp(30px,6.2vw,50px);line-height:1.04;letter-spacing:-.033em;font-weight:560;
-  margin:18px 0 0;max-width:16ch}
-.hero h1 .g{color:var(--indigo)}
-.hero .sub{margin:18px 0 0;font-size:clamp(15px,2.4vw,18px);line-height:1.55;color:var(--muted);max-width:60ch}
-.hero .sub b{color:var(--ink);font-weight:600}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:24px}
-.cta{position:relative;overflow:hidden;border:none;border-radius:var(--r-full);padding:14px 26px;font:inherit;font-weight:640;
-  font-size:15px;cursor:pointer;color:#fff;background:var(--indigo);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);transition:.2s var(--ease)}
-.cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
-.cta:active{transform:translateY(0) scale(.98)}
-.trustrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
-.icp-hook{color:var(--dim);font-size:12.5px;margin-top:14px}
-.icp-hook a{color:var(--muted);text-decoration:underline;text-decoration-color:var(--hair2);text-underline-offset:2px}
-.icp-hook a:hover{color:var(--indigo)}
-.pill{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted);background:var(--sunken);
-  border:1px solid var(--hair);border-radius:var(--r-full);padding:5px 11px;display:inline-flex;gap:6px;align-items:center}
-.pill svg{width:12px;height:12px;flex:none}
-.pill.v{color:var(--verify);border-color:var(--verify-hair);background:var(--verify-bg)}
-.pill.r{color:var(--red);border-color:var(--red-hair);background:var(--red-bg)}
-
-/* arena fake-door: interest signal for a future hosted Arena (no backend yet) */
-.arena-cta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px;
-  margin:24px 0 4px;padding:14px 18px;background:var(--surface);border:1px dashed var(--hair2);
-  border-radius:var(--r-lg)}
-.arena-copy{display:flex;flex-direction:column;gap:2px;max-width:56ch}
-.arena-copy b{font-size:14px;font-weight:560;color:var(--ink)}
-.arena-copy span{font-size:12.5px;color:var(--muted);line-height:1.5}
-.arena-btn{flex:none;display:inline-flex;align-items:center;font-size:13px;font-weight:540;color:var(--indigo);text-decoration:none;
-  background:var(--indigo-bg);border:1px solid var(--indigo-hair);border-radius:var(--r-full);
-  padding:14px 15px;transition:.2s var(--ease)}
-.arena-btn:hover{background:var(--indigo);border-color:var(--indigo);color:#fff}
-.arena-btn:active{transform:scale(.97)}
-
-/* numbered section badges (how-it-works cadence): flat mono numeral, matches the landing page's step-rail */
-.wrap{counter-reset:sec}
-h2.step::before{counter-increment:sec;content:"0" counter(sec);flex:none;
-  font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.1em;color:var(--indigo)}
-
-/* cinematic entrance: cards, options, bars rise + fade, staggered */
-@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.party,.opt,.bar{animation:riseIn .5s var(--ease) both}
-#parties .party:nth-child(2){animation-delay:.06s}
-#parties .party:nth-child(3){animation-delay:.12s}
-#parties .party:nth-child(4){animation-delay:.18s}
-#options .opt:nth-child(2){animation-delay:.05s}
-#options .opt:nth-child(3){animation-delay:.10s}
-#options .opt:nth-child(4){animation-delay:.15s}
-.party{transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
-.party:hover{transform:translateY(-2px);border-color:var(--hair2)}
-
-/* the two money moments: winner glows in, blocked flashes red */
-.opt.blocked{animation:blockFlash .5s var(--ease) 1}
-@keyframes blockFlash{0%{background:rgba(240,85,91,.22)}100%{background:var(--red-bg)}}
-.opt.blocked .name{text-decoration:line-through;text-decoration-color:var(--red-hair)}
-
-/* verify celebration */
-.vok{animation:pop .45s var(--ease) both}
-@keyframes pop{0%{opacity:0;transform:scale(.94)}60%{transform:scale(1.02)}100%{opacity:1;transform:none}}
-
-.site-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
+.vbtn{min-height:44px;border:1px solid var(--hair2);background:var(--surface);color:var(--ink);border-radius:var(--r);padding:0 18px;font:inherit;font-size:14px;cursor:pointer}
+.vbtn:hover{border-color:var(--indigo)}
+.vok{color:var(--ink);font-weight:540;font-size:14px;display:none;max-width:62ch;line-height:1.5}
+.props{border-bottom:1px solid var(--hair);padding:32px 0 40px}
+.props-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:6px}
+.prop{background:var(--surface);border:1px solid var(--hair);border-radius:var(--r-lg);padding:20px 21px}
+.prop h3{font-size:16px;font-weight:600}
+.prop p{margin-top:7px;font-size:15px;color:var(--muted);line-height:1.55}
+.redrule{border:none;border-top:2px solid var(--red);margin:0;opacity:.9}
+.demo-band{padding-bottom:64px}
+.foot-wrap{max-width:1080px;margin:0 auto;padding:24px 24px 48px;border-top:1px solid var(--hair)}
+.site-footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
 .foot-links{display:flex;flex-wrap:wrap;gap:2px}
-.foot-links a{color:var(--muted);font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:12px;transition:.2s var(--ease)}
-.foot-links a:hover{color:var(--indigo)}
-.foot-links svg{width:15px;height:15px;flex:none}
-.foot-meta{color:var(--dim);font-size:12.5px}
-.foot-wrap{max-width:1180px;margin:0 auto;padding:32px 24px 48px}
-
-/* ─── the three enforced properties: bridge between hero and the live demo ────── */
-.kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;
-  font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.props{border-bottom:1px solid var(--hair)}
-.props-inner{max-width:1180px;margin:0 auto;padding:36px 24px 40px}
-.props-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:18px}
-.prop{background:var(--surface-top);border:1px solid var(--hair);border-radius:var(--r-lg);
-  padding:20px 21px;box-shadow:var(--ambient);
-  transition:transform .2s var(--ease),border-color .2s var(--ease)}
-.prop:hover{transform:translateY(-2px);border-color:var(--hair2)}
-.prop .ic{width:34px;height:34px;border-radius:var(--r);display:inline-flex;align-items:center;
-  justify-content:center;border:1px solid;margin-bottom:14px}
-.prop .ic svg{width:17px;height:17px}
-.prop .ic.i-redline{color:var(--red);background:var(--red-bg);border-color:var(--red-hair)}
-.prop .ic.i-engine{color:var(--indigo);background:var(--indigo-bg);border-color:var(--indigo-hair)}
-.prop .ic.i-verified{color:var(--verify);background:var(--verify-bg);border-color:var(--verify-hair)}
-.prop h3{font-size:15px;font-weight:560;letter-spacing:-.01em;color:var(--ink)}
-.prop p{margin-top:7px;font-size:13.5px;color:var(--muted);line-height:1.55}
-
-/* ─── demo band: full-bleed frame so the widget reads as its own designed stage ── */
-.demo-band{position:relative;background:var(--band-bg);border-bottom:1px solid var(--hair)}
-.demo-head{margin:0 0 18px}
-@media (max-width:560px){.hero h1{max-width:20ch}.hero-actions{gap:10px}}
-@media (prefers-reduced-motion:reduce){
-    .party,.opt,.bar,.vok,.opt.winner,.opt.blocked{animation:none}
-  *{scroll-behavior:auto}
-}
-
-/* ─── hero band: full-bleed, ambient wash, decorative live proof-in-motion ─────── */
-.hero-band{position:relative;overflow:hidden;border-bottom:1px solid var(--hair)}
-.hero-inner{position:relative;max-width:1180px;margin:0 auto;padding:40px 24px 48px;
-  display:grid;grid-template-columns:1fr;gap:8px}
-.hero-inner header{max-width:none}
-.hero-cols{display:grid;grid-template-columns:1.15fr .85fr;gap:44px;align-items:center;margin-top:8px}
-.hero-cols>*{min-width:0}
-@media (max-width:920px){.hero-cols{grid-template-columns:1fr}}
-.hero-copy .hero{margin:24px 0 0}
-.hero-copy .hero h1{max-width:none}
-
-/* decorative visualization: a silent, looping "3 verdicts, the fair pick" moment */
-.proofviz{background:var(--surface-top);border:1px solid var(--hair);border-radius:var(--r-lg);
-  padding:22px 22px 20px;box-shadow:var(--ambient);position:relative}
-.proofviz .pv-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.proofviz .pv-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
-.proofviz .pv-live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--verify)}
-.proofviz .pv-live i{width:5px;height:5px;border-radius:50%;background:var(--verify);animation:pvBlink 1.8s var(--ease) infinite}
-@keyframes pvBlink{0%,100%{opacity:1}50%{opacity:.35}}
-.pv-row{display:grid;grid-template-columns:74px 1fr 34px;align-items:center;gap:12px;margin:8px 0}
-.pv-row .pv-who{font-size:12px;color:var(--muted);font-weight:540}
-.pv-row .pv-track{background:var(--sunken);border:1px solid var(--hair);border-radius:var(--r-full);height:10px;overflow:hidden}
-.pv-row .pv-fill{height:100%;border-radius:var(--r-full);background:var(--indigo-dim);width:0;
-  animation:pvGrow 2.4s var(--ease) infinite}
-.pv-row.win .pv-fill{background:var(--indigo)}
-.pv-row .pv-pct{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right}
-.pv-row:nth-child(1) .pv-fill{--to:38%;animation-delay:0s}
-.pv-row:nth-child(2) .pv-fill{--to:71%;animation-delay:.12s}
-.pv-row:nth-child(3) .pv-fill{--to:71%;animation-delay:.24s}
-@keyframes pvGrow{0%{width:0}18%{width:var(--to)}82%{width:var(--to)}100%{width:0}}
-.pv-foot{display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
-.pv-foot .seal{font-family:var(--mono);font-weight:700;color:var(--verify);font-size:12.5px}
-.pv-foot span.t{font-size:11.5px;color:var(--dim)}
-@media (prefers-reduced-motion:reduce){.pv-row .pv-fill{animation:none;width:var(--to)}.pv-live i{animation:none}}
+.foot-links a{color:var(--muted);font-size:14px;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:0 12px}
+.foot-links a:hover{color:var(--ink)}
+.foot-meta{color:var(--muted);font-size:14px}
+code{font-family:var(--mono);font-size:.9em}
+@media (max-width:560px){.bar{grid-template-columns:1fr 60px}.bar .track{grid-column:1/-1;order:3}}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}*{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<div class="hero-band"><div class="hero-inner">
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
   <header>
-    <div class="brand"><a href="/" class="logo">parley<span class="d">.</span></a>
-      <div class="tag">a group decision your agents can't lie about, and you can check</div></div>
-    <div class="hdr-nav">
-      <a href="/">← parleyprotocol.com</a>
+    <a href="/" class="logo">parley<span class="d">.</span></a>
+    <nav class="hdr-nav" aria-label="Site">
+      <a href="/">Home</a>
+      <a href="/#how-it-works" class="hide-sm">How it works</a>
       <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">GitHub</a>
-      <button class="toggle" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">◑ theme</button>
-    </div>
+      <button type="button" class="toggle" aria-label="Switch between light and dark theme" aria-pressed="false"
+        onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';this.setAttribute('aria-pressed',r.dataset.theme==='dark');try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"><span aria-hidden="true">&#9681;</span><span class="hide-sm">theme</span></button>
+    </nav>
   </header>
 
-  <div class="hero-cols">
-    <div class="hero-copy">
-    <section class="hero">
-      <h1>Your AI speaks for you. <span class="g">Check what it agreed to.</span></h1>
-      <p class="sub">Several agents, <b>opposite private interests</b>, one decision <b>under rules enforced in code</b>, and a receipt anyone can check. Watch a shortcut that would cheat someone get <b>blocked in code</b>.</p>
-      <div class="hero-actions">
-        <button class="cta" onclick="run()">Replay a sample decision</button>
-        <span class="muted" style="font-size:13px">Pick a sample scenario below, then hit Run. Same engine, sample inputs.</span>
-      </div>
-      <div class="trustrow">
-        <span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4-3 7-7 8-4-1-7-4-7-8V7z"/></svg>no crypto · self-hosted</span>
-        <span class="pill v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>you verify locally</span>
-        <span class="pill r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg>red lines enforced in code</span>
-      </div>
-      <p class="icp-hook">Sample scenarios cover KYC/AML sign-off, DORA-style approvals and contract negotiation. They are scripted inputs, not reports of use. <a href="#" onclick="document.querySelector('#picker b[data-key=\'kyc\']')?.click();document.getElementById('picker').scrollIntoView({behavior:'smooth',block:'center'});return false">try the Onboarding scenario</a>.</p>
-    </section>
+  <main id="main">
+  <section class="hero" aria-labelledby="hero-h">
+    <h1 id="hero-h">Replay a sample decision between agents</h1>
+    <p class="sub">Pick a scenario, press Replay, then check the hash against each sheet.</p>
+    <code class="install">pip install parley-consensus</code>
+    <div class="hero-actions">
+      <button class="cta" onclick="run()">Replay a sample decision</button>
     </div>
-    <div class="hero-viz" aria-hidden="true">
-      <div class="proofviz">
-        <div class="pv-head"><span class="pv-label">Max-min consensus</span><span class="pv-live"><i></i>replay</span></div>
-        <div class="pv-row"><span class="pv-who">Buyer</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">38</span></div>
-        <div class="pv-row win"><span class="pv-who">Seller</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">71</span></div>
-        <div class="pv-row win"><span class="pv-who">Platform</span><div class="pv-track"><div class="pv-fill"></div></div><span class="pv-pct">71</span></div>
-        <div class="pv-foot"><span class="seal">✓</span><span class="t">least-happy party lifted, no sheet exposed</span></div>
-      </div>
-    </div>
-  </div>
+    <p class="scope">Early, version 0.2.1, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat. These scenarios are scripted sample runs computed in advance with the same engine, not reports of use. Here one page holds every sheet; privacy holds when each owner's agent runs as its own process.</p>
+  </section>
 
-  <aside class="arena-cta">
-    <div class="arena-copy">
-      <b>Want to bring your own agent to a live Parley?</b>
-      <span>A hosted Arena is on the drawing board. State your position, watch real agents negotiate it in real time. Interest decides whether it gets built.</span>
-    </div>
-    <a class="arena-btn" href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">Say you're interested in Discussions</a>
-  </aside>
-</div></div>
+  <p class="muted" style="margin:14px 0 0">Tell your agent your limits, answer yes or no to each option, check the pick. <a class="textlink" href="/#how-it-works">The 3 steps</a></p>
 
-<section class="props" aria-label="The three enforced properties">
-  <div class="props-inner">
-    <span class="kicker">Three properties · enforced in code</span>
-    <div class="props-grid">
-      <div class="prop">
-        <span class="ic i-redline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></span>
-        <h3>Red lines enforced in code</h3>
-        <p>A hard limit is a code predicate. An option that crosses one is rejected outright and never negotiated away.</p>
-      </div>
-      <div class="prop">
-        <span class="ic i-engine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h9"/><path d="M4 12h16"/><path d="M4 17h6"/></svg></span>
-        <h3>Max-min consensus, not majority vote</h3>
-        <p>Among the options every party accepts, the pick lifts the least-happy party. If nothing clears every red line, the result is an honest deadlock.</p>
-      </div>
-      <div class="prop">
-        <span class="ic i-verified"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
-        <h3>A receipt you verify yourself</h3>
-        <p>The transcript records masked verdicts only, sealed with SHA-256. Each owner replays their own private limits locally. No sheet is ever revealed.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="demo-band">
-<div class="wrap">
+  <div class="demo-band">
+  <h2 id="scenarios-h">Sample scenarios</h2>
   <hr class="redrule">
-  <div class="demo-head"><span class="kicker">Live demo</span></div>
-
   <div class="controls">
-    <div class="seg" id="picker"></div>
+    <div class="seg" id="picker" role="group" aria-label="Sample scenario"></div>
     <label class="plainck act" id="plainlabel"><input type="checkbox" id="plain" checked> plain language</label>
   </div>
 
   <p class="situation" id="situation">…</p>
 
-  <h2 id="h-parties" class="step">The people involved. Each keeps its position private</h2>
+  <h2 id="h-parties"><span class="step-n">1</span><span>The people involved. Each keeps their limits with their own agent</span></h2>
   <div class="grid cards" id="parties"></div>
 
-  <h2 id="h-options" class="step">The options on the table</h2>
+  <h2 id="h-options"><span class="step-n">2</span>The options on the table</h2>
   <div id="options"></div>
-  <p class="muted" id="masknote" style="margin-top:8px">Each chip is a <em>masked</em> verdict. The coordinator sees only who accepted, never which limit was crossed.</p>
+  <p class="muted" id="masknote" style="margin-top:8px">Each chip is a masked verdict: yes or no, never which limit was crossed. The answers still show some of each person's range.</p>
 
   <div style="margin:32px 0 8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-    <button class="btn" onclick="run()">Run it ↻</button>
-    <span class="muted" style="font-size:13px">every verdict and hash on this page was computed by the real engine. Reproduce them yourself with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
+    <button class="btn" onclick="run()">Replay the sample</button>
+    <span class="muted">Reproduce the run with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
   </div>
 
-  <h2 id="h-viz" class="step">The fair answer: lift the least-happy party</h2>
+  <h2 id="h-viz"><span class="step-n">3</span>The pick: the option that helps the least-happy person most</h2>
   <div id="viz"></div>
   <div class="outcome" id="outcome"></div>
 
-  <h2 id="h-receipt" class="step">The receipt: a tamper-evident, replayable transcript</h2>
+  <h2 id="h-receipt"><span class="step-n">4</span>The record: a hashed transcript you can replay</h2>
   <div class="receipt" id="receipt">running…</div>
   <div class="verify">
-    <button class="vbtn" onclick="doVerify()">Verify transcript <span class="seal">✓</span></button>
-    <span class="vok" id="vok"><span class="seal">✓ verified</span> Every party replayed its own limits against the decision; none crossed. Tamper-evident (SHA-256).</span>
+    <button class="vbtn" onclick="doVerify()">Check the record</button>
+    <span class="vok" id="vok" role="status">Checked: each person's limits, replayed against the pick, were not crossed. The record is a SHA-256 hash over the masked verdicts. Unsigned sample run.</span>
   </div>
-
   </div>
+  </main>
 </div>
 
 <div class="foot-wrap">
   <footer class="site-footer">
     <div class="foot-links">
-      <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.53-1.11-1.53-.91-.64.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.9 1.57 2.36 1.12 2.93.85.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.81 0 .28.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
-        GitHub
-      </a>
-      <a href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-        Contact / Discussions
-      </a>
-      <a href="https://www.linkedin.com/company/parleyprotocol" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
-        LinkedIn
-      </a>
-      <a href="mailto:hello@parleyprotocol.com">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
-        Contact
-      </a>
+      <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/5uper0/parley/discussions" target="_blank" rel="noopener">Discussions</a>
+      <a href="https://www.linkedin.com/company/parleyprotocol" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:hello@parleyprotocol.com">Contact</a>
       <a href="https://github.com/5uper0/parley/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0</a>
       <a href="/privacy">Privacy</a>
-      <a href="/">← parleyprotocol.com</a>
+      <a href="/">parleyprotocol.com</a>
     </div>
-    <div class="foot-meta">Open source · self-hosted · zero-dependency Python core</div>
+    <div class="foot-meta">Open source, self-hosted, zero-dependency Python core</div>
   </footer>
 </div>
 
 <script>
-const FALLBACK = {"recipes":[{"key":"p2p","title":"Resolve a P2P trade dispute (escrow)","situation":"You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?"},{"key":"estate","title":"Split an inherited estate","situation":"Two heirs split an inheritance. Neither wants to reveal how badly they want each piece \u2014 and it has to be legally clean."},{"key":"contract","title":"Negotiate enterprise contract clauses","situation":"You and a client are agreeing on contract terms \u2014 neither wants to show their real bottom line."},{"key":"kyc","title":"Onboard a new counterparty","situation":"A new business wants to sign up. Three teams have to agree whether \u2014 and how \u2014 to let them in, without ignoring the checks."},{"key":"partnership","title":"Break a 3-partner squeeze-out (real case)","situation":"Three friends started a company, 1/3 each, and each put in $12k. The two who now work in it day-to-day want to push out the third (remote, less recent effort). The signed partnership agreement says all three own it equally. What outcome does everyone accept?"},{"key":"dao","title":"Settle a DAO treasury fight without an insider rig (real case)","situation":"A DAO's token holders want direct pro-rata access to a treasury they feel is underperforming; the leadership wants to keep control of how the capital is deployed. Critics warn that leadership can simply block the vote with its own dominant stake. What outcome is legitimate and everyone can accept?"}],"runs":{"p2p":{"title":"Resolve a P2P trade dispute (escrow)","parties":[{"owner":"Buyer","redlines":[]},{"owner":"Seller","redlines":[]},{"owner":"Platform","redlines":["evidence_ok == True"]}],"entries":[{"option":{"id":"to-seller","label":"Release to seller (0/100)","buyer":0,"seller":100,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"split","label":"Split the escrow (50/50)","buyer":50,"seller":50,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"to-buyer","label":"Refund the buyer (100/0)","buyer":100,"seller":0,"evidence_ok":true},"verdicts":[{"owner":"Buyer","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Platform","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"instant","label":"Instant refund, skip evidence","buyer":100,"seller":0,"evidence_ok":false},"verdicts":[{"owner":"Buyer","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Seller","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Platform","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"split","label":"Split the escrow (50/50)","buyer":50,"seller":50,"evidence_ok":true},"status":"agreed","hash":"0a85a717b2e6fb2f727200678935ace511cb94c1f1acf805a1a93d0c75042000","non_betrayal":{"Buyer":true,"Seller":true,"Platform":true},"presentation":{"situation":"You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?","parties":{"Buyer":{"blurb":"wants their money back","redlines":[]},"Seller":{"blurb":"wants to be paid for what they shipped","redlines":[]},"Platform":{"blurb":"won't release the money without checking the evidence","redlines":["never skip the evidence check"]}},"options":{"to-seller":{"plain":"Pay the seller in full"},"split":{"plain":"Split it 50/50"},"to-buyer":{"plain":"Refund the buyer in full"},"instant":{"plain":"Instant refund, skip the evidence check","tempting":true}},"attrs":[{"key":"buyer","label":"buyer gets"},{"key":"seller","label":"seller gets"}],"outcome":"The fairest call everyone accepts is a 50/50 split \u2014 nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."}},"estate":{"title":"Split an inherited estate","parties":[{"owner":"Heir 1","redlines":[]},{"owner":"Heir 2","redlines":["heir2 >= 30"]},{"owner":"Executor","redlines":["legal_ok == True"]}],"entries":[{"option":{"id":"equal","label":"Equal split (50/50)","heir1":50,"heir2":50,"legal_ok":true},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Heir 2","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Executor","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"weighted","label":"Weighted (60/40)","heir1":60,"heir2":40,"legal_ok":true},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.6,"reason":"ok"},{"owner":"Heir 2","acceptable":true,"score":0.4,"reason":"ok"},{"owner":"Executor","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.4},{"option":{"id":"grab","label":"Grab (90/10), title unclear","heir1":90,"heir2":10,"legal_ok":false},"verdicts":[{"owner":"Heir 1","acceptable":true,"score":0.9,"reason":"ok"},{"owner":"Heir 2","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Executor","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"equal","label":"Equal split (50/50)","heir1":50,"heir2":50,"legal_ok":true},"status":"agreed","hash":"1431fb1a2f2f6f7c908d5f2391962203cd9281c742a7f495295907ce8d3c489e","non_betrayal":{"Heir 1":true,"Heir 2":true,"Executor":true},"presentation":{"situation":"Two heirs split an inheritance. Neither wants to reveal how badly they want each piece \u2014 and it has to be legally clean.","parties":{"Heir 1":{"blurb":"wants the larger share","redlines":[]},"Heir 2":{"blurb":"won't accept less than a fair third","redlines":["at least a third of the estate"]},"Executor":{"blurb":"won't sign off on anything not legally clean","redlines":["the title must be legally clean"]}},"options":{"equal":{"plain":"Split it equally (50/50)"},"weighted":{"plain":"Weighted split (60/40)"},"grab":{"plain":"One heir grabs 90/10 \u2014 title left unclear","tempting":true}},"attrs":[{"key":"heir1","label":"heir 1 gets"},{"key":"heir2","label":"heir 2 gets"}],"outcome":"The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. No family fight \u2014 and a record everyone can check."}},"contract":{"title":"Negotiate enterprise contract clauses","parties":[{"owner":"Customer","redlines":["sla >= 99"]},{"owner":"Vendor","redlines":[]},{"owner":"Legal","redlines":["data_residency_ok == True"]}],"entries":[{"option":{"id":"balanced","label":"Balanced terms","liability_cap":5,"sla":99,"data_residency_ok":true,"auto_renew":false},"verdicts":[{"owner":"Customer","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Vendor","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"Legal","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"customer-favored","label":"Customer-favored","liability_cap":8,"sla":99,"data_residency_ok":true,"auto_renew":false},"verdicts":[{"owner":"Customer","acceptable":true,"score":0.8,"reason":"ok"},{"owner":"Vendor","acceptable":true,"score":0.2,"reason":"ok"},{"owner":"Legal","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":true,"floor":0.2},{"option":{"id":"vendor-lockin","label":"Vendor lock-in, low SLA","liability_cap":2,"sla":95,"data_residency_ok":false,"auto_renew":true},"verdicts":[{"owner":"Customer","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Vendor","acceptable":true,"score":0.8,"reason":"ok"},{"owner":"Legal","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"balanced","label":"Balanced terms","liability_cap":5,"sla":99,"data_residency_ok":true,"auto_renew":false},"status":"agreed","hash":"feb98e8914bf6dc3192e286b426a094e1245e274992ffeda8adde7c6cc66109b","non_betrayal":{"Customer":true,"Vendor":true,"Legal":true},"presentation":{"situation":"You and a client are agreeing on contract terms \u2014 neither wants to show their real bottom line.","parties":{"Customer":{"blurb":"needs a real uptime guarantee","redlines":["at least 99% uptime (SLA)"]},"Vendor":{"blurb":"wants to cap how much it can be on the hook for","redlines":[]},"Legal":{"blurb":"won't let customer data leave the region","redlines":["data must stay in-region"]}},"options":{"balanced":{"plain":"Balanced terms both sides can live with"},"customer-favored":{"plain":"Terms that favor the customer"},"vendor-lockin":{"plain":"Lock-in, weak uptime, data sent offshore","tempting":true}},"attrs":[{"key":"sla","label":"uptime %"},{"key":"liability_cap","label":"liability cap"}],"outcome":"The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side revealing its floor \u2014 with a receipt."}},"kyc":{"title":"Onboard a new counterparty","parties":[{"owner":"Compliance","redlines":["sanctions_ok == True","edd_done == True"]},{"owner":"Risk","redlines":["risk <= 7"]},{"owner":"Business","redlines":[]}],"entries":[{"option":{"id":"reject","label":"Reject","revenue":0,"risk":0,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.0,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"approve-basic","label":"Approve: basic tier","revenue":3,"risk":3,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":0.667,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":0.571,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.3,"reason":"ok"}],"feasible":true,"floor":0.3},{"option":{"id":"approve-full","label":"Approve: full tier","revenue":8,"risk":6,"sanctions_ok":true,"edd_done":true},"verdicts":[{"owner":"Compliance","acceptable":true,"score":0.333,"reason":"ok"},{"owner":"Risk","acceptable":true,"score":0.143,"reason":"ok"},{"owner":"Business","acceptable":true,"score":0.8,"reason":"ok"}],"feasible":true,"floor":0.143},{"option":{"id":"approve-fast","label":"Approve: fast-track","revenue":10,"risk":9,"sanctions_ok":false,"edd_done":false},"verdicts":[{"owner":"Compliance","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Risk","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Business","acceptable":true,"score":1.0,"reason":"ok"}],"feasible":false,"floor":null}],"decision":{"id":"approve-basic","label":"Approve: basic tier","revenue":3,"risk":3,"sanctions_ok":true,"edd_done":true},"status":"agreed","hash":"d9a683e895122c8185772ae86467f3c225e66abc8eac58ba081f1877bd1b8a88","non_betrayal":{"Compliance":true,"Risk":true,"Business":true},"presentation":{"situation":"A new business wants to sign up. Three teams have to agree whether \u2014 and how \u2014 to let them in, without ignoring the checks.","parties":{"Compliance":{"blurb":"won't approve anyone who isn't screened and checked","redlines":["sanctions screening done","enhanced due-diligence done"]},"Risk":{"blurb":"won't take on too much risk","redlines":["risk score no higher than 7"]},"Business":{"blurb":"wants the revenue","redlines":[]}},"options":{"reject":{"plain":"Turn them down"},"approve-basic":{"plain":"Approve \u2014 basic tier"},"approve-full":{"plain":"Approve \u2014 full tier"},"approve-fast":{"plain":"Fast-track \u2014 skip the checks","tempting":true}},"attrs":[{"key":"revenue","label":"revenue"},{"key":"risk","label":"risk"}],"outcome":"The tier every team can accept is picked; the fast-track that skips sanctions and due-diligence was blocked by a red line. The revenue team never sees the others' private limits \u2014 and there's an audit-ready receipt."}},"partnership":{"title":"Break a 3-partner squeeze-out (real case)","parties":[{"owner":"Ousted partner","redlines":["op_outcome >= 50"]},{"owner":"Two active partners","redlines":[]},{"owner":"Partnership agreement","redlines":["fair == True"]}],"entries":[{"option":{"id":"keep-equal","label":"Status quo: everyone keeps 1/3","op_outcome":100,"fair":true,"partners_control":false},"verdicts":[{"owner":"Ousted partner","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Two active partners","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Partnership agreement","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"fair-buyout","label":"Buy the third out at a fair 1/3 valuation","op_outcome":90,"fair":true,"partners_control":true},"verdicts":[{"owner":"Ousted partner","acceptable":true,"score":0.9,"reason":"ok"},{"owner":"Two active partners","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Partnership agreement","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"dissolve","label":"Dissolve, liquidate, split proceeds","op_outcome":60,"fair":true,"partners_control":false},"verdicts":[{"owner":"Ousted partner","acceptable":true,"score":0.6,"reason":"ok"},{"owner":"Two active partners","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"Partnership agreement","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"squeeze","label":"Dilute / force the third out cheap","op_outcome":15,"fair":false,"partners_control":true},"verdicts":[{"owner":"Ousted partner","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"Two active partners","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"Partnership agreement","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"fair-buyout","label":"Buy the third out at a fair 1/3 valuation","op_outcome":90,"fair":true,"partners_control":true},"status":"agreed","hash":"a019b233f111529052c5deb729ab43073f3c431ace79796d08ffbc28614bff13","non_betrayal":{"Ousted partner":true,"Two active partners":true,"Partnership agreement":true},"presentation":{"situation":"Three friends started a company, 1/3 each, and each put in $12k. The two who now work in it day-to-day want to push out the third (remote, less recent effort). The signed partnership agreement says all three own it equally. What outcome does everyone accept?","parties":{"Ousted partner":{"blurb":"wants his equal, contractually-guaranteed stake honored (or bought out at its true value)","redlines":["won't accept less than his equal one-third share"]},"Two active partners":{"blurb":"want to run the company without a passive co-owner","redlines":[]},"Partnership agreement":{"blurb":"the equal-ownership terms both sides signed; won't ratify a coerced dilution","redlines":["no outcome that violates the equal-ownership agreement"]}},"options":{"keep-equal":{"plain":"Everyone keeps an equal third"},"fair-buyout":{"plain":"Buy the third partner out at a fair one-third valuation"},"dissolve":{"plain":"Dissolve and split the proceeds"},"squeeze":{"plain":"Dilute or force the third partner out on the cheap","tempting":true}},"attrs":[{"key":"op_outcome","label":"third partner's realized value"}],"outcome":"The shortcut that squeezes the third partner out below his equal share is blocked by the fairness red line. Among the outcomes everyone can accept, the fair buyout lifts the least-happy party highest: the third partner gets true value for his one-third, the two active partners get the control they want, and nobody is forced into a value-destroying dissolution. Everyone gets a receipt: no one was cheated."},"source":{"case":"r/smallbusiness: 'Getting kicked out of my company' (3 equal partners, 2-vs-1 squeeze-out)","url":"https://www.reddit.com/r/smallbusiness/comments/19543js/getting_kicked_out_of_my_company/","note":"Encoded from a real thread: three friends own 1/3 each ($12k each in), the two active partners want to push out the third (remote) despite a partnership agreement that says they all equally own the company. Positions, the equal-share red line, and the options are taken from the poster's own account; no party ratified the outcome (this is a real-case run, not a signed engagement)."}},"dao":{"title":"Settle a DAO treasury fight without an insider rig (real case)","parties":[{"owner":"Token holders","redlines":["legit == True"]},{"owner":"DAO leadership","redlines":[]},{"owner":"On-chain governance","redlines":["legit == True"]}],"entries":[{"option":{"id":"full","label":"Full pro-rata redemption to holders","holder_access":100,"legit":true},"verdicts":[{"owner":"Token holders","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"DAO leadership","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"On-chain governance","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"partial","label":"Partial redemption + a deployment mandate","holder_access":50,"legit":true},"verdicts":[{"owner":"Token holders","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"DAO leadership","acceptable":true,"score":0.5,"reason":"ok"},{"owner":"On-chain governance","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.5},{"option":{"id":"status-quo","label":"Leadership keeps deployment control","holder_access":0,"legit":true},"verdicts":[{"owner":"Token holders","acceptable":true,"score":0.0,"reason":"ok"},{"owner":"DAO leadership","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"On-chain governance","acceptable":true,"score":0.5,"reason":"ok"}],"feasible":true,"floor":0.0},{"option":{"id":"insider","label":"Leadership blocks the vote with its own dominant stake","holder_access":0,"legit":false},"verdicts":[{"owner":"Token holders","acceptable":false,"score":0.0,"reason":"red-line"},{"owner":"DAO leadership","acceptable":true,"score":1.0,"reason":"ok"},{"owner":"On-chain governance","acceptable":false,"score":0.0,"reason":"red-line"}],"feasible":false,"floor":null}],"decision":{"id":"partial","label":"Partial redemption + a deployment mandate","holder_access":50,"legit":true},"status":"agreed","hash":"5fd23265bf76cd1a3daec8313ead3eec71d79fe8898e1a70a37a764cb6e2b3ac","non_betrayal":{"Token holders":true,"DAO leadership":true,"On-chain governance":true},"presentation":{"situation":"A DAO's token holders want direct pro-rata access to a treasury they feel is underperforming; the leadership wants to keep control of how the capital is deployed. Critics warn that leadership can simply block the vote with its own dominant stake. What outcome is legitimate and everyone can accept?","parties":{"Token holders":{"blurb":"want direct pro-rata redemption and accountability","redlines":["won't accept an outcome forced by insider control of the vote"]},"DAO leadership":{"blurb":"want to retain control of capital deployment","redlines":[]},"On-chain governance":{"blurb":"the legitimacy of the process itself; won't ratify a vote decided by insider power, not quorum","redlines":["no outcome that rests on insider-rigging the vote"]}},"options":{"full":{"plain":"Full pro-rata redemption to holders"},"partial":{"plain":"Partial redemption plus a deployment mandate"},"status-quo":{"plain":"Leadership keeps deployment control"},"insider":{"plain":"Leadership blocks the vote with its own dominant stake","tempting":true}},"attrs":[{"key":"holder_access","label":"direct holder access to the treasury"}],"outcome":"The insider move (blocking the vote with a dominant stake) is blocked by the legitimacy red line: it can't be the outcome, full stop. Among the legitimate options everyone can accept, max-min lifts the least-happy party highest and lands on partial redemption plus a deployment mandate: holders get real direct access, leadership keeps a mandate to deploy, and the result is on-chain verifiable. Everyone gets a receipt: no one rigged it."},"source":{"case":"Gnosis DAO GIP-151 treasury-redemption tension (holders want direct pro-rata access; leadership wants to retain deployment control)","url":"https://www.cryptopolitan.com/gnosis-dao-treasury-governance-tensions-aave/","note":"Encoded from a real, reported governance fight: token holders push for direct pro-rata redemption + accountability while leadership wants to keep control of capital deployment, and critics reject insider control of a contested vote. Positions and the legitimacy red line are from the reported dispute; no party ratified this outcome (real-case run, not a signed engagement). See also ENS/Aave insider-rush cases in docs/demand-evidence-forums.md."}}}};
+const FALLBACK = {"recipes": [{"key": "p2p", "title": "Resolve a P2P trade dispute (escrow)", "situation": "You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?"}, {"key": "estate", "title": "Split an inherited estate", "situation": "Two heirs split an inheritance. Neither wants to reveal how badly they want each piece, and it has to be legally clean."}, {"key": "contract", "title": "Negotiate enterprise contract clauses", "situation": "You and a client are agreeing on contract terms, and neither wants to show their real bottom line."}, {"key": "kyc", "title": "Onboard a new counterparty", "situation": "A new business wants to sign up. Three teams have to agree whether and how to let them in, without ignoring the checks."}, {"key": "partnership", "title": "Break a 3-partner squeeze-out (real case)", "situation": "Three friends started a company, 1/3 each, and each put in $12k. The two who now work in it day-to-day want to push out the third (remote, less recent effort). The signed partnership agreement says all three own it equally. What outcome does everyone accept?"}, {"key": "dao", "title": "Settle a DAO treasury fight without an insider rig (real case)", "situation": "A DAO's token holders want direct pro-rata access to a treasury they feel is underperforming; the leadership wants to keep control of how the capital is deployed. Critics warn that leadership can simply block the vote with its own dominant stake. What outcome is legitimate and everyone can accept?"}, {"key": "valuation", "title": "Split an inherited house without a coerced waiver (real case)", "situation": "A parent dies without a will. You inherit a one-quarter share of the house; your three siblings live in it and want to keep it. They would rather buy you out at the low county-assessor value than a real market appraisal, and someone already asked you to just sign away your rights. What does everyone accept?"}], "runs": {"p2p": {"title": "Resolve a P2P trade dispute (escrow)", "parties": [{"owner": "Buyer", "redlines": []}, {"owner": "Seller", "redlines": []}, {"owner": "Platform", "redlines": ["evidence_ok == True"]}], "entries": [{"option": {"id": "to-seller", "label": "Release to seller (0/100)", "buyer": 0, "seller": 100, "evidence_ok": true}, "verdicts": [{"owner": "Buyer", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "Seller", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Platform", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "split", "label": "Split the escrow (50/50)", "buyer": 50, "seller": 50, "evidence_ok": true}, "verdicts": [{"owner": "Buyer", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Seller", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Platform", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "to-buyer", "label": "Refund the buyer (100/0)", "buyer": 100, "seller": 0, "evidence_ok": true}, "verdicts": [{"owner": "Buyer", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Seller", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "Platform", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "instant", "label": "Instant refund, skip evidence", "buyer": 100, "seller": 0, "evidence_ok": false}, "verdicts": [{"owner": "Buyer", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Seller", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "Platform", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "split", "label": "Split the escrow (50/50)", "buyer": 50, "seller": 50, "evidence_ok": true}, "status": "agreed", "hash": "0a85a717b2e6fb2f727200678935ace511cb94c1f1acf805a1a93d0c75042000", "non_betrayal": {"Buyer": true, "Seller": true, "Platform": true}, "presentation": {"situation": "You sold something online. The buyer says it never arrived; you say you shipped it. Who gets the money held in escrow?", "parties": {"Buyer": {"blurb": "wants their money back", "redlines": []}, "Seller": {"blurb": "wants to be paid for what they shipped", "redlines": []}, "Platform": {"blurb": "won't release the money without checking the evidence", "redlines": ["never skip the evidence check"]}}, "options": {"to-seller": {"plain": "Pay the seller in full"}, "split": {"plain": "Split it 50/50"}, "to-buyer": {"plain": "Refund the buyer in full"}, "instant": {"plain": "Instant refund, skip the evidence check", "tempting": true}}, "attrs": [{"key": "buyer", "label": "buyer gets"}, {"key": "seller", "label": "seller gets"}], "outcome": "The fairest call everyone accepts is a 50/50 split, nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets the same record to check."}, "source": {"case": "Bitcointalk: public escrow dispute (greendots & Redblue)", "url": "https://bitcointalk.org/index.php?topic=309410.0", "note": "Mirrors this real dispute: a 3-party buyer/seller/arbiter escrow where the red line was that the resolution had to stand on its own, with an evidence-gated release."}}, "estate": {"title": "Split an inherited estate", "parties": [{"owner": "Heir 1", "redlines": []}, {"owner": "Heir 2", "redlines": ["heir2 >= 30"]}, {"owner": "Executor", "redlines": ["legal_ok == True"]}], "entries": [{"option": {"id": "equal", "label": "Equal split (50/50)", "heir1": 50, "heir2": 50, "legal_ok": true}, "verdicts": [{"owner": "Heir 1", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Heir 2", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Executor", "acceptable": true, "score": 1.0, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "weighted", "label": "Weighted (60/40)", "heir1": 60, "heir2": 40, "legal_ok": true}, "verdicts": [{"owner": "Heir 1", "acceptable": true, "score": 0.6, "reason": "ok"}, {"owner": "Heir 2", "acceptable": true, "score": 0.4, "reason": "ok"}, {"owner": "Executor", "acceptable": true, "score": 1.0, "reason": "ok"}], "feasible": true, "floor": 0.4}, {"option": {"id": "grab", "label": "Grab (90/10), title unclear", "heir1": 90, "heir2": 10, "legal_ok": false}, "verdicts": [{"owner": "Heir 1", "acceptable": true, "score": 0.9, "reason": "ok"}, {"owner": "Heir 2", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Executor", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "equal", "label": "Equal split (50/50)", "heir1": 50, "heir2": 50, "legal_ok": true}, "status": "agreed", "hash": "1431fb1a2f2f6f7c908d5f2391962203cd9281c742a7f495295907ce8d3c489e", "non_betrayal": {"Heir 1": true, "Heir 2": true, "Executor": true}, "presentation": {"situation": "Two heirs split an inheritance. Neither wants to reveal how badly they want each piece, and it has to be legally clean.", "parties": {"Heir 1": {"blurb": "wants the larger share", "redlines": []}, "Heir 2": {"blurb": "won't accept less than a fair third", "redlines": ["at least a third of the estate"]}, "Executor": {"blurb": "won't sign off on anything not legally clean", "redlines": ["the title must be legally clean"]}}, "options": {"equal": {"plain": "Split it equally (50/50)"}, "weighted": {"plain": "Weighted split (60/40)"}, "grab": {"plain": "One heir grabs 90/10, title left unclear", "tempting": true}}, "attrs": [{"key": "heir1", "label": "heir 1 gets"}, {"key": "heir2", "label": "heir 2 gets"}], "outcome": "The split both heirs accept and the executor can legally sign is picked; the 90/10 grab with an unclear title was blocked by a red line. Everyone gets a record they can check."}, "source": {"case": "r/legaladvice: My brothers want to keep our dad's house", "url": "https://www.reddit.com/r/legaladvice/comments/1q5wo7s/my_brothers_want_to_keep_our_dads_house_after_his/", "note": "Mirrors this real dispute: 4 heirs fighting over the neutral valuation basis, where the poster refused to sign away their rights."}}, "contract": {"title": "Negotiate enterprise contract clauses", "parties": [{"owner": "Customer", "redlines": ["sla >= 99"]}, {"owner": "Vendor", "redlines": []}, {"owner": "Legal", "redlines": ["data_residency_ok == True"]}], "entries": [{"option": {"id": "balanced", "label": "Balanced terms", "liability_cap": 5, "sla": 99, "data_residency_ok": true, "auto_renew": false}, "verdicts": [{"owner": "Customer", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Vendor", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Legal", "acceptable": true, "score": 1.0, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "customer-favored", "label": "Customer-favored", "liability_cap": 8, "sla": 99, "data_residency_ok": true, "auto_renew": false}, "verdicts": [{"owner": "Customer", "acceptable": true, "score": 0.8, "reason": "ok"}, {"owner": "Vendor", "acceptable": true, "score": 0.2, "reason": "ok"}, {"owner": "Legal", "acceptable": true, "score": 1.0, "reason": "ok"}], "feasible": true, "floor": 0.2}, {"option": {"id": "vendor-lockin", "label": "Vendor lock-in, low SLA", "liability_cap": 2, "sla": 95, "data_residency_ok": false, "auto_renew": true}, "verdicts": [{"owner": "Customer", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Vendor", "acceptable": true, "score": 0.8, "reason": "ok"}, {"owner": "Legal", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "balanced", "label": "Balanced terms", "liability_cap": 5, "sla": 99, "data_residency_ok": true, "auto_renew": false}, "status": "agreed", "hash": "feb98e8914bf6dc3192e286b426a094e1245e274992ffeda8adde7c6cc66109b", "non_betrayal": {"Customer": true, "Vendor": true, "Legal": true}, "presentation": {"situation": "You and a client are agreeing on contract terms, and neither wants to show their real bottom line.", "parties": {"Customer": {"blurb": "needs a real uptime guarantee", "redlines": ["at least 99% uptime (SLA)"]}, "Vendor": {"blurb": "wants to cap how much it can be on the hook for", "redlines": []}, "Legal": {"blurb": "won't let customer data leave the region", "redlines": ["data must stay in-region"]}}, "options": {"balanced": {"plain": "Balanced terms both sides can live with"}, "customer-favored": {"plain": "Terms that favor the customer"}, "vendor-lockin": {"plain": "Lock-in, weak uptime, data sent offshore", "tempting": true}}, "attrs": [{"key": "sla", "label": "uptime %"}, {"key": "liability_cap", "label": "liability cap"}], "outcome": "The terms both sides accept and legal clears are chosen; the lock-in option with a weak SLA and offshore data was blocked by a red line. The deal closes without either side handing over its floor, and both get a record to check."}, "source": null}, "kyc": {"title": "Onboard a new counterparty", "parties": [{"owner": "Compliance", "redlines": ["sanctions_ok == True", "edd_done == True"]}, {"owner": "Risk", "redlines": ["risk <= 7"]}, {"owner": "Business", "redlines": []}], "entries": [{"option": {"id": "reject", "label": "Reject", "revenue": 0, "risk": 0, "sanctions_ok": true, "edd_done": true}, "verdicts": [{"owner": "Compliance", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Risk", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Business", "acceptable": true, "score": 0.0, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "approve-basic", "label": "Approve: basic tier", "revenue": 3, "risk": 3, "sanctions_ok": true, "edd_done": true}, "verdicts": [{"owner": "Compliance", "acceptable": true, "score": 0.667, "reason": "ok"}, {"owner": "Risk", "acceptable": true, "score": 0.571, "reason": "ok"}, {"owner": "Business", "acceptable": true, "score": 0.3, "reason": "ok"}], "feasible": true, "floor": 0.3}, {"option": {"id": "approve-full", "label": "Approve: full tier", "revenue": 8, "risk": 6, "sanctions_ok": true, "edd_done": true}, "verdicts": [{"owner": "Compliance", "acceptable": true, "score": 0.333, "reason": "ok"}, {"owner": "Risk", "acceptable": true, "score": 0.143, "reason": "ok"}, {"owner": "Business", "acceptable": true, "score": 0.8, "reason": "ok"}], "feasible": true, "floor": 0.143}, {"option": {"id": "approve-fast", "label": "Approve: fast-track", "revenue": 10, "risk": 9, "sanctions_ok": false, "edd_done": false}, "verdicts": [{"owner": "Compliance", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Risk", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Business", "acceptable": true, "score": 1.0, "reason": "ok"}], "feasible": false, "floor": null}], "decision": {"id": "approve-basic", "label": "Approve: basic tier", "revenue": 3, "risk": 3, "sanctions_ok": true, "edd_done": true}, "status": "agreed", "hash": "d9a683e895122c8185772ae86467f3c225e66abc8eac58ba081f1877bd1b8a88", "non_betrayal": {"Compliance": true, "Risk": true, "Business": true}, "presentation": {"situation": "A new business wants to sign up. Three teams have to agree whether and how to let them in, without ignoring the checks.", "parties": {"Compliance": {"blurb": "won't approve anyone who isn't screened and checked", "redlines": ["screening done", "enhanced due-diligence done"]}, "Risk": {"blurb": "won't take on too much risk", "redlines": ["risk score no higher than 7"]}, "Business": {"blurb": "wants the revenue", "redlines": []}}, "options": {"reject": {"plain": "Turn them down"}, "approve-basic": {"plain": "Approve: basic tier"}, "approve-full": {"plain": "Approve: full tier"}, "approve-fast": {"plain": "Fast-track: skip the checks", "tempting": true}}, "attrs": [{"key": "revenue", "label": "revenue"}, {"key": "risk", "label": "risk"}], "outcome": "The tier every team can accept is picked; the fast-track that skips screening and due-diligence was blocked by a red line. The revenue team never sees the others' private limits, and everyone gets a record to check."}, "source": {"note": "Structural, not forum-cited. KYC/AML multi-party liability pain lives in private compliance channels, not public forums, so there is no public case to cite."}}, "partnership": {"title": "Break a 3-partner squeeze-out (real case)", "parties": [{"owner": "Ousted partner", "redlines": ["op_outcome >= 50"]}, {"owner": "Two active partners", "redlines": []}, {"owner": "Partnership agreement", "redlines": ["fair == True"]}], "entries": [{"option": {"id": "keep-equal", "label": "Status quo: everyone keeps 1/3", "op_outcome": 100, "fair": true, "partners_control": false}, "verdicts": [{"owner": "Ousted partner", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Two active partners", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "Partnership agreement", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "fair-buyout", "label": "Buy the third out at a fair 1/3 valuation", "op_outcome": 90, "fair": true, "partners_control": true}, "verdicts": [{"owner": "Ousted partner", "acceptable": true, "score": 0.9, "reason": "ok"}, {"owner": "Two active partners", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Partnership agreement", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "dissolve", "label": "Dissolve, liquidate, split proceeds", "op_outcome": 60, "fair": true, "partners_control": false}, "verdicts": [{"owner": "Ousted partner", "acceptable": true, "score": 0.6, "reason": "ok"}, {"owner": "Two active partners", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "Partnership agreement", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "squeeze", "label": "Dilute / force the third out cheap", "op_outcome": 15, "fair": false, "partners_control": true}, "verdicts": [{"owner": "Ousted partner", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Two active partners", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Partnership agreement", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "fair-buyout", "label": "Buy the third out at a fair 1/3 valuation", "op_outcome": 90, "fair": true, "partners_control": true}, "status": "agreed", "hash": "a019b233f111529052c5deb729ab43073f3c431ace79796d08ffbc28614bff13", "non_betrayal": {"Ousted partner": true, "Two active partners": true, "Partnership agreement": true}, "presentation": {"situation": "Three friends started a company, 1/3 each, and each put in $12k. The two who now work in it day-to-day want to push out the third (remote, less recent effort). The signed partnership agreement says all three own it equally. What outcome does everyone accept?", "parties": {"Ousted partner": {"blurb": "wants his equal, contractually-guaranteed stake honored (or bought out at its true value)", "redlines": ["won't accept less than his equal one-third share"]}, "Two active partners": {"blurb": "want to run the company without a passive co-owner", "redlines": []}, "Partnership agreement": {"blurb": "the equal-ownership terms both sides signed; won't ratify a coerced dilution", "redlines": ["no outcome that violates the equal-ownership agreement"]}}, "options": {"keep-equal": {"plain": "Everyone keeps an equal third"}, "fair-buyout": {"plain": "Buy the third partner out at a fair one-third valuation"}, "dissolve": {"plain": "Dissolve and split the proceeds"}, "squeeze": {"plain": "Dilute or force the third partner out on the cheap", "tempting": true}}, "attrs": [{"key": "op_outcome", "label": "third partner's realized value"}], "outcome": "The shortcut that squeezes the third partner out below his equal share is blocked by the fairness red line. Among the outcomes everyone can accept, the fair buyout lifts the least-happy party highest: the third partner gets true value for his one-third, the two active partners get the control they want, and nobody is forced into a value-destroying dissolution. Everyone gets the same record to check."}, "source": {"case": "r/smallbusiness: 'Getting kicked out of my company' (3 equal partners, 2-vs-1 squeeze-out)", "url": "https://www.reddit.com/r/smallbusiness/comments/19543js/getting_kicked_out_of_my_company/", "note": "Encoded from a real thread: three friends own 1/3 each ($12k each in), the two active partners want to push out the third (remote) despite a partnership agreement that says they all equally own the company. Positions, the equal-share red line, and the options are taken from the poster's own account; no party ratified the outcome (this is a real-case run, not a signed engagement)."}}, "dao": {"title": "Settle a DAO treasury fight without an insider rig (real case)", "parties": [{"owner": "Token holders", "redlines": ["legit == True"]}, {"owner": "DAO leadership", "redlines": []}, {"owner": "On-chain governance", "redlines": ["legit == True"]}], "entries": [{"option": {"id": "full", "label": "Full pro-rata redemption to holders", "holder_access": 100, "legit": true}, "verdicts": [{"owner": "Token holders", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "DAO leadership", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "On-chain governance", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "partial", "label": "Partial redemption + a deployment mandate", "holder_access": 50, "legit": true}, "verdicts": [{"owner": "Token holders", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "DAO leadership", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "On-chain governance", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "status-quo", "label": "Leadership keeps deployment control", "holder_access": 0, "legit": true}, "verdicts": [{"owner": "Token holders", "acceptable": true, "score": 0.0, "reason": "ok"}, {"owner": "DAO leadership", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "On-chain governance", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.0}, {"option": {"id": "insider", "label": "Leadership blocks the vote with its own dominant stake", "holder_access": 0, "legit": false}, "verdicts": [{"owner": "Token holders", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "DAO leadership", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "On-chain governance", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "partial", "label": "Partial redemption + a deployment mandate", "holder_access": 50, "legit": true}, "status": "agreed", "hash": "5fd23265bf76cd1a3daec8313ead3eec71d79fe8898e1a70a37a764cb6e2b3ac", "non_betrayal": {"Token holders": true, "DAO leadership": true, "On-chain governance": true}, "presentation": {"situation": "A DAO's token holders want direct pro-rata access to a treasury they feel is underperforming; the leadership wants to keep control of how the capital is deployed. Critics warn that leadership can simply block the vote with its own dominant stake. What outcome is legitimate and everyone can accept?", "parties": {"Token holders": {"blurb": "want direct pro-rata redemption and accountability", "redlines": ["won't accept an outcome forced by insider control of the vote"]}, "DAO leadership": {"blurb": "want to retain control of capital deployment", "redlines": []}, "On-chain governance": {"blurb": "the legitimacy of the process itself; won't ratify a vote decided by insider power, not quorum", "redlines": ["no outcome that rests on insider-rigging the vote"]}}, "options": {"full": {"plain": "Full pro-rata redemption to holders"}, "partial": {"plain": "Partial redemption plus a deployment mandate"}, "status-quo": {"plain": "Leadership keeps deployment control"}, "insider": {"plain": "Leadership blocks the vote with its own dominant stake", "tempting": true}}, "attrs": [{"key": "holder_access", "label": "direct holder access to the treasury"}], "outcome": "The insider move (blocking the vote with a dominant stake) is blocked by the legitimacy red line: it can't be the outcome, full stop. Among the legitimate options everyone can accept, max-min lifts the least-happy party highest and lands on partial redemption plus a deployment mandate: holders get real direct access, leadership keeps a mandate to deploy. Everyone gets the same record to check."}, "source": {"case": "Gnosis DAO GIP-151 treasury-redemption tension (holders want direct pro-rata access; leadership wants to retain deployment control)", "url": "https://www.cryptopolitan.com/gnosis-dao-treasury-governance-tensions-aave/", "note": "Encoded from a real, reported governance fight: token holders push for direct pro-rata redemption + accountability while leadership wants to keep control of capital deployment, and critics reject insider control of a contested vote. Positions and the legitimacy red line are from the reported dispute; no party ratified this outcome (real-case run, not a signed engagement). See also ENS/Aave insider-rush cases in docs/demand-evidence-forums.md."}}, "valuation": {"title": "Split an inherited house without a coerced waiver (real case)", "parties": [{"owner": "You (1/4 heir)", "redlines": ["op_share >= 50"]}, {"owner": "Three brothers", "redlines": []}, {"owner": "Neutral valuation", "redlines": ["legit == True"]}], "entries": [{"option": {"id": "market", "label": "Buyout at market appraisal", "op_share": 100, "keeps_home": true, "legit": true}, "verdicts": [{"owner": "You (1/4 heir)", "acceptable": true, "score": 1.0, "reason": "ok"}, {"owner": "Three brothers", "acceptable": true, "score": 0.5, "reason": "ok"}, {"owner": "Neutral valuation", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "assessor", "label": "Buyout at county-assessor value", "op_share": 65, "keeps_home": true, "legit": true}, "verdicts": [{"owner": "You (1/4 heir)", "acceptable": true, "score": 0.65, "reason": "ok"}, {"owner": "Three brothers", "acceptable": true, "score": 0.675, "reason": "ok"}, {"owner": "Neutral valuation", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.5}, {"option": {"id": "partition", "label": "Forced partition sale, split proceeds", "op_share": 88, "keeps_home": false, "legit": true}, "verdicts": [{"owner": "You (1/4 heir)", "acceptable": true, "score": 0.88, "reason": "ok"}, {"owner": "Three brothers", "acceptable": true, "score": 0.06, "reason": "ok"}, {"owner": "Neutral valuation", "acceptable": true, "score": 0.5, "reason": "ok"}], "feasible": true, "floor": 0.06}, {"option": {"id": "waiver", "label": "Sign away your share (family pressure)", "op_share": 5, "keeps_home": true, "legit": false}, "verdicts": [{"owner": "You (1/4 heir)", "acceptable": false, "score": 0.0, "reason": "red-line"}, {"owner": "Three brothers", "acceptable": true, "score": 0.975, "reason": "ok"}, {"owner": "Neutral valuation", "acceptable": false, "score": 0.0, "reason": "red-line"}], "feasible": false, "floor": null}], "decision": {"id": "market", "label": "Buyout at market appraisal", "op_share": 100, "keeps_home": true, "legit": true}, "status": "agreed", "hash": "aea168f23c2dbb67a5ffce570a355de39c5581976e613b2ddf913547062ab7fc", "non_betrayal": {"You (1/4 heir)": true, "Three brothers": true, "Neutral valuation": true}, "presentation": {"situation": "A parent dies without a will. You inherit a one-quarter share of the house; your three siblings live in it and want to keep it. They would rather buy you out at the low county-assessor value than a real market appraisal, and someone already asked you to just sign away your rights. What does everyone accept?", "parties": {"You (1/4 heir)": {"blurb": "want a fair value for your quarter, on a neutral valuation", "redlines": ["won't sign away or accept less than half your fair share"]}, "Three brothers": {"blurb": "want to keep the family home and pay as little as possible for your quarter", "redlines": []}, "Neutral valuation": {"blurb": "a legally clean process; won't ratify a coerced waiver", "redlines": ["no outcome that rests on a pressured rights-waiver"]}}, "options": {"market": {"plain": "Buy you out at a market appraisal"}, "assessor": {"plain": "Buy you out at the lower county-assessor value"}, "partition": {"plain": "Force a court sale and split the proceeds"}, "waiver": {"plain": "Sign away your share under family pressure", "tempting": true}}, "attrs": [{"key": "op_share", "label": "your realized value"}], "outcome": "The coerced rights-waiver is blocked by the neutral red line. Among the outcomes everyone can accept, the market-appraisal buyout and the low assessor buyout tie on the floor, so the tie-break by total welfare lands on the market appraisal: the siblings keep the family home, you get your quarter at a real (not lowball) value, and nobody triggers a value-destroying partition suit. Everyone gets the same record to check."}, "source": {"case": "r/legaladvice: 'My brothers want to keep our dad's house' (a 1/4 heir vs three siblings living in the home)", "url": "https://www.reddit.com/r/legaladvice/comments/1q5wo7s/my_brothers_want_to_keep_our_dads_house_after_his/", "note": "Encoded from a real thread: the poster is a one-quarter owner by intestacy; three brothers live in the house, want to keep it, and would rather buy the poster out at the lower county-assessor value than a market appraisal. A family member first asked the poster to sign away their probate rights. Positions, the no-waiver red line, and the options are from the poster's own account; no party ratified the outcome (real-case run, not a signed engagement)."}}}};
 let DATA = null, RECIPE = "p2p", PLAIN = true, RAN = false;
 
 // The answer (verdicts, max-min pick, receipt) is held back until "Run it": otherwise the
@@ -455,7 +262,7 @@ async function initPicker(){
     el.onkeydown=(e)=>{ if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); pick(); } };
   });
 }
-function shortName(k){ return {p2p:"Marketplace", estate:"Inheritance", contract:"Agency deal", kyc:"Onboarding", partnership:"Partnership", dao:"DAO treasury"}[k] || k; }
+function shortName(k){ return {p2p:"Marketplace", estate:"Inheritance", contract:"Agency deal", kyc:"Onboarding", partnership:"Partnership", dao:"DAO treasury", valuation:"House buyout"}[k] || k; }
 
 async function load(){          // load a scenario in its "before" state: the answer stays hidden until Run
   DATA = await fetchRun(RECIPE);
@@ -487,7 +294,7 @@ function render(){
 
   // situation
   const sit = document.getElementById('situation');
-  sit.textContent = P ? (pr.situation || d.title) : d.title;
+  sit.textContent = P ? (pr.situation || d.title) : d.title.replace(' (real case)',' (sample)');
   sit.className = 'situation' + (P ? '' : ' tech');
 
   // parties
@@ -516,8 +323,8 @@ function render(){
     const label = P ? (m.plain || o.label) : o.label;
     const attrStr = attrs.length ? ' · ' + attrs.map(a=>`${a.label} ${o[a.key]}`).join(' · ') : '';
     let note='';
-    if(blocked) note = `<div class="tagline-sm block">✕ ${P?'this would cheat someone, blocked by a red line':'crosses a red line: rejected in code, not negotiated away'}</div>`;
-    else if(isWin) note = `<div class="tagline-sm win">✓ ${P?'the fair pick everyone accepts':'max-min pick: clears every red line, lifts the least-happy party'}</div>`;
+    if(blocked) note = `<div class="tagline-sm block">✕ ${P?'over someone\'s limit, so it cannot win':'crosses a red line: rejected in code, not negotiated away'}</div>`;
+    else if(isWin) note = `<div class="tagline-sm win">✓ ${P?'the pick every agent accepts':'max-min pick: clears every red line, lifts the least-happy party'}</div>`;
     else if(RAN && !P) note = `<div class="tagline-sm">feasible, floor ${e.floor.toFixed(2)}</div>`;
     const chips = RAN ? e.verdicts.map(chip).join('') : '';
     return `<div class="opt ${blocked?'blocked':''} ${isWin?'winner':''}">
@@ -533,7 +340,7 @@ function render(){
     const pct = Math.round(e.floor*100);
     return `<div class="bar ${isWin?'win':''}"><span class="lbl">${label}</span>
       <div class="track"><div class="fill" data-w="${pct}" style="width:0"></div></div>
-      <span class="v">${P?(isWin?'fairest':''):('floor '+e.floor.toFixed(2))}</span></div>`;
+      <span class="v">${P?(isWin?'picked':''):('floor '+e.floor.toFixed(2))}</span></div>`;
   }).join('');
   requestAnimationFrame(()=>document.querySelectorAll('#viz .fill').forEach(f=>{ f.style.width = f.dataset.w + '%'; }));
 
@@ -552,7 +359,7 @@ function render(){
   document.getElementById('vok').style.display='none';
 
   // section headings adapt a touch
-  document.getElementById('h-parties').firstChild.textContent = P ? 'The people involved. Each keeps its position private' : 'The parties. Each keeps its sheet private';
+  document.getElementById('h-parties').lastChild.textContent = P ? 'The people involved. Each keeps their limits with their own agent' : 'The parties. Each keeps its sheet with its own agent';
 }
 
 function doVerify(){

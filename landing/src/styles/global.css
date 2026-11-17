@@ -12,6 +12,7 @@
   --color-subtle: var(--subtle);
   --color-hairline: var(--hairline);
   --color-indigo: var(--indigo);
+  --color-indigo-solid: var(--indigo-solid);
   --color-verify: var(--verify);
   --color-redline: var(--redline);
   --color-masked: var(--masked);
@@ -38,6 +39,8 @@
   --subtle: #7a8394;
   --hairline: rgba(255, 255, 255, 0.08);
   --indigo: #6675d3;
+  /* Fill behind white labels: #6675d3 gives 4.16:1, this gives 7.90:1 (design-dept contrast table). */
+  --indigo-solid: #3a45b0;
   --verify: #14a473;
   --redline: #d93a3a;
   --masked: #d9971c;
@@ -49,6 +52,8 @@
   /* indigo-300 primitive — same reason, for indigo used as small text
      (6675d3 is 4.47:1 on the tape surface, a hair under 4.5:1). */
   --indigo-text: #8e9be1;
+  /* Page content width for the homepage sections. */
+  --container: 75rem;
 }
 
 /* Light theme — same palette the demo already ships (docs/brand/tokens.css),
@@ -68,6 +73,7 @@
   --subtle: #6c727f;
   --hairline: #e3e6ef;
   --indigo: #3a45b0;
+  --indigo-solid: #3a45b0;
   --verify: #0d825a;
   --redline: #c42121;
   --masked: #996711;
@@ -77,9 +83,26 @@
 
 /* Keyboard focus — on-brand (--color-focus-ring in docs/brand/tokens.css),
    not the browser default. There was no focus treatment at all before this. */
-a:focus-visible {
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--color-indigo);
   outline-offset: 2px;
+}
+
+/* Homepage section wrapper: --container of content plus the side padding. */
+@layer components {
+  .home-wrap {
+    width: 100%;
+    max-width: calc(var(--container) + 5rem);
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 721px) {
+    .home-wrap {
+      padding-inline: 2.5rem;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

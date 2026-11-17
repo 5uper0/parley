@@ -1,0 +1,91 @@
+---
+// Home hero, identity spec 2026-11-17 (WI-261116-134). The copy comes from pages/index.astro.
+import Header from "../Header.astro";
+
+interface Props {
+  wrap: string;
+  headline: string;
+  sub: string;
+  install: string;
+  scope: string;
+  demoUrl: string;
+  stepsHref: string;
+}
+const { wrap, headline, sub, install, scope, demoUrl, stepsHref } = Astro.props;
+---
+
+<section class="pb-10 md:pb-16" aria-labelledby="hero-h" data-hero>
+  <div class={wrap}>
+    <Header large padded={false} />
+    <div class="mt-6 grid gap-10 md:mt-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,.95fr)] lg:items-center lg:gap-14">
+    <div>
+      <h1
+        id="hero-h"
+        class="max-w-[24ch] font-display text-3xl leading-[1.14] tracking-[-0.02em] text-balance text-ink md:text-5xl md:leading-[1.08]"
+      >{headline}</h1>
+      <p class="mt-4 max-w-[64ch] text-base leading-normal text-muted md:mt-6 md:text-lg md:leading-relaxed" data-hero-sub>
+        {sub}
+      </p>
+      <div
+        class="mt-4 flex w-fit max-w-full items-center gap-1 rounded-lg border border-hairline bg-surface pl-4 md:mt-6"
+        data-install-row
+      >
+        <code class="min-w-0 overflow-x-auto font-mono text-sm whitespace-nowrap text-ink md:text-base" data-install
+          >{install}</code
+        >
+        <button
+          type="button"
+          class="inline-flex min-h-11 min-w-16 flex-none cursor-pointer items-center justify-center rounded-lg px-3 text-sm font-medium text-indigo-text"
+          data-copy={install}
+          aria-label="Copy the install command"
+        >
+          Copy
+        </button>
+      </div>
+      <p class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 md:mt-6">
+        <a
+          href={demoUrl}
+          class="inline-flex min-h-12 items-center justify-center rounded-lg bg-indigo-solid px-6 text-base font-semibold text-white"
+          data-hero-cta
+        >
+          Open the demo
+        </a>
+        <a
+          href={stepsHref}
+          class="inline-flex min-h-11 items-center text-base text-ink underline underline-offset-4"
+          data-hero-link
+        >
+          Read the 3 steps
+        </a>
+      </p>
+      <p class="mt-4 max-w-[64ch] text-[15px] leading-normal text-muted md:mt-6" data-scope>
+        {scope}{" "}
+        Privacy holds when each owner's agent runs as its own process; one process that holds every sheet sees them all.
+      </p>
+    </div>
+    <div class="min-w-0" data-hero-visual><slot /></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  for (const b of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
+    b.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copy ?? "");
+        b.textContent = "Copied";
+        setTimeout(() => (b.textContent = "Copy"), 2000);
+      } catch {
+        const code = b.parentElement?.querySelector("code");
+        if (code) getSelection()?.selectAllChildren(code);
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Header nav links are 43.5 px tall on their own; the hero needs 44. */
+  [data-hero] :global(header nav a) {
+    min-height: 2.75rem;
+  }
+</style>

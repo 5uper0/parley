@@ -1,0 +1,190 @@
+---
+// Section 1. Text on the left, the drawn dinner sample on the right; one column on phones with
+// the stage between the sub and the buttons. Source order is the tab order: links, install line,
+// then the stage. Sizes are steps from docs/brand/tokens.css.
+import { DEMO_URL } from "../../data/film-copy";
+import { hero } from "../../data/home-hero";
+import { receiptDinner } from "../../data/receipt-dinner";
+import HeroExplainer from "./HeroExplainer.astro";
+---
+
+<section class="hero" aria-labelledby="hero-h">
+  <div class="home-wrap wrap">
+    <h1 id="hero-h">{hero.headline}</h1>
+    <p class="sub">{hero.sub}</p>
+    <p class="use" data-hero-use>{hero.useCase}</p>
+    <p class="cta">
+      <a href={DEMO_URL} class="primary" data-hero-cta>{hero.primary}</a>
+      <a href="#how" class="more">{hero.secondary}</a>
+    </p>
+    <div class="dev">
+      <p>{hero.installLabel}</p>
+      <pre tabindex="0" class="select-all whitespace-nowrap" aria-label={hero.installAria} data-install>{hero.install}</pre>
+    </div>
+    <p class="status" data-hero-status>{hero.status(receiptDinner.version)}</p>
+    <div class="explainer"><HeroExplainer /></div>
+  </div>
+</section>
+
+<style>
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.5rem;
+    padding-bottom: 2rem;
+  }
+  h1 {
+    order: 1;
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.875rem;
+    font-weight: var(--font-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .sub {
+    order: 2;
+    max-width: 40ch;
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  /* Phones: dropped, the stage and the install line take the first screen. */
+  .use {
+    order: 2;
+    display: none;
+    margin: 0.5rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+  .explainer {
+    order: 3;
+    margin-top: 0.5rem;
+  }
+  .cta {
+    order: 4;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.5rem;
+    margin: 0;
+  }
+  .primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0 1.5rem;
+    border-radius: 0.5rem;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--ink);
+    font-size: 1rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+  }
+  /* Phones: label and command share one row, so the command stays above the fold. */
+  .dev {
+    order: 5;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .dev p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    line-height: 1.35;
+  }
+  pre {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    flex: none;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 0.5rem;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-variant-ligatures: none;
+  }
+  .status {
+    order: 6;
+    margin: 0.75rem 0 0;
+    color: var(--muted);
+    font-size: 0.875rem;
+    line-height: 1.35;
+  }
+
+  @media (min-width: 721px) {
+    .wrap {
+      padding-top: 2.5rem;
+    }
+    h1 {
+      font-size: 3rem;
+    }
+    .sub {
+      margin-top: 1rem;
+      font-size: 1.125rem;
+      line-height: 1.55;
+    }
+    .use {
+      display: block;
+    }
+    .explainer {
+      width: 100%;
+      max-width: 42.5rem;
+      margin: 1.5rem auto 0;
+    }
+    .cta {
+      margin-top: 1.5rem;
+    }
+    .dev {
+      display: block;
+      margin-top: 1.5rem;
+    }
+    .dev p {
+      font-size: 0.875rem;
+    }
+    pre {
+      margin-top: 0.5rem;
+      padding: 0 0.75rem;
+      font-size: 1rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-rows: repeat(6, auto) 1fr;
+      column-gap: 3rem;
+    }
+    .wrap > * {
+      grid-column: 1;
+    }
+    .wrap > .explainer {
+      grid-row: 1 / span 7;
+      grid-column: 2;
+      max-width: none;
+      margin: 0;
+    }
+  }
+</style>

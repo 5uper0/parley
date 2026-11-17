@@ -20,6 +20,12 @@ const { large = false, padded = true } = Astro.props;
   </a>
   <nav class="flex items-center gap-1">
     <a
+      href="/#how-it-works"
+      class="hidden items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink sm:inline-flex"
+    >
+      How it works
+    </a>
+    <a
       href="/demo/"
       class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
@@ -35,10 +41,12 @@ const { large = false, padded = true } = Astro.props;
     </a>
     <button
       type="button"
-      onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
-      class="ml-2 rounded-full border border-hairline bg-surface px-[15px] py-[13px] text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink"
+      aria-label="Switch between light and dark theme"
+      aria-pressed="false"
+      onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';this.setAttribute('aria-pressed',r.dataset.theme==='dark');try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
+      class="ml-1 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-hairline bg-surface px-3 text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink sm:ml-2 sm:px-[15px]"
     >
-      ◑ theme
+      <span aria-hidden="true">&#9681;</span><span class="hidden sm:inline">theme</span>
     </button>
   </nav>
 </header>

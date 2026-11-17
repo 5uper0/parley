@@ -27,7 +27,7 @@ const code =
   "rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em] text-ink";
 
 const btnPrimary =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-solid px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
 
 const btnGhost =
   "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
@@ -116,7 +116,7 @@ const jsonLd = JSON.stringify({
 
   <a
     href="#main"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo-solid focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
   >
     Skip to content
   </a>
@@ -451,7 +451,7 @@ Receipt written to receipt-deadlock.json`}</code></pre>
           rebuilds the hash, recomputes the winner from the recorded verdicts and checks that
           every acceptance is bound to exactly this hash and this decision. Its output on the
           first run. The script ends every run with a list of what it checked and what it
-          does not prove; that list is cut here to two of its lines:
+          does not show; that list is cut here to two of its lines:
         </p>
         <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Output of verify-receipt.py on the pick-a-date receipt, scrollable code"><code>{`$ python scripts/verify-receipt.py receipt.json
 Parley receipt check: Which weekend do we actually go?
@@ -484,7 +484,7 @@ What this does NOT prove
           really is the max-min pick over the recorded verdicts and that all three acceptances
           are bound to this exact record, but not that Ana, Bob and Cara gave them: every field
           of an unsigned acceptance is public, so that tier authenticates nobody. What each
-          check proves and what it does not is the subject of the{" "}
+          check shows and what it does not is the subject of the{" "}
           <a href="/verify-ai-agent-decision/" class={link}>verification guide</a>.
         </p>
       </section>
@@ -537,7 +537,7 @@ What this does NOT prove
               edit visible to anyone who kept the hash from the ratification screen; it does not
               say who accepted. The roster is written by the same process that writes the
               record. <code class={code}>--sign</code> adds Ed25519 signatures with keys made by
-              that same process, which proves the file was not altered afterwards, not who
+              that same process, which shows the file was not altered afterwards, not who
               signed.
             </li>
             <li>
