@@ -168,23 +168,15 @@ code{font-family:var(--mono);font-size:.9em}
   <main id="main">
   <section class="hero" aria-labelledby="hero-h">
     <h1 id="hero-h">Replay a sample decision between agents</h1>
-    <p class="sub">Agents that act for different people can agree without anyone handing over their limit. Pick a sample scenario below, replay it, then check the record.</p>
+    <p class="sub">Pick a scenario, press Replay, then check the hash against each sheet.</p>
     <code class="install">pip install parley-consensus</code>
     <div class="hero-actions">
       <button class="cta" onclick="run()">Replay a sample decision</button>
-      <a class="textlink" href="#how">Read how it works</a>
     </div>
     <p class="scope">Early, version 0.2.1, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat. These scenarios are scripted sample runs computed in advance with the same engine, not reports of use. Here one page holds every sheet; privacy holds when each owner's agent runs as its own process.</p>
   </section>
 
-  <section class="props" id="how" aria-labelledby="how-h">
-    <h2 id="how-h" style="margin-top:0">How it works in three steps</h2>
-    <div class="props-grid">
-      <div class="prop"><h3><span class="step-n">1</span>Tell</h3><p>Each person tells their own agent what they like and the limits they won't cross. In code a limit is a red line.</p></div>
-      <div class="prop"><h3><span class="step-n">2</span>Yes or no</h3><p>Every agent answers yes or no to each option. An option over anyone's limit cannot win. Among the rest, the pick helps the least-happy person most. If nothing fits everyone, it says so.</p></div>
-      <div class="prop"><h3><span class="step-n">3</span>Check</h3><p>Everyone gets one pick and the record. You check the pick against your own sheet, on your own computer.</p></div>
-    </div>
-  </section>
+  <p class="muted" style="margin:14px 0 0">Tell your agent your limits, answer yes or no to each option, check the pick. <a class="textlink" href="/#how-it-works">The 3 steps</a></p>
 
   <div class="demo-band">
   <h2 id="scenarios-h">Sample scenarios</h2>
@@ -195,7 +187,6 @@ code{font-family:var(--mono);font-size:.9em}
   </div>
 
   <p class="situation" id="situation">…</p>
-  <p class="samplenote">Recorded sample run. The sheets are scripted, so this is not a report of anyone using Parley.</p>
 
   <h2 id="h-parties"><span class="step-n">1</span><span>The people involved. Each keeps their limits with their own agent</span></h2>
   <div class="grid cards" id="parties"></div>
@@ -206,7 +197,7 @@ code{font-family:var(--mono);font-size:.9em}
 
   <div style="margin:32px 0 8px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <button class="btn" onclick="run()">Replay the sample</button>
-    <span class="muted">Every verdict and hash here was computed in advance by the Parley engine from scripted sheets. Reproduce them with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
+    <span class="muted">Reproduce the run with <code>docker build -t parley . &amp;&amp; docker run --rm -p 8080:8080 parley</code></span>
   </div>
 
   <h2 id="h-viz"><span class="step-n">3</span>The pick: the option that helps the least-happy person most</h2>
