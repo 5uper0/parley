@@ -90,6 +90,8 @@ The hash above is what version 0.2.1 and later print: a rejected option's score 
 The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red line, so it is rejected
 before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
 
+Want a runnable version with a receipt block to paste back? [`examples/five_minute_run.py`](examples/five_minute_run.py) prints one, and [the five-minute path](docs/five-minute-path.md) walks through it. If you ran it, [Discussion 92](https://github.com/5uper0/parley/discussions/92) is where the receipt goes, errors included.
+
 Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Status](#status-v0-working-core)).
 
 ### Install as a Claude Code plugin
