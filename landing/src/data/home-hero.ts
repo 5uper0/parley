@@ -4,15 +4,15 @@
 // receipt-dinner.ts, which scripts/gen-receipt.py writes from a real run.
 
 export const hero = {
-  headline: "Pick together without saying your limit out loud.",
-  sub: "Parley lets each person's agent, software acting for them, say yes or no. Options over anyone's limit cannot win.",
+  headline: "Agents that act for different people can agree without anyone handing over their limit.",
+  sub: "Parley is an open-source Python library. Each person's hard limits run as code: an option over anyone's limit cannot win, nobody hands over their limit sheet, and every result leaves a record anyone can check.",
   useCase: "For developers building agents that act for different people.",
-  primary: "Try the demo",
-  secondary: "See how it works",
+  primary: "Open the demo",
+  secondary: "Read the 3 steps",
   installLabel: "For developers",
   installAria: "Install command",
   install: "pip install parley-consensus",
-  status: (version: string) => `v${version}, early. Open source, Apache-2.0. Not for adversarial use yet.`,
+  status: (version: string) => `Early, version ${version}, no outside users yet. Scores and accept or reject answers still show some of each person's range. It picks from a given list of options and is not built for owners who try to cheat.`,
 } as const;
 
 export const explainer = {

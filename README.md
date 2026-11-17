@@ -22,7 +22,7 @@ Red lines are code, not prompts · multilateral (N&gt;2) · non-crypto · self-h
 ![core](https://img.shields.io/badge/core-zero--dependency-informational.svg)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**[Try it live](https://parleyprotocol.com/demo/)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [Español: herencia entre hermanos](https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/) · [Español: ¿unanimidad para vender?](https://parleyprotocol.com/es/unanimidad-vender-piso-heredado/) · [English: do all heirs have to agree to sell a flat in Spain?](https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/) · [Ukrainian](https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/)
+**[Try the demo](https://parleyprotocol.com/demo/)** · **[See it in 30 seconds](#see-it-in-30-seconds)** · [Roadmap](docs/ROADMAP.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 <br>
 
@@ -44,15 +44,6 @@ pip install "parley-consensus[crypto]"    # + Ed25519-signed verdicts
 ```
 
 The distribution is `parley-consensus` (PyPI's `parley` is an unrelated project); the import name is `parley`.
-
-### Install as a Claude Code plugin
-
-```
-/plugin marketplace add 5uper0/parley
-/plugin install parley@parley
-```
-
-This registers the `parley-mcp` stdio server, launched with `uvx --from parley-consensus parley-mcp`, so [uv](https://docs.astral.sh/uv/) must be installed.
 
 ### Quickstart
 
@@ -100,6 +91,15 @@ The rooftop is Ana's favourite and loses anyway: it crosses Bob's budget red lin
 before any score is weighed. The coordinator only ever saw `red-line`, never the budget or the sheet.
 
 Contributors install from a clone instead: `pip install -e ".[dev]"` (see [Status](#status-v0-working-core)).
+
+### Install as a Claude Code plugin
+
+```
+/plugin marketplace add 5uper0/parley
+/plugin install parley@parley
+```
+
+This registers the `parley-mcp` stdio server, launched with `uvx --from parley-consensus parley-mcp`, so [uv](https://docs.astral.sh/uv/) must be installed.
 
 ### Use it from an MCP host (Claude, Cursor)
 
@@ -163,7 +163,7 @@ recomputes the winner from the recorded verdicts. For private sheets, run one pr
 
 Most agent tooling in 2026 solves either transport/identity (A2A, MCP) or 1:1 agentic
 commerce (an agent buys/books for you), or *cooperative* debate between agents of the
-**same** owner. Parley targets the gap nobody productised: a group of delegates, each
+**same** owner. Parley works on one narrower case: a group of delegates, each
 representing a **different** principal with **conflicting** and **private** interests,
 reaching a decision that crosses nobody's red line, where each owner can check afterwards
 that their own limit held.
@@ -173,6 +173,8 @@ one decision that crosses none of their red lines, and each can check that after
 machine. No outside user has run it yet. The worked examples in this repo are a P2P escrow dispute
 ([`docs/dogfood-01-p2p-escrow.md`](docs/dogfood-01-p2p-escrow.md), synthetic) and an early lease exit
 replayed after the fact ([`docs/dogfood-02-early-lease-exit.md`](docs/dogfood-02-early-lease-exit.md)).
+
+Guides for heirs selling a flat in Spain: [Español: herencia entre hermanos](https://parleyprotocol.com/es/reparto-de-herencia-entre-hermanos/) · [Español: ¿unanimidad para vender?](https://parleyprotocol.com/es/unanimidad-vender-piso-heredado/) · [English](https://parleyprotocol.com/spain-inherited-flat-do-all-heirs-have-to-agree/) · [Ukrainian](https://parleyprotocol.com/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/).
 
 The wedge is three properties, enforced in code rather than left to an LLM's discretion:
 
@@ -192,8 +194,7 @@ The wedge is three properties, enforced in code rather than left to an LLM's dis
 
 Agents are starting to act on our behalf: booking, negotiating, onboarding, allocating. The moment
 two agents serve **different** owners, "did my agent sell me out?" stops being paranoia and becomes a
-real question. The crypto answer to agent-trust (put it on a chain, add a token) collapsed 89–99.7%;
-the durable need is the **trust primitive itself**, decoupled from tokens.
+real question.
 
 > **Agents you can check.** The 2026 agent-hype cycle showed virality can be
 > fully decoupled from truth. Parley is the checkable version: every verdict in a parley is a
@@ -257,9 +258,10 @@ landlord side is inferred, not ratified). The screenshot-native proof card is `e
 docker build -t parley . && docker run --rm -p 8080:8080 parley
 ```
 
-**Try it live: [parleyprotocol.com/demo](https://parleyprotocol.com/demo/)** runs the real engine
-behind one web page, no install and nothing to sign up for. Prefer to self-host? The repo ships a
-`Dockerfile` (and a `render.yaml` Blueprint) so you can run the same demo anywhere in one command.
+**Try it in the browser: [parleyprotocol.com/demo](https://parleyprotocol.com/demo/)**
+replays sample decisions that the engine computed when the site was built.
+No install, nothing to sign up for. To run the engine on your own options,
+`pip install parley-consensus` or start `examples/demo/server.py`; the repo also ships a `Dockerfile`.
 
 ## Built by an agent fleet
 
@@ -292,14 +294,19 @@ The net layer is hardened against the obvious attacks (see `tests/test_redteam.p
   still passes. (`verify_non_betrayal` still only checks your *own* red lines.)
 
 Not yet (honest limits, do not rely on it against owners who try to cheat):
-- **Authenticity pinning**, signatures verify against a self-asserted key, not a trusted roster
-  (above); the roster-pinned check (verify against the key from each bot's discovery Agent Card) is v0.2.
+- **Authenticity pinning**, signatures verify against a self-asserted key unless the caller passes a
+  roster. On `main` (after 0.2.1, not on PyPI yet), `verify_transcript(roster={owner: pubkey_hex})`
+  rejects a signed verdict whose key is not the one that owner pinned at join; the roster must come
+  from the owners, never from the record. The 0.2.1 release has no roster check.
   Today only the coordinator's own side pins it: the client checks that a signature is present
   under the card's key; whether the signature is valid is checked by
   `verify_transcript(require_signed=True)`, which `examples/run_env.py` now runs and any other
   caller must run.
-- **Replay binding**, verdicts carry no session/nonce, so a signed verdict is replayable into another
-  parley that reuses the same option.
+- **Replay binding is opt-in and not in the 0.2.1 release.** On `main`, after `client.bind(session)`
+  each question carries the session and a fresh nonce, a signed verdict covers both, and
+  `verify_transcript(expected_session=...)` rejects a verdict from another run or a repeated nonce.
+  Runs that do not call `bind`, and the 0.2.1 release, carry neither, so a signed verdict can be
+  replayed into another parley that reuses the same option.
 - **Range-masked scores**, the soft cardinal `score` of every accepted option is public in the
   transcript, so an untrusted coordinator can infer preference *ordering* among those options, and the
   `acceptable` flags show each party's feasible region (a rejected option always reports score 0; the
@@ -315,9 +322,8 @@ self-hosted `docker run` path collect nothing.
 The consensus mechanism itself is a commodity (voting/consensus is free, Snapshot, polls). Value,
 and willingness to pay, scales with **decision stakes × number of parties × need for privacy /
 neutrality / audit**. The paid layer is the *trusted neutral broker*: hosted identity/trust-registry,
-audit-grade signed transcripts, and managed self-hosting, not the algorithm. First candidate
-segments: private multi-party B2B negotiation (procurement/SOW) and auditable delegated governance
-(committees, panels). Differentiator vs **Fetch.ai / Olas** (real prior art, agent platforms built around a ledger and a
+audit-grade signed transcripts, and managed self-hosting, not the algorithm. No paid segment
+is chosen yet; the next goal is a first outside user. Differentiator vs **Fetch.ai / Olas** (real prior art, agent platforms built around a ledger and a
 token): their pages describe no red-line or consensus mechanism, and Olas is on-chain and token-based;
 Parley does *multilateral group consensus*, non-betrayal each owner can check, **no crypto**, self-hosted.
 
@@ -346,9 +352,7 @@ that hits an honest deadlock instead of forcing a bad decision.
 - **Paid (self-host):** hosted relay/trust-registry so agents meet safely beyond the LAN,
   plus managed hosting of agents on your own hardware. Open-source core, paid federation.
 
-First ICP: a **closed group** (a team/department/family) where one operator deploys all
-the agents, sidesteps the cold-start network effect. "Delegate the position to your
-agent, agents find the common decision" is exactly this.
+First users we look for: developers building agents that act for different people (see **Who it's for** above).
 
 ## Contributing
 
