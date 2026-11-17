@@ -75,7 +75,11 @@ def main() -> int:
     print()
     print("Paste this into https://github.com/5uper0/parley/discussions/92 :")
     print("---")
-    print("parley-consensus", metadata.version("parley-consensus"),
+    try:
+        version = metadata.version("parley-consensus")
+    except metadata.PackageNotFoundError:
+        version = "(run from a source checkout)"
+    print("parley-consensus", version,
           "| Python", platform.python_version(), "|", platform.system(), platform.machine())
     print("script: five_minute_run.py |", "PASS" if passed else "FAIL")
     print("receipt sha256:", claimed)
