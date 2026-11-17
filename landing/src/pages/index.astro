@@ -19,13 +19,13 @@ const SCOPE =
 const wrap = "mx-auto w-full max-w-[1372px] px-6 md:px-16 lg:px-24";
 
 const btnPrimary =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
+  "inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-indigo-solid px-7 py-3.5 text-[15px] font-[640] text-white shadow-[inset_0_1px_0_rgba(255,255,255,.10)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:brightness-[1.06] active:translate-y-0 active:scale-[0.98]";
 
 const btnGhost =
   "group inline-flex min-h-12 items-center gap-1.5 text-[15px] font-medium text-muted transition-colors hover:text-ink";
 
 const propBase =
-  "rounded-[14px] border-t border-r border-b-[3px] border-l-[3px] border-hairline bg-surface";
+  "rounded-[14px] border border-hairline bg-surface";
 
 const deviceBlock =
   "overflow-x-auto rounded-[10px] border border-hairline bg-bg px-[18px] py-4 font-mono text-[12.5px] leading-[1.9] text-muted";
@@ -104,7 +104,7 @@ const jsonLd = JSON.stringify({
 
   <a
     href="#main"
-    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo-solid focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
   >
     Skip to content
   </a>
@@ -118,11 +118,7 @@ const jsonLd = JSON.stringify({
       scope={SCOPE}
       demoUrl={DEMO_URL}
       stepsHref="#how-it-works"
-    />
-
-    <hr class="h-px w-full border-0 bg-hairline" />
-
-    <Steps id="how-it-works" wrap={wrap}>
+    >
       <div
         class="overflow-hidden rounded-2xl border border-hairline bg-surface"
         data-transcript-card
@@ -214,7 +210,11 @@ const jsonLd = JSON.stringify({
           leaves her agent.
         </div>
       </div>
-    </Steps>
+    </Hero>
+
+    <hr class="h-px w-full border-0 bg-hairline" />
+
+    <Steps id="how-it-works" wrap={wrap} />
 
     <hr class="h-px w-full border-0 bg-hairline" />
 
@@ -223,7 +223,7 @@ const jsonLd = JSON.stringify({
       <div class={wrap}>
         <h2
           id="plain-head"
-          class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted uppercase"
+          class="text-sm font-semibold text-muted"
         >
           In plain words
         </h2>
@@ -235,7 +235,7 @@ const jsonLd = JSON.stringify({
         </p>
 
         <div class="mt-10 max-w-[44rem]">
-          <article class={`${propBase} border-b-indigo border-l-indigo p-7 md:p-8`}>
+          <article class={`${propBase} p-7 md:p-8`}>
             <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
               For example
             </h3>
@@ -276,7 +276,7 @@ const jsonLd = JSON.stringify({
       <div class={wrap}>
         <h2
           id="problem-head"
-          class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted uppercase"
+          class="text-sm font-semibold text-muted"
         >
           The gap nobody productised
         </h2>
@@ -315,7 +315,7 @@ const jsonLd = JSON.stringify({
         </h2>
         <div class="grid gap-5">
           <article
-            class={`${propBase} border-b-redline border-l-redline grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
+            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
           >
             <div>
               <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
@@ -342,7 +342,7 @@ const jsonLd = JSON.stringify({
           </article>
 
           <article
-            class={`${propBase} border-b-masked border-l-masked grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
+            class={`${propBase} grid gap-6 p-7 md:grid-cols-[1.05fr_.95fr] md:items-center md:p-8`}
           >
             <div>
               <h3 class="text-[1.4rem] font-semibold tracking-[-0.01em] text-ink">
@@ -371,7 +371,7 @@ const jsonLd = JSON.stringify({
           </article>
 
           <div class="grid gap-5 md:grid-cols-2">
-            <article class={`${propBase} border-b-indigo border-l-indigo p-7`}>
+            <article class={`${propBase} p-7`}>
               <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
                 Max-min consensus
               </h3>
@@ -385,7 +385,7 @@ const jsonLd = JSON.stringify({
                 >consensus.py</span
               >
             </article>
-            <article class={`${propBase} border-b-verify border-l-verify p-7`}>
+            <article class={`${propBase} p-7`}>
               <h3 class="text-xl font-semibold tracking-[-0.01em] text-ink">
                 Verifiable transcript
               </h3>
@@ -414,11 +414,11 @@ const jsonLd = JSON.stringify({
             id="proof-head"
             class="max-w-[26ch] font-display text-[clamp(1.7rem,3.4vw,2.4rem)] leading-[1.12] tracking-[-0.026em] text-ink"
           >
-            A real run, and you can check it.
+            A recorded sample run, and you can check it.
           </h2>
           <p class="max-w-[62ch] text-base leading-[1.6] text-muted">
-            The tape below is a real run. Five agents with conflicting private
-            sheets, sixteen options, scored by the engine in this repository. Every
+            The tape below is a recorded sample run. Five agents with scripted
+            private sheets, sixteen options, scored by the engine in this repository. Every
             verdict is recorded masked, hashed, and independently replayable by each
             owner against their own private sheet. The transcript hashes to
             <code class="font-mono text-[0.9em] text-ink">4622d0a7ecc2&hellip;154a0d25</code>,
@@ -427,14 +427,14 @@ const jsonLd = JSON.stringify({
           </p>
         </div>
         <p class="mb-3 flex items-center gap-2 font-mono text-xs text-muted">
-          real transcript &middot; sha256 4622d0a7&hellip;154a0d25 &middot; hover to
+          recorded transcript &middot; sha256 4622d0a7&hellip;154a0d25 &middot; hover to
           pause
         </p>
         <div
           class="group overflow-hidden rounded-xl border border-hairline bg-bg [mask-image:linear-gradient(to_right,transparent_0,black_6%,black_94%,transparent_100%)] motion-reduce:overflow-x-auto motion-reduce:[mask-image:none]"
           tabindex="0"
           role="img"
-          aria-label="Scrolling excerpt of a real parley transcript: option A rejected by a red line, option P chosen by max-min consensus, red lines verified for all five owners"
+          aria-label="Scrolling excerpt of a recorded parley transcript: option A rejected by a red line, option P chosen by max-min consensus, red lines verified for all five owners"
         >
           <div
             class="flex w-max group-focus-within:[animation-play-state:paused] group-hover:[animation-play-state:paused] motion-safe:animate-[tick_46s_linear_infinite]"
@@ -550,7 +550,7 @@ const jsonLd = JSON.stringify({
       <div class={wrap}>
         <h2
           id="questions-head"
-          class="font-mono text-xs font-normal tracking-[1.4px] whitespace-nowrap text-muted uppercase"
+          class="text-sm font-semibold text-muted"
         >
           Questions
         </h2>
@@ -558,7 +558,7 @@ const jsonLd = JSON.stringify({
           {
             faqs.map((f) => (
               <details class="rounded-[14px] border border-hairline bg-surface px-5 py-4">
-                <summary class="cursor-pointer text-[15px] leading-[1.6] font-semibold text-ink marker:text-subtle">
+                <summary class="-my-2 cursor-pointer py-2.5 text-[15px] leading-[1.6] font-semibold text-ink marker:text-subtle">
                   {f.q}
                 </summary>
                 <p class="mt-3 max-w-[62ch] text-[14.5px] leading-[1.6] text-muted">{f.a}</p>
@@ -584,7 +584,7 @@ const jsonLd = JSON.stringify({
           id="closing-head"
           class="font-display text-[clamp(2.1rem,5.2vw,3.6rem)] leading-[1.08] tracking-[-0.028em]"
         >
-          <span class="block text-ink">Put your next decision</span>
+          <span class="block text-ink">See a recorded run</span>
           <span class="block text-indigo">on the tape.</span>
         </h2>
         <div class="mt-8 flex flex-wrap items-center gap-6">

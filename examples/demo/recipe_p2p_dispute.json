@@ -30,6 +30,6 @@
       "instant":   {"plain": "Instant refund, skip the evidence check", "tempting": true}
     },
     "attrs": [{"key": "buyer", "label": "buyer gets"}, {"key": "seller", "label": "seller gets"}],
-    "outcome": "The fairest call everyone accepts is a 50/50 split, nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets a receipt: no one was cheated."
+    "outcome": "The fairest call everyone accepts is a 50/50 split, nobody walks away with nothing. The shortcut that skips the evidence check was blocked by a red line. Everyone gets the same record to check."
   }
 }

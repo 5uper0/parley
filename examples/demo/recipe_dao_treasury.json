@@ -30,6 +30,6 @@
       "insider":    {"plain": "Leadership blocks the vote with its own dominant stake", "tempting": true}
     },
     "attrs": [{"key": "holder_access", "label": "direct holder access to the treasury"}],
-    "outcome": "The insider move (blocking the vote with a dominant stake) is blocked by the legitimacy red line: it can't be the outcome, full stop. Among the legitimate options everyone can accept, max-min lifts the least-happy party highest and lands on partial redemption plus a deployment mandate: holders get real direct access, leadership keeps a mandate to deploy, and the result is on-chain verifiable. Everyone gets a receipt: no one rigged it."
+    "outcome": "The insider move (blocking the vote with a dominant stake) is blocked by the legitimacy red line: it can't be the outcome, full stop. Among the legitimate options everyone can accept, max-min lifts the least-happy party highest and lands on partial redemption plus a deployment mandate: holders get real direct access, leadership keeps a mandate to deploy. Everyone gets the same record to check."
   }
 }
