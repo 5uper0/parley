@@ -73,7 +73,7 @@ const faqs = [
   },
   {
     q: "Does the check need the parley-consensus package, or anything else installed?",
-    a: "The verifier script and the examples are not in the PyPI wheel: clone the repository (or check out the v0.2.0 tag) and install the base package with Python 3.10 or later. The script imports parley.consensus, parley.ratify and parley.transcript. No network, no key. Signature checks additionally need pynacl, installed with pip install \"parley-consensus[crypto]\". Without it the script still runs, prints a note, and fails any receipt that carries a signature it could not check.",
+    a: "The verifier script and the examples are not in the PyPI wheel: clone the repository (or check out the v0.2.1 tag) and install the base package with Python 3.10 or later. The script imports parley.consensus, parley.ratify and parley.transcript. No network, no key. Signature checks additionally need pynacl, installed with pip install \"parley-consensus[crypto]\". Without it the script still runs, prints a note, and fails any receipt that carries a signature it could not check.",
   },
 ];
 
@@ -150,11 +150,11 @@ const jsonLd = JSON.stringify({
           things the check does not show.
         </p>
         <p class="mt-4 text-[13px] text-subtle">
-          Library calls here were checked against version 0.2.0; hashes and verdicts come from the repository's current code, which reports a red-lined verdict's score as 0 (not yet released, see CHANGELOG). The verifier,{" "}
+          Library calls here were checked against version 0.2.1 from PyPI; the committee receipt in section 4 comes from a repository checkout and was not re-run on 0.2.1. The verifier,{" "}
           <a href={VERIFIER_URL} target="_blank" rel="noopener" class={link}>
             scripts/verify-receipt.py
           </a>, and the examples are not in the PyPI wheel: they need a clone of the
-          repository (or the v0.2.0 tag) plus the base package. Companion guides:{" "}
+          repository (or the v0.2.1 tag) plus the base package. Companion guides:{" "}
           <a href="/mcp-multi-party-decisions/" class={link}>running Parley as an MCP tool</a>,{" "}
           <a href="/fair-multi-agent-negotiation/" class={link}>fair multi-agent negotiation</a>,{" "}
           <a href="/llm-agent-red-lines/" class={link}>red lines for LLM agents</a>{" "}
