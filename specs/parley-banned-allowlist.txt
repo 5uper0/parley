@@ -10,4 +10,4 @@
 # Lines starting with # and blank lines are ignored.
 
 # Verbatim output of scripts/verify-receipt.py, shown in a code block.
-landing/src/pages/fair-group-decision-private-limits.astro:476: What this does NOT prove
+landing/src/pages/fair-group-decision-private-limits.astro:475: What this does NOT prove
