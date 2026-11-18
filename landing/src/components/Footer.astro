@@ -2,26 +2,37 @@
 import futuristLogo from "../assets/futurist-logo-mono.svg?raw";
 
 type FooterLink = { href: string; label: string; lang?: string; ext?: boolean };
+interface Props {
+  lang?: "en" | "es" | "uk";
+}
+const { lang = "en" } = Astro.props;
+const T = {
+  en: { product: "Product", learn: "Learn", other: "Other languages", project: "Project", demo: "Demo", verify: "Verify a receipt", mcp: "MCP setup", fair: "Fair negotiation", red: "Red lines", group: "Group decisions", contact: "Contact / Discussions", email: "Email", press: "Press", privacy: "Privacy", tag: "Open source Python library.", nav: "Footer" },
+  es: { product: "Producto", learn: "Guías", other: "Otros idiomas", project: "Proyecto", demo: "Demo", verify: "Verificar un recibo", mcp: "Configurar MCP", fair: "Negociación justa", red: "Líneas rojas", group: "Decisiones de grupo", contact: "Contacto / Discusiones", email: "Correo", press: "Prensa", privacy: "Privacidad", tag: "Biblioteca Python de código abierto.", nav: "Pie de página" },
+  uk: { product: "Продукт", learn: "Посібники", other: "Інші мови", project: "Проєкт", demo: "Демо", verify: "Перевірити квитанцію", mcp: "Налаштування MCP", fair: "Чесні переговори", red: "Червоні лінії", group: "Групові рішення", contact: "Контакт / Обговорення", email: "Пошта", press: "Преса", privacy: "Конфіденційність", tag: "Python-бібліотека з відкритим кодом.", nav: "Нижня навігація" },
+}[lang];
+// Destination pages are English; label language follows the page, the link says so.
+const hl = lang === "en" ? undefined : "en";
 const groups: { title: string; links: FooterLink[] }[] = [
   {
-    title: "Product",
+    title: T.product,
     links: [
-      { href: "/demo/", label: "Demo" },
-      { href: "/verify-ai-agent-decision/", label: "Verify a receipt" },
-      { href: "/mcp-multi-party-decisions/", label: "MCP setup" },
+      { href: "/demo/", label: T.demo },
+      { href: "/verify-ai-agent-decision/", label: T.verify },
+      { href: "/mcp-multi-party-decisions/", label: T.mcp },
       { href: "https://github.com/5uper0/parley", label: "GitHub", ext: true },
     ],
   },
   {
-    title: "Learn",
+    title: T.learn,
     links: [
-      { href: "/fair-multi-agent-negotiation/", label: "Fair negotiation" },
-      { href: "/llm-agent-red-lines/", label: "Red lines" },
-      { href: "/fair-group-decision-private-limits/", label: "Group decisions" },
+      { href: "/fair-multi-agent-negotiation/", label: T.fair },
+      { href: "/llm-agent-red-lines/", label: T.red },
+      { href: "/fair-group-decision-private-limits/", label: T.group },
     ],
   },
   {
-    title: "Other languages",
+    title: T.other,
     links: [
       { href: "/es/reparto-de-herencia-entre-hermanos/", label: "Herencia entre hermanos", lang: "es" },
       { href: "/es/unanimidad-vender-piso-heredado/", label: "¿Unanimidad para vender?", lang: "es" },
@@ -29,21 +40,21 @@ const groups: { title: string; links: FooterLink[] }[] = [
     ],
   },
   {
-    title: "Project",
+    title: T.project,
     links: [
-      { href: "https://github.com/5uper0/parley/discussions", label: "Contact / Discussions", ext: true },
-      { href: "mailto:hello@parleyprotocol.com", label: "Email" },
+      { href: "https://github.com/5uper0/parley/discussions", label: T.contact, ext: true },
+      { href: "mailto:hello@parleyprotocol.com", label: T.email },
       { href: "https://www.linkedin.com/company/parleyprotocol", label: "LinkedIn", ext: true },
-      { href: "/press/", label: "Press" },
+      { href: "/press/", label: T.press },
       { href: "https://github.com/5uper0/parley/blob/main/LICENSE", label: "Apache-2.0", ext: true },
-      { href: "/privacy/", label: "Privacy" },
+      { href: "/privacy/", label: T.privacy },
     ],
   },
 ];
 ---
 
 <footer class="px-6 py-10 md:px-16 lg:px-24">
-  <nav aria-label="Footer" class="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+  <nav aria-label={T.nav} class="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
     {
       groups.map((g) => (
         <div>
@@ -54,6 +65,7 @@ const groups: { title: string; links: FooterLink[] }[] = [
                 <a
                   href={l.href}
                   lang={l.lang}
+                  hreflang={l.href.startsWith("/") && !l.lang ? hl : undefined}
                   target={l.ext ? "_blank" : undefined}
                   rel={l.ext ? "noopener" : undefined}
                   class="inline-flex min-h-[44px] min-w-[44px] items-center text-[14px] text-muted transition-colors hover:text-ink"
@@ -67,7 +79,7 @@ const groups: { title: string; links: FooterLink[] }[] = [
       ))
     }
   </nav>
-  <p class="mt-6 text-[13px] text-muted">Open source Python library.</p>
+  <p class="mt-6 text-[13px] text-muted">{T.tag}</p>
 </footer>
 
 <div class="fs-credit">
