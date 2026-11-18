@@ -2,8 +2,14 @@
 interface Props {
   large?: boolean;
   padded?: boolean;
+  lang?: "en" | "es" | "uk";
 }
-const { large = false, padded = true } = Astro.props;
+const { large = false, padded = true, lang = "en" } = Astro.props;
+const t = {
+  en: { how: "How it works", demo: "Demo", theme: "theme", aria: "Switch between light and dark theme" },
+  es: { how: "Cómo funciona", demo: "Demo", theme: "tema", aria: "Cambiar entre tema claro y oscuro" },
+  uk: { how: "Як це працює", demo: "Демо", theme: "тема", aria: "Перемкнути світлу й темну тему" },
+}[lang];
 ---
 
 <header
@@ -23,13 +29,13 @@ const { large = false, padded = true } = Astro.props;
       href="/#how-it-works"
       class="hidden items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink sm:inline-flex"
     >
-      How it works
+      {t.how}
     </a>
     <a
       href="/demo/"
       class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
-      Demo
+      {t.demo}
     </a>
     <a
       href="https://github.com/5uper0/parley"
@@ -41,12 +47,12 @@ const { large = false, padded = true } = Astro.props;
     </a>
     <button
       type="button"
-      aria-label="Switch between light and dark theme"
+      aria-label={t.aria}
       aria-pressed="false"
       onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';this.setAttribute('aria-pressed',r.dataset.theme==='dark');try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"
       class="ml-1 inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-hairline bg-surface px-3 text-[12.5px] text-muted transition-colors hover:border-indigo hover:text-ink sm:ml-2 sm:px-[15px]"
     >
-      <span aria-hidden="true">&#9681;</span><span class="hidden sm:inline">theme</span>
+      <span aria-hidden="true">&#9681;</span><span class="hidden sm:inline">{t.theme}</span>
     </button>
   </nav>
 </header>
