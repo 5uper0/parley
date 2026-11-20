@@ -111,3 +111,42 @@ button:focus-visible,
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Guide and press tables: under 640px each row stacks and each cell shows its column
+   label (data-label is set by the script in Layout.astro). Without JS the wrapper scrolls. */
+@media (max-width: 639px) {
+  .overflow-x-auto > table {
+    min-width: 0 !important;
+    width: 100%;
+  }
+  .overflow-x-auto > table,
+  .overflow-x-auto > table :is(thead, tbody, tfoot, tr, th, td) {
+    display: block;
+  }
+  .overflow-x-auto > table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .overflow-x-auto > table tbody tr {
+    padding: 0.75rem 0;
+  }
+  .overflow-x-auto > table :is(th, td) {
+    padding: 0.125rem 1.25rem !important;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .overflow-x-auto > table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-subtle, currentColor);
+    margin-top: 0.375rem;
+  }
+}

@@ -72,5 +72,18 @@ const ga4 = process.env.PARLEY_GA4_ID || "";
   </head>
   <body class="bg-bg font-sans text-ink antialiased">
     <slot />
+    <script is:inline>
+      document.querySelectorAll(".overflow-x-auto > table").forEach(function (t) {
+        var roles = { TABLE: "table", THEAD: "rowgroup", TBODY: "rowgroup", TFOOT: "rowgroup", TR: "row", TD: "cell" };
+        t.querySelectorAll("table, thead, tbody, tfoot, tr, td").forEach(function (e) { e.setAttribute("role", roles[e.tagName]); });
+        t.querySelectorAll("th").forEach(function (e) { e.setAttribute("role", e.getAttribute("scope") === "row" ? "rowheader" : "columnheader"); });
+        var heads = Array.prototype.map.call(t.querySelectorAll("thead tr:first-child > *"), function (h) { return h.textContent.trim(); });
+        t.querySelectorAll("tbody tr").forEach(function (r) {
+          Array.prototype.forEach.call(r.children, function (c, i) {
+            if (c.tagName === "TD" && heads[i]) c.setAttribute("data-label", heads[i]);
+          });
+        });
+      });
+    </script>
   </body>
 </html>
