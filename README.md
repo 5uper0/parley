@@ -137,12 +137,15 @@ call the tools yourself instead of through a host, the three calls look like thi
                         "parties": [...]}}}
 {"name": "parley_verify_receipt",
  "arguments": {"transcript": {...},
-               "sha256": "<transcript_sha256 from parley_decide>"}}
+               "sha256": "<transcript_sha256 from parley_decide>",
+               "expected_owners": ["Ana", "Bob", "Cara"]}}
 {"name": "parley_check_party",
  "arguments": {"party": {"owner": "Bob", "hard": [...],
                         "utility": [...]},
                "decision": {...}}}
 ```
+
+`expected_owners` is the roster you expect: the check fails if any recorded entry lacks a verdict from one of those owners.
 
 The result of `parley_decide` is not a receipt file for `scripts/verify-receipt.py`; check it with
 `parley_verify_receipt`. Example prompt:
@@ -172,7 +175,7 @@ that their own limit held.
 
 **Who it's for.** People building agents that act for different people: several parties must reach
 one decision that crosses none of their red lines, and each can check that afterward on their own
-machine. No outside user has run it yet. The worked examples in this repo are a P2P escrow dispute
+machine. One outside developer has run the quickstart and built a purchasing-system example on a recorded decision ([Discussion #92](https://github.com/5uper0/parley/discussions/92); the ZIP replays four cases). No outside team has used it for a decision of its own yet. The worked examples in this repo are a P2P escrow dispute
 ([`docs/dogfood-01-p2p-escrow.md`](docs/dogfood-01-p2p-escrow.md), synthetic) and an early lease exit
 replayed after the fact ([`docs/dogfood-02-early-lease-exit.md`](docs/dogfood-02-early-lease-exit.md)).
 
