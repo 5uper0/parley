@@ -396,20 +396,39 @@ const jsonLd = JSON.stringify({
       <!-- Founder -->
       <section class={`${wrap} mt-14`}>
         <h2 class={sectionLabel}>Founder</h2>
-        <div class={`${card} mt-5 px-5 py-[22px]`}>
-          <p class="font-display text-[22px] tracking-[-0.02em] text-ink">Oleh Veheria</p>
-          <p class="mt-1 text-[13px] text-subtle">Founder · Valencia, Spain · Ukrainian</p>
-          <p class="mt-4 max-w-[58ch] text-[15px]/[25px] text-muted">
-            A decade building systems where the interesting failures were about conflicting
-            incentives rather than uptime. Parley started from a practical annoyance: every
-            agent framework assumed the agents were on the same side, and the moment they
-            were not, the design had nothing to say.
-          </p>
-          <p class="mt-3 flex flex-wrap gap-x-5 text-[13.5px] [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
-            <a href="mailto:hello@parleyprotocol.com" class={link}>hello@parleyprotocol.com</a>
-            <a href="https://www.linkedin.com/in/oleh-veheria" target="_blank" rel="noopener" class={link}>LinkedIn</a>
-            <a href="https://github.com/5uper0" target="_blank" rel="noopener" class={link}>GitHub</a>
-          </p>
+        <div class={`${card} mt-5 flex flex-col gap-5 px-5 py-[22px] sm:flex-row sm:items-start`}>
+          <img
+            src="/press/founder-oleh-veheria-800.jpg"
+            alt="Portrait of Oleh Veheria, founder of Parley"
+            width="800"
+            height="800"
+            loading="lazy"
+            class="h-28 w-28 shrink-0 rounded-[12px] border border-hairline object-cover"
+          />
+          <div>
+            <p class="font-display text-[22px] tracking-[-0.02em] text-ink">Oleh Veheria</p>
+            <p class="mt-1 text-[13px] text-subtle">Founder · Valencia, Spain</p>
+            <p class="mt-4 max-w-[58ch] text-[15px]/[25px] text-muted">
+              Oleh Veheria is the founder of Parley and works from Valencia, Spain.
+            </p>
+            <p class="mt-3 max-w-[58ch] text-[15px]/[25px] text-muted">
+              Oleh has written software for more than ten years, with iOS as the craft, and has led
+              engineering teams of up to 15 people on Fortune-500 mobile products.
+            </p>
+            <p class="mt-3 max-w-[58ch] text-[15px]/[25px] text-muted">
+              An ads SDK Oleh built raised ad impressions 32% across more than 20 ad networks, and
+              the article "My Way to iOS Development" has 65K+ views on DOU.ua.
+            </p>
+            <p class="mt-3 max-w-[58ch] text-[15px]/[25px] text-muted">
+              Parley grew out of running agents under written gates: limits that hold in code, and a
+              record each owner can check alone.
+            </p>
+            <p class="mt-3 flex flex-wrap gap-x-5 text-[13.5px] [&_a]:inline-flex [&_a]:min-h-11 [&_a]:items-center">
+              <a href="mailto:hello@parleyprotocol.com" class={link}>hello@parleyprotocol.com</a>
+              <a href="https://www.linkedin.com/in/oleh-veheria" target="_blank" rel="noopener" class={link}>LinkedIn</a>
+              <a href="https://github.com/5uper0" target="_blank" rel="noopener" class={link}>GitHub</a>
+            </p>
+          </div>
         </div>
       </section>
 

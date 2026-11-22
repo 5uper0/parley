@@ -115,13 +115,20 @@ before anyone could prove what had been agreed.
 
 ## 6. Founder
 
-**Oleh Veheria**, founder. Valencia, Spain. Ukrainian.
+Photo: `/press/founder-oleh-veheria-800.jpg` (800 x 800 px, free to use with the text below).
 
-A decade building systems where the interesting failures were about conflicting incentives rather
-than uptime. Parley started from a practical annoyance: every agent framework assumed the agents
-were on the same side, and the moment they were not, the design had nothing to say.
+Oleh Veheria is the founder of Parley and works from Valencia, Spain.
 
-Contact: oleh@veheria.tech · LinkedIn: linkedin.com/in/oleh-veheria · GitHub: github.com/5uper0
+Oleh has written software for more than ten years, with iOS as the craft, and has led engineering
+teams of up to 15 people on Fortune-500 mobile products.
+
+An ads SDK Oleh built raised ad impressions 32% across more than 20 ad networks, and the article
+"My Way to iOS Development" has 65K+ views on DOU.ua.
+
+Parley grew out of running agents under written gates: limits that hold in code, and a record each
+owner can check alone.
+
+Contact: hello@parleyprotocol.com · LinkedIn: linkedin.com/in/oleh-veheria · GitHub: github.com/5uper0
 
 ---
 
