@@ -12,6 +12,7 @@ Run standalone:  PARLEY_TOKEN=$(openssl rand -hex 16) python -m parley.net.bot -
 import argparse
 import dataclasses
 import hmac
+import ipaddress
 import json
 import math
 import os
@@ -150,11 +151,22 @@ def _make_handler(agent, identity, auth_token, limiter):
     return Handler
 
 
+def _is_loopback(host):
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
 def serve(owner, sheet, host="127.0.0.1", port=0, identity="auto",
           auth_token=None, rate_limit=None):
     """Build (don't run) a bot server. `identity='auto'` generates a signing key."""
     if auth_token == "":  # "" is falsy, so it would silently turn auth off
         raise ValueError("auth_token is empty; pass None to run without auth")
+    if auth_token is None and not _is_loopback(host):
+        raise ValueError(f"auth_token is required to listen on non-loopback host {host!r}")
     agent = Agent(owner, sheet)
     if identity == "auto":
         identity = Identity.generate(owner)
@@ -173,8 +185,11 @@ def main():
     token = os.environ.get("PARLEY_TOKEN")  # auth on if set
     if token == "":
         raise SystemExit("PARLEY_TOKEN is set but empty; unset it to run without auth")
-    httpd = serve(sheet.owner, sheet, args.host, args.port, auth_token=token)
-    auth = "auth ON" if token else "auth off (dev)"
+    try:
+        httpd = serve(sheet.owner, sheet, args.host, args.port, auth_token=token)
+    except ValueError as exc:
+        raise SystemExit(str(exc))
+    auth = "auth ON" if token else "auth off (dev, loopback only)"
     print(f"[bot:{sheet.owner}] listening on {args.host}:{args.port} — signed, {auth}", flush=True)
     httpd.serve_forever()
 
