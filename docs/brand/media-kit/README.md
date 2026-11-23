@@ -16,5 +16,3 @@ Concept "the floor line" (reviewed by an independent design pass 2026-10-24): th
 | logo/wordmark-on-dark.svg, wordmark-on-light.svg | tight viewBox, no clear space: add the 16 percent clear space from `brands/parley.md` yourself. viewBox `184 -2050 8335.6 2628` (2026-11-23): full path bounds x 186 to 8517.6, y -2048 to 576, plus 2 units on every side; the old `-300 -1856 9118 2732` clipped the l ascender 192 units at the top. Checked at 1x: the 1-px border has no opaque pixel |
 | favicon/ | icon-16, 32, 180, 192, 512 PNG and favicon.ico |
 | fonts/ | Inter SemiBold and Regular, JetBrains Mono Regular and Bold (SIL OFL) |
-
-Existing assets: `docs/brand/assets/og-card.png` (link preview), `proofcard.png`, `parley-money-shot.gif`, favicon set. Text for boilerplate and facts: `docs/press/PRESS-KIT.md` (public) and `docs/capital/media-kit/README.md` (funders).
