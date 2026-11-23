@@ -70,6 +70,9 @@ _ES = {
     "match": "Los 12 primeros caracteres del hash de tu tarjeta coinciden con el de arriba. La tarjeta que genera el comando sale en inglés. La receta es inventada para esta demostración: ninguna persona, caso ni dato real.",
     "source": "Código",
     "demo": "Demo interactiva",
+    "home": "Inicio",
+    "guide": "Guía: reparto entre hermanos",
+    "nav": "Navegación del sitio",
     "legal": "Herramienta para ordenar la conversación entre coherederos. No es asesoramiento jurídico y no sustituye a un notario, mediador o abogado. El caso de esta página es inventado.",
 }
 _EN = {
@@ -96,6 +99,9 @@ _EN = {
     "match": "The first 12 characters of the hash on your card match the one above. The recipe is invented for this demo: no real person, case or data.",
     "source": "Source",
     "demo": "Interactive demo",
+    "home": "Home",
+    "guide": "",
+    "nav": "Site navigation",
     "legal": "",
 }
 LANGS = {"en": _EN, "es": _ES}
@@ -209,12 +215,19 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
              ".wrap table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--n0)}"
              ".wrap td,.wrap th{border:1px solid var(--n200);padding:7px 9px;text-align:left}"
              ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
+             ".wrap h1{font-size:22px;margin:0 0 16px;line-height:1.25}"
+             ".wrap nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 22px;font-size:14px}"
+             ".wrap nav a{color:var(--indigo-600);min-height:24px}"
              ".wrap pre{background:var(--n900);color:#fff;padding:12px 14px;border-radius:8px;"
              "overflow-x:auto;font-size:12.5px}.wrap code.h{word-break:break-all;font-family:var(--mono)}")
+    guide = f'<a href="/es/reparto-de-herencia-entre-hermanos/">{T["guide"]}</a>' if T["guide"] else ""
+    nav = (f'<nav aria-label="{T["nav"]}"><a href="/">{T["home"]}</a> '
+           f'<a href="/demo/">{T["demo"]}</a> {guide}</nav>')
+    card = card_html(data, lang).replace(f'<div class="scn">{html.escape(str(data["title"]))}</div>', "", 1)
     legal = f'<p class="legal"><b>{html.escape(T["legal"])}</b></p>' if T["legal"] else ""
     return (f'<!doctype html><html lang="{lang}"><head>\n{_head_meta(data, path, lang)}\n{_FONTS}'
             f'<style>{style}</style></head><body><div class="wrap">'
-            f'{legal}{card_html(data, lang)}'
+            f'{nav}<h1>{html.escape(str(data["title"]))}</h1>{legal}{card}'
             f'<h2>{T["said"]}</h2>'
             f'<table><tr><th>{T["option"]}</th>{heads}</tr>{"".join(rows)}</table>'
             f'<p>{T["masked"]}</p>'
