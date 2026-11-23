@@ -216,8 +216,8 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
              ".wrap td,.wrap th{border:1px solid var(--n200);padding:7px 9px;text-align:left}"
              ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
              ".wrap h1{font-size:22px;margin:0 0 16px;line-height:1.25}"
-             ".wrap nav{display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 22px;font-size:14px}"
-             ".wrap nav a{color:var(--indigo-600);min-height:24px}"
+             ".wrap nav{display:flex;flex-wrap:wrap;gap:0 14px;margin:0 0 14px;font-size:14px}"
+             ".wrap nav a{color:var(--indigo-600);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}"
              ".wrap pre{background:var(--n900);color:#fff;padding:12px 14px;border-radius:8px;"
              "overflow-x:auto;font-size:12.5px}.wrap code.h{word-break:break-all;font-family:var(--mono)}")
     guide = f'<a href="/es/reparto-de-herencia-entre-hermanos/">{T["guide"]}</a>' if T["guide"] else ""
