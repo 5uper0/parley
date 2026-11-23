@@ -19,8 +19,8 @@ SITE = "https://parleyprotocol.com"
 OG_IMAGE = f"{SITE}/demo/og-card-demo.png"
 
 STYLE = """
-:root{--indigo-600:#3A45B0;--verify-600:#0E8F63;--verify-sub:#E7F6EF;--redline-600:#C42121;
---redline-sub:#FCEAEA;--n0:#FFFFFF;--n100:#EDEFF3;--n200:#DCE0E8;--n500:#6B7383;--n600:#4A5163;--n900:#12151C;
+:root{--indigo-600:#3A45B0;--verify-600:#0A7550;--verify-sub:#E7F6EF;--redline-600:#C42121;
+--redline-sub:#FCEAEA;--n0:#FFFFFF;--n100:#EDEFF3;--n200:#DCE0E8;--n500:#5F6676;--n600:#4A5163;--n900:#12151C;
 --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
 *{margin:0;box-sizing:border-box}
 .card{width:680px;max-width:100%;background:var(--n0);border:1px solid var(--n200);border-radius:16px;padding:32px 34px;box-shadow:0 12px 40px rgba(18,21,28,.14)}
