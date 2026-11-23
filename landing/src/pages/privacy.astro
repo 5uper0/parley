@@ -6,7 +6,7 @@ import Footer from "../components/Footer.astro";
 
 <Layout
   title="Privacy — Parley"
-  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus Microsoft Clarity session recordings with all text masked, both loaded only after you accept, no ads, no data resale, no tracking in the self-hosted core."
+  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus Microsoft Clarity session recordings, both loaded only after you accept, no ads, no data resale, no tracking in the self-hosted core."
   path="/privacy/"
 >
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
@@ -38,7 +38,8 @@ import Footer from "../components/Footer.astro";
           — it uses Google Analytics (GA4) and Microsoft Clarity so we can tell whether the
           site is reaching anyone worth talking to. Neither loads until you choose
           Accept in the banner. Until then the page makes no request to Google or
-          Microsoft and sets no analytics cookie.
+          Microsoft and sets no analytics cookie. On the demo and its replay pages only
+          GA4 is used; Clarity runs on the other pages.
         </p>
       </div>
 
@@ -58,8 +59,7 @@ import Footer from "../components/Footer.astro";
         </li>
         <li class="text-[14.5px] text-muted">
           Only after you accept: Microsoft Clarity (free) records how pages are used:
-          clicks, scrolls and page layout. Text on the page is masked in the recording
-          and nothing you type into the demo is captured. Once you accept, Clarity sets
+          clicks, scrolls and page layout. Once you accept, Clarity sets
           the cookies <code
             class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
             >_clck</code

@@ -13,6 +13,7 @@ const ES_SIBLING = "/es/reparto-de-herencia-entre-hermanos/";
 export function langTargets(pathname: string, current: Lang): Record<Lang, string> {
   const path = pathname.endsWith("/") ? pathname : `${pathname}/`;
   if (Object.values(GROUP).includes(path)) return { ...GROUP };
+  if (path === "/404/") return { en: "/", es: ES_SIBLING, uk: GROUP.uk };
   if (path === ES_SIBLING) return { en: "/", es: ES_SIBLING, uk: GROUP.uk };
   return { en: current === "en" ? path : "/", es: ES_SIBLING, uk: GROUP.uk };
 }

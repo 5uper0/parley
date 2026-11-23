@@ -13,6 +13,11 @@
     uk: { label: "Згода на аналітику", text: "Цей сайт може використовувати Google Analytics і Microsoft Clarity, щоб рахувати візити й бачити, як користуються сторінками. Без вашої згоди нічого не завантажується і cookies не ставляться.", more: "Конфіденційність (англійською)", reject: "Відхилити", accept: "Прийняти" }
   };
   var L = T[(document.documentElement.lang || "en").slice(0, 2)] || T.en;
+  if (!CL) {
+    L = Object.assign({}, L, {
+      text: L.text.replace(" and Microsoft Clarity", "").replace(" y Microsoft Clarity", "").replace(" і Microsoft Clarity", "")
+    });
+  }
 
   window.gtag = function () {
     if (granted && GA) (window.dataLayer = window.dataLayer || []).push(arguments);

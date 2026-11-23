@@ -36,3 +36,22 @@ def test_privacy_page_discloses_both_tools_and_the_consent_gate():
     assert "Only after you accept" in src and "no request to Google or" in src
     assert "_ga" in src and "_clck" in src and "data-consent-open" in src
     assert "cookies switched off" not in src
+
+
+def test_reject_and_accept_share_one_style_rule():
+    css = CONSENT[CONSENT.index("#parley-consent{"):CONSENT.index("document.head.appendChild(css)")]
+    assert css.count("#parley-consent button{") == 1
+    for sel in ("[data-v", ":first-child", ":last-child", ":nth-", "button.", "button:not"):
+        assert sel not in css
+    assert "min-height:44px" in css and "opacity" not in css
+    assert 'data-v="rejected"></button><button type="button" data-v="accepted"></button>' in CONSENT
+
+
+def test_gtag_pushes_nothing_before_consent():
+    assert "if (granted && GA) (window.dataLayer = window.dataLayer || []).push(arguments);" in CONSENT
+    assert CONSENT.count("dataLayer") == 2
+    assert "var granted = false;" in CONSENT
+
+
+def test_banner_names_only_what_the_page_loads():
+    assert "if (!CL) {" in CONSENT and '.replace(" and Microsoft Clarity", "")' in CONSENT
