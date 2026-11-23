@@ -287,7 +287,7 @@ const jsonLd = JSON.stringify({
           Three owners pick a venue. Ana wants the rooftop. Bob will not spend more than
           700, written as a predicate rather than a preference. Cara likes the garden.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`from parley.agent import Agent
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`from parley.agent import Agent
 from parley.consensus import run_consensus
 from parley.preferences import HardConstraint, PreferenceSheet
 
@@ -301,7 +301,7 @@ result = run_consensus([Agent(s.owner, s) for s in (ana, bob, cara)], options)
 print(result.status, result.decision)
 for sheet in (ana, bob, cara):
     print(sheet.owner, "not betrayed:", result.transcript.verify_non_betrayal(sheet, result.decision))`}</code></pre>
-        <pre class={`${deviceBlock} mt-3 whitespace-pre`}><code>{`agreed {'venue': 'garden', 'cost': 600}
+        <pre class={`${deviceBlock} mt-3 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`agreed {'venue': 'garden', 'cost': 600}
 Ana not betrayed: True
 Bob not betrayed: True
 Cara not betrayed: True`}</code></pre>

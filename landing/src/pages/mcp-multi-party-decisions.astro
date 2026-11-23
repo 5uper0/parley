@@ -172,13 +172,13 @@ const jsonLd = JSON.stringify({
           package, so the console script <code class={code}>parley-mcp</code> is part of
           the plain install.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`pip install parley-consensus`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`pip install parley-consensus`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           The same server is also registered under the distribution name, so a host that
           runs Python tools through <code class={code}>uv</code> can start it without a
           separate install step:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`uvx parley-consensus`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`uvx parley-consensus`}</code></pre>
       </section>
 
       <!-- Point the host at it -->
@@ -188,16 +188,16 @@ const jsonLd = JSON.stringify({
           Add one stdio server entry to the host's MCP configuration. This is the entry
           from the README:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "parley-mcp"}}}`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`{"mcpServers": {"parley": {"command": "parley-mcp"}}}`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           If the console script is not on the host's <code class={code}>PATH</code>, launch
           it through the interpreter that has the package:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "python", "args": ["-m", "parley.mcp"]}}}`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`{"mcpServers": {"parley": {"command": "python", "args": ["-m", "parley.mcp"]}}}`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Or let <code class={code}>uv</code> fetch and run it:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{"mcpServers": {"parley": {"command": "uvx", "args": ["parley-consensus"]}}}`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`{"mcpServers": {"parley": {"command": "uvx", "args": ["parley-consensus"]}}}`}</code></pre>
         <p class="mt-4 max-w-[62ch] text-[15px]/[25px] text-muted">
           Once connected, three tools appear in the host's tool list. The README's example
           prompt is a venue decision: "Three of us are picking a venue: rooftop (900), garden
@@ -216,8 +216,8 @@ const jsonLd = JSON.stringify({
           server answers with its protocol version and name, then exits when stdin
           closes. Logs go to stderr; stdout carries replies only.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`echo '{"jsonrpc":"2.0","id":0,"method":"initialize","params":{}}' | parley-mcp`}</code></pre>
-        <pre class={`${deviceBlock} mt-3 whitespace-pre`}><code>{`{"jsonrpc": "2.0", "id": 0, "result": {"protocolVersion": "2025-06-18", "capabilities": {"tools": {}}, "serverInfo": {"name": "parley", "version": "0.2.1"}}}`}</code></pre>
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`echo '{"jsonrpc":"2.0","id":0,"method":"initialize","params":{}}' | parley-mcp`}</code></pre>
+        <pre class={`${deviceBlock} mt-3 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`{"jsonrpc": "2.0", "id": 0, "result": {"protocolVersion": "2025-06-18", "capabilities": {"tools": {}}, "serverInfo": {"name": "parley", "version": "0.2.1"}}}`}</code></pre>
       </section>
 
       <!-- Tools -->
@@ -266,7 +266,7 @@ const jsonLd = JSON.stringify({
           The venue decision as a <code class={code}>parley_decide</code> spec. Bob's budget
           is a red line, not a preference; the other two parties only have soft terms.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`{
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`{
   "title": "Pick a venue",
   "options": [
     {"venue": "rooftop", "cost": 900},
@@ -284,7 +284,7 @@ const jsonLd = JSON.stringify({
           What came back, with the transcript shortened to the rooftop entry and scores
           rounded to one decimal:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`status:            agreed
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`status:            agreed
 decision:          {"cost": 600, "venue": "garden"}
 transcript_sha256: ffa80a757ba16c62f5f50d78aab9879012af98965a640437b43edd285368c257
 
@@ -299,7 +299,7 @@ transcript.entries[0]:
           <code class={code}>red-line</code>, not which line. Then the two checks, passing
           the transcript and hash straight back, and Bob's party object with the decision:
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`parley_verify_receipt(transcript, sha256, expected_owners=["Ana","Bob","Cara"])
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`parley_verify_receipt(transcript, sha256, expected_owners=["Ana","Bob","Cara"])
   {"match": true, "max_min_verified": true, "expected_sha256": "ffa80a...c257", "recomputed_sha256": "ffa80a...c257"}
 
 parley_check_party(party=Bob, decision={"cost": 600, "venue": "garden"})
