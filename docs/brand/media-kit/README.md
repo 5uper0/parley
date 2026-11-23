@@ -18,13 +18,3 @@ Concept "the floor line" (reviewed by an independent design pass 2026-10-24): th
 | fonts/ | Inter SemiBold and Regular, JetBrains Mono Regular and Bold (SIL OFL) |
 
 Existing assets: `docs/brand/assets/og-card.png` (link preview), `proofcard.png`, `parley-money-shot.gif`, favicon set. Text for boilerplate and facts: `docs/press/PRESS-KIT.md` (public) and `docs/capital/media-kit/README.md` (funders).
-
-## Rollout status (2026-10-24)
-
-| Place | State |
-|---|---|
-| dev.to @parley-protocol | default avatar; upload avatar-square-1024.png (file picker is on the MacBook, so Oleh uploads) |
-| Hugging Face parley-protocol | default avatar; same |
-| Reddit u/parley_protocol | not checked |
-| LinkedIn Page parleyprotocol | marketing-dept to apply avatar and cover |
-| GitHub 5uper0/parley social preview | not set; `gh` cannot set it, upload in repo settings |
