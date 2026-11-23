@@ -55,3 +55,11 @@ def test_gtag_pushes_nothing_before_consent():
 
 def test_banner_names_only_what_the_page_loads():
     assert "if (!CL) {" in CONSENT and '.replace(" and Microsoft Clarity", "")' in CONSENT
+
+
+def test_demo_and_replay_self_host_fonts_so_nothing_loads_before_consent():
+    demo = ROOT / "examples" / "demo"
+    for f in [demo / "index.html", demo / "proofcard.py", *demo.glob("proofcard_*.html")]:
+        text = f.read_text()
+        assert "fonts.googleapis.com" not in text and "fonts.gstatic.com" not in text, f.name
+    assert (ROOT / "landing" / "public" / "fonts" / "fonts.css").exists()
