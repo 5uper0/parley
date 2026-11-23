@@ -161,6 +161,7 @@ def _head_meta(data: dict, path, lang: str = "en") -> str:
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
         f'<title>{t}</title>',
         f'<meta name="description" content="{d}">',
+        '<meta name="robots" content="noindex">',
     ]
     if url:
         tags.append(f'<link rel="canonical" href="{url}">')
