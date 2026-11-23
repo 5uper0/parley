@@ -548,3 +548,26 @@ def test_an_empty_token_refuses_to_start_instead_of_silently_disabling_auth(monk
     monkeypatch.setattr("sys.argv", ["bot", "--profile", "ana", "--port", "0"])
     with pytest.raises(SystemExit):
         bot_mod.main()
+
+
+@pytest.mark.parametrize("host", ["0.0.0.0", "::", "192.168.1.10", "example.com"])
+def test_a_non_loopback_host_without_a_token_refuses_to_start(host):
+    sheet = PROFILES["ana"]()
+    with pytest.raises(ValueError, match="auth_token"):
+        serve(sheet.owner, sheet, host=host, port=0)
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1", "localhost", "::1"])
+def test_a_loopback_host_without_a_token_still_starts(host):
+    sheet = PROFILES["ana"]()
+    try:
+        httpd = serve(sheet.owner, sheet, host=host, port=0)
+    except OSError:
+        pytest.skip(f"{host} not bindable here")
+    httpd.server_close()
+
+
+def test_a_non_loopback_host_with_a_token_starts():
+    sheet = PROFILES["ana"]()
+    httpd = serve(sheet.owner, sheet, host="0.0.0.0", port=0, auth_token=TOKEN)
+    httpd.server_close()
