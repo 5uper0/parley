@@ -6,7 +6,7 @@ import Footer from "../components/Footer.astro";
 
 <Layout
   title="Privacy — Parley"
-  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus cookieless Microsoft Clarity session recordings with all text masked, no ads, no data resale, no tracking in the self-hosted core."
+  description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus Microsoft Clarity session recordings with all text masked, both loaded only after you accept, no ads, no data resale, no tracking in the self-hosted core."
   path="/privacy/"
 >
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
@@ -14,7 +14,7 @@ import Footer from "../components/Footer.astro";
 
     <main class="flex-1 pb-16">
       <h1 class="font-display text-3xl tracking-[-0.02em] text-ink">Privacy</h1>
-      <p class="mt-1.5 text-[12.5px] text-subtle">Last updated 2026-09-04</p>
+      <p class="mt-1.5 text-[12.5px] text-subtle">Last updated 2026-11-23</p>
 
       <p class="mt-8 text-[15px]/[24px] text-muted">
         Parley itself — the protocol and the code in{" "}
@@ -36,7 +36,9 @@ import Footer from "../components/Footer.astro";
         <p class="text-[15px]/[24px] text-muted">
           <strong class="text-ink">The hosted site at parleyprotocol.com (homepage and demo) is different</strong>{" "}
           — it uses Google Analytics (GA4) and Microsoft Clarity so we can tell whether the
-          site is reaching anyone worth talking to.
+          site is reaching anyone worth talking to. Neither loads until you choose
+          Accept in the banner. Until then the page makes no request to Google or
+          Microsoft and sets no analytics cookie.
         </p>
       </div>
 
@@ -45,19 +47,30 @@ import Footer from "../components/Footer.astro";
       </h2>
       <ul class="list-disc space-y-1.5 pl-5">
         <li class="text-[14.5px] text-muted">
-          Standard GA4 page views and browser/device metadata (the same as most
-          websites).
+          Only after you accept: standard GA4 page views and browser/device metadata (the
+          same as most websites). GA4 sets the cookies <code
+            class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+            >_ga</code
+          > and <code
+            class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+            >_ga_*</code
+          >.
         </li>
         <li class="text-[14.5px] text-muted">
-          Microsoft Clarity (free) records how pages are used: clicks, scrolls and page
-          layout. It runs with cookies switched off and with strict masking, so all
-          text on the page is hidden in the recording and nothing you type into the
-          demo is captured. Without cookies, Clarity cannot link visits together; each
-          page view is separate. Microsoft processes this data under its own privacy
-          terms. An ad-blocker or tracking-protection extension blocks it as well.
+          Only after you accept: Microsoft Clarity (free) records how pages are used:
+          clicks, scrolls and page layout. Text on the page is masked in the recording
+          and nothing you type into the demo is captured. Once you accept, Clarity sets
+          the cookies <code
+            class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+            >_clck</code
+          > and <code
+            class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+            >_clsk</code
+          > so it can link the page views of one visit. Microsoft processes this data
+          under its own privacy terms.
         </li>
         <li class="text-[14.5px] text-muted">
-          A handful of click events scoped to this page: running a scenario, clicking
+          Only after you accept: a handful of click events scoped to this page: running a scenario, clicking
           verify, clicking the Arena "join the beta" link, or clicking through to
           GitHub, Discussions, or LinkedIn. No content you type into the demo (party
           names, preferences) is sent — the events log that a button was clicked, not
@@ -78,6 +91,23 @@ import Footer from "../components/Footer.astro";
         Your options
       </h2>
       <p class="text-[14.5px]/[24px] text-muted">
+        The banner offers Reject and Accept with equal weight. Your choice is stored in
+        this browser (localStorage key <code
+          class="rounded-[5px] border border-hairline bg-surface px-[5px] py-px font-mono text-[0.92em]"
+          >parley-consent</code
+        >) and is not sent anywhere. If you reject, nothing from Google or Microsoft
+        loads. You can change your choice at any time:
+      </p>
+      <p class="mt-3">
+        <button
+          type="button"
+          data-consent-open
+          class="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-hairline bg-surface px-5 text-[14px] text-ink transition-colors hover:border-indigo"
+        >
+          Cookie settings
+        </button>
+      </p>
+      <p class="mt-4 text-[14.5px]/[24px] text-muted">
         Any ad-blocker or tracking-protection extension that blocks Google Analytics or
         Microsoft Clarity will block them too — the demo works identically either way, nothing is gated
         on analytics. For zero analytics of any kind, run the demo yourself: <code

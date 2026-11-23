@@ -65,6 +65,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;pa
 .hdr-nav{display:flex;align-items:center;gap:2px}
 .hdr-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--muted);font-size:14px;text-decoration:none}
 .hdr-nav a:hover{color:var(--ink)}
+.hdr-nav a.lang{min-width:44px;justify-content:center;padding:0 6px;font-size:12.5px}
 .toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;margin-left:4px;padding:0 12px;
   border:1px solid var(--hair2);background:var(--surface);color:var(--muted);border-radius:9999px;font:inherit;font-size:13px;cursor:pointer}
 .toggle:hover{color:var(--ink);border-color:var(--indigo)}
@@ -160,6 +161,8 @@ code{font-family:var(--mono);font-size:.9em}
       <a href="/">Home</a>
       <a href="/#how-it-works" class="hide-sm">How it works</a>
       <a href="https://github.com/5uper0/parley" target="_blank" rel="noopener">GitHub</a>
+      <a href="/es/reparto-de-herencia-entre-hermanos/" lang="es" hreflang="es" aria-label="ES, Español" class="lang">ES</a>
+      <a href="/uk/zghoda-spadkoyemtsiv-prodazh-kvartyry/" lang="uk" hreflang="uk" aria-label="UK, Українська" class="lang">UK</a>
       <button type="button" class="toggle" aria-label="Switch between light and dark theme" aria-pressed="false"
         onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';this.setAttribute('aria-pressed',r.dataset.theme==='dark');try{localStorage.setItem('parley-theme',r.dataset.theme)}catch(e){}"><span aria-hidden="true">&#9681;</span><span class="hide-sm">theme</span></button>
     </nav>

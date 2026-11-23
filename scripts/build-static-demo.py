@@ -27,8 +27,7 @@ OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build/static-demo")
 # demo source carries no tracking tag and a contributor building locally is not silently
 # instrumented. Opt in with PARLEY_GA4_ID; unset means no analytics.
 GA4_ID = os.environ.get("PARLEY_GA4_ID", "")
-GA4_SNIPPET = """<script async src="https://www.googletagmanager.com/gtag/js?id={id}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('js',new Date());gtag('config','{id}');</script>
+GA4_SNIPPET = """<script src="/consent.js" data-ga="{id}" defer></script>
 <script>document.addEventListener('click',function(e){{var el=e.target.closest&&e.target.closest('.cta,.btn,.vbtn,a[href]');if(!el)return;if(el.matches('.vbtn')){{gtag('event','demo_verify_click',{{transport_type:'beacon'}});}}else if(el.matches('.cta,.btn')){{gtag('event','demo_run_click',{{transport_type:'beacon',cta_location:el.matches('.cta')?'hero':'panel'}});}}else{{var h=el.getAttribute('href')||'';if(el.matches('.arena-btn')){{gtag('event','arena_interest_click',{{transport_type:'beacon'}});}}else if(/github\\.com\\/5uper0\\/parley\\/discussions/.test(h)){{gtag('event','discussions_click',{{transport_type:'beacon'}});}}else if(/github\\.com\\/5uper0\\/parley/.test(h)){{gtag('event','github_click',{{transport_type:'beacon'}});}}else if(/linkedin\\.com/.test(h)){{gtag('event','linkedin_click',{{transport_type:'beacon'}});}}}}}});</script>"""
 # The `.arena-btn` check runs BEFORE the discussions-href regex on purpose: the Arena fake-door
 # CTA links into /discussions too, and arena_interest_click must fire INSTEAD OF the generic
