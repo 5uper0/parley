@@ -33,9 +33,13 @@ def path(d, x, fill):
     return f'<path transform="translate({x:.1f} 0) scale(1 -1)" d="{d}" fill="{fill}"/>'
 
 
-def svg(w0, y0, w, h, body, bg=None, title="Parley"):
+def num(v, prec):
+    return f"{v:.{prec}f}".removesuffix(".0") if prec else f"{v:.0f}"
+
+
+def svg(w0, y0, w, h, body, bg=None, title="Parley", prec=0):
     rect = f'<rect x="{w0}" y="{y0}" width="{w}" height="{h}" fill="{bg}"/>' if bg else ""
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{w0:.0f} {y0:.0f} {w:.0f} {h:.0f}" role="img" aria-label="{title}">'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{num(w0, prec)} {num(y0, prec)} {num(w, prec)} {num(h, prec)}" role="img" aria-label="{title}">'
             f'<title>{title}</title>{rect}{body}</svg>\n')
 
 
@@ -65,7 +69,9 @@ def wordmark(fg, dot, name, bg=None):
         x += adv + (TRACK if i < 5 else 0)
     cx = x + DOT_GAP * 0.35 + DOT_R
     parts.append(f'<circle cx="{cx:.1f}" cy="{-DOT_R:.1f}" r="{DOT_R:.1f}" fill="{dot}"/>')
-viewBox="184 -2050 8335.6 2628"
+    x0, ytop, ybot = 186, -2048, 576  # full path bounds: p stem left edge, l ascender top, p descender bottom
+    pad = 2
+    (OUT / name).write_text(svg(x0 - pad, ytop - pad, cx + DOT_R - x0 + 2 * pad, ybot - ytop + 2 * pad, "".join(parts), bg, "parley", prec=1))
 
 
 def motif(name, bg=None):
