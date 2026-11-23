@@ -185,7 +185,10 @@ def main():
     token = os.environ.get("PARLEY_TOKEN")  # auth on if set
     if token == "":
         raise SystemExit("PARLEY_TOKEN is set but empty; unset it to run without auth")
-    httpd = serve(sheet.owner, sheet, args.host, args.port, auth_token=token)
+    try:
+        httpd = serve(sheet.owner, sheet, args.host, args.port, auth_token=token)
+    except ValueError as exc:
+        raise SystemExit(str(exc))
     auth = "auth ON" if token else "auth off (dev, loopback only)"
     print(f"[bot:{sheet.owner}] listening on {args.host}:{args.port} — signed, {auth}", flush=True)
     httpd.serve_forever()
