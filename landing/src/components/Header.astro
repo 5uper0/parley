@@ -1,4 +1,5 @@
 ---
+import { langTargets } from "../data/langs";
 interface Props {
   large?: boolean;
   padded?: boolean;
@@ -10,10 +11,13 @@ const t = {
   es: { how: "Cómo funciona", demo: "Demo", theme: "tema", aria: "Cambiar entre tema claro y oscuro" },
   uk: { how: "Як це працює", demo: "Демо", theme: "тема", aria: "Перемкнути світлу й темну тему" },
 }[lang];
+const targets = langTargets(Astro.url.pathname, lang);
+const langNames = { en: "English", es: "Español", uk: "Українська" };
+const langAria = { en: "Language", es: "Idioma", uk: "Мова" }[lang];
 ---
 
 <header
-  class:list={["flex items-center justify-between gap-4", padded && "py-9"]}
+  class:list={["flex flex-wrap items-center justify-between gap-x-4", padded && "py-9"]}
 >
   <a
     href="/"
@@ -27,13 +31,13 @@ const t = {
   <nav class="flex items-center gap-1">
     <a
       href="/#how-it-works"
-      class="hidden items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink sm:inline-flex"
+      class="hidden min-h-11 items-center px-3 text-[13px] text-muted transition-colors hover:text-ink sm:inline-flex"
     >
       {t.how}
     </a>
     <a
       href="/demo/"
-      class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
+      class="inline-flex min-h-11 items-center px-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
       {t.demo}
     </a>
@@ -41,10 +45,29 @@ const t = {
       href="https://github.com/5uper0/parley"
       target="_blank"
       rel="noopener"
-      class="inline-flex items-center px-3 py-3 text-[13px] text-muted transition-colors hover:text-ink"
+      class="inline-flex min-h-11 items-center px-3 text-[13px] text-muted transition-colors hover:text-ink"
     >
       GitHub
     </a>
+    <ul class="m-0 flex list-none items-center p-0" aria-label={langAria} role="list">
+      {(["en", "es", "uk"] as const).map((l) => (
+        <li>
+          <a
+            href={targets[l]}
+            lang={l}
+            hreflang={l}
+            aria-label={`${l.toUpperCase()}, ${langNames[l]}`}
+            aria-current={l === lang ? "true" : undefined}
+            class:list={[
+              "inline-flex min-h-11 min-w-11 items-center justify-center px-1.5 text-[12.5px] uppercase tracking-wide transition-colors hover:text-ink",
+              l === lang ? "font-semibold text-ink underline decoration-redline decoration-2 underline-offset-[6px]" : "text-muted",
+            ]}
+          >
+            {l}
+          </a>
+        </li>
+      ))}
+    </ul>
     <button
       type="button"
       aria-label={t.aria}

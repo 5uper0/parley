@@ -135,7 +135,8 @@ def test_replay_pages_carry_analytics_only_when_an_id_is_set(tmp_path):
     build.main()
     for slug in ("committee", "herencia-hermanos"):
         page = (tmp_path / "on" / "replay" / slug / "index.html").read_text(encoding="utf-8")
-        assert "googletagmanager.com/gtag/js?id=G-TEST123" in page
+        assert 'src="/consent.js" data-ga="G-TEST123"' in page
+        assert "googletagmanager" not in page  # loaded by consent.js only after accept
     build.OUT = tmp_path / "off"
     build.GA4_ID = ""
     build.main()

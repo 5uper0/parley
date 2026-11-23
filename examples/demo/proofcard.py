@@ -40,10 +40,7 @@ STYLE = """
 .card .foot{margin-top:20px;font-size:12px;color:var(--n500);font-family:var(--sans)}
 """
 
-_FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
-          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-          '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&'
-          'family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">')
+_FONTS = '<link rel="stylesheet" href="/fonts/fonts.css">'
 
 
 _ES = {
@@ -72,6 +69,8 @@ _ES = {
     "demo": "Demo interactiva",
     "home": "Inicio",
     "guide": "Guía: reparto entre hermanos",
+    "skip": "Saltar al contenido",
+    "english": "English",
     "nav": "Navegación del sitio",
     "legal": "Herramienta para ordenar la conversación entre coherederos. No es asesoramiento jurídico y no sustituye a un notario, mediador o abogado. El caso de esta página es inventado.",
 }
@@ -101,6 +100,7 @@ _EN = {
     "demo": "Interactive demo",
     "home": "Home",
     "guide": "",
+    "skip": "Skip to content",
     "nav": "Site navigation",
     "legal": "",
 }
@@ -212,22 +212,25 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
     style = (STYLE + "\nbody{background:#e7e9f0;padding:28px;font-family:var(--sans);color:var(--n900)}"
              ".wrap{max-width:680px;margin:0 auto}.wrap h2{font-size:16px;margin:26px 0 8px}"
              ".wrap p,.wrap li{font-size:14px;color:var(--n600);line-height:1.5}"
-             ".wrap table{border-collapse:collapse;width:100%;font-size:12.5px;background:var(--n0)}"
+             ".wrap table{border-collapse:collapse;width:100%;table-layout:fixed;overflow-wrap:anywhere;font-size:12.5px;background:var(--n0)}"
              ".wrap td,.wrap th{border:1px solid var(--n200);padding:7px 9px;text-align:left}"
              ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
+             ".skip{position:absolute;left:12px;top:-100px;z-index:10;background:var(--n900);color:#fff;padding:12px 18px;border-radius:8px}.skip:focus{top:12px}"
              ".wrap h1{font-size:22px;margin:0 0 16px;line-height:1.25}"
              ".wrap nav{display:flex;flex-wrap:wrap;gap:0 14px;margin:0 0 14px;font-size:14px}"
-             ".wrap nav a{color:var(--indigo-600);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}"
+             ".wrap nav a{color:var(--indigo-600);display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:0 4px}"
              ".wrap pre{background:var(--n900);color:#fff;padding:12px 14px;border-radius:8px;"
              "overflow-x:auto;font-size:12.5px}.wrap code.h{word-break:break-all;font-family:var(--mono)}")
     guide = f'<a href="/es/reparto-de-herencia-entre-hermanos/">{T["guide"]}</a>' if T["guide"] else ""
+    english = '<a href="/" lang="en" hreflang="en">English</a>' if T.get("english") else ""
     nav = (f'<nav aria-label="{T["nav"]}"><a href="/">{T["home"]}</a> '
-           f'<a href="/demo/">{T["demo"]}</a> {guide}</nav>')
+           f'<a href="/demo/">{T["demo"]}</a> {guide} {english}</nav>')
     card = card_html(data, lang).replace(f'<div class="scn">{html.escape(str(data["title"]))}</div>', "", 1)
     legal = f'<p class="legal"><b>{html.escape(T["legal"])}</b></p>' if T["legal"] else ""
     return (f'<!doctype html><html lang="{lang}"><head>\n{_head_meta(data, path, lang)}\n{_FONTS}'
-            f'<style>{style}</style></head><body><div class="wrap">'
-            f'{nav}<h1>{html.escape(str(data["title"]))}</h1>{legal}{card}'
+            f'<style>{style}</style></head><body>'
+            f'<a class="skip" href="#main">{T["skip"]}</a><div class="wrap">'
+            f'{nav}<main id="main"><h1>{html.escape(str(data["title"]))}</h1>{legal}{card}'
             f'<h2>{T["said"]}</h2>'
             f'<table><tr><th>{T["option"]}</th>{heads}</tr>{"".join(rows)}</table>'
             f'<p>{T["masked"]}</p>'
@@ -240,7 +243,7 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
             f'<p>{T["match"]} '
             f'<a href="https://github.com/5uper0/parley">{T["source"]}</a> · '
             f'<a href="/demo/">{T["demo"]}</a></p>'
-            f'</div></body></html>')
+            f'</main></div></body></html>')
 
 
 def main():

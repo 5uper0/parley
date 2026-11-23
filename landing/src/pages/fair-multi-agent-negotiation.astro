@@ -218,7 +218,7 @@ const jsonLd = JSON.stringify({
               </p>
               <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">preferences.py</span>
             </div>
-            <div class={deviceBlock} aria-label="Example: a red line rejecting an option">
+            <div class={deviceBlock} role="region" tabindex="0" aria-label="Example: a red line rejecting an option">
               <span class="text-muted">option: rooftop, cost 900</span><br />
               Ana &rarr; acceptable, score 1.0<br />
               <span class="text-redline-text">Bob &rarr; red-line</span><br />
@@ -243,7 +243,7 @@ const jsonLd = JSON.stringify({
               </p>
               <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">agent.py &middot; consensus.py</span>
             </div>
-            <div class={deviceBlock} aria-label="Example: what the coordinator sees and how it ranks">
+            <div class={deviceBlock} role="region" tabindex="0" aria-label="Example: what the coordinator sees and how it ranks">
               <span class="text-muted">leaves each agent:</span><br />
               <span class="text-verify">acceptable</span> &middot; score 0.4 &middot; reason "ok"<br />
               <span class="text-muted">rule over feasible options:</span><br />
@@ -268,7 +268,7 @@ const jsonLd = JSON.stringify({
               </p>
               <span class="mt-4 inline-block rounded-full border border-hairline bg-bg px-3 py-[5px] font-mono text-[11.5px] text-muted">transcript.py &middot; consensus.py</span>
             </div>
-            <div class={deviceBlock} aria-label="Example: the two local checks">
+            <div class={deviceBlock} role="region" tabindex="0" aria-label="Example: the two local checks">
               transcript.hash()<br />
               <span class="text-verify">&rarr; 30483303e4d9&hellip;c88f516</span><br />
               transcript.verify_non_betrayal(my_sheet, decision)<br />
