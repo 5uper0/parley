@@ -76,7 +76,7 @@ _ES = {
     "legal": "Herramienta para ordenar la conversación entre coherederos. No es asesoramiento jurídico y no sustituye a un notario, mediador o abogado. El caso de esta página es inventado.",
 }
 _EN = {
-    "hook": "AI that can't lie — and you can check",
+    "hook": "Each owner can check their own limit held",
     "blocked": "BLOCKED by a red line — rejected in code, not negotiated away.",
     "pushed": "One agent pushed",
     "parties": "rival parties",
@@ -85,7 +85,7 @@ _EN = {
     "agreed_sub": "max-min consensus — the least-happy party lifted. No one was betrayed.",
     "ok": "✓ verified · tamper-evident · every red line held",
     "bad": "unverified",
-    "foot": "parley — provable-fairness for multi-party decisions · self-hosted · no crypto · replay it yourself",
+    "foot": "parley · decisions between parties with private limits · self-hosted · no crypto · replay it yourself",
     "title": "Parley proof card",
     "said": "What each agent said",
     "option": "Option",
