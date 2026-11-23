@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <!--
-  Parley social-preview (Open Graph) card — 1280×640, shown when the repo link is shared on
+  Parley social-preview (Open Graph) card — 1200x630, shown when the repo link is shared on
   X / LinkedIn / Slack / Discord. Linear-calibrated dark (docs/brand/calibration-linear.md).
   Render to PNG → GitHub Settings → Social preview:
-    chrome --headless --screenshot=og-card.png --window-size=1280,640 og-card.html
+    chrome --headless --screenshot=og-card.png --window-size=1200,630 og-card.html
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --indigo:#6E79E0; --verify:#1FB98A; --red:#F0555B; --grid:rgba(255,255,255,.025);
+    --indigo:#6E79E0; --verify:#1FB98A; --red:#C42121; --grid:rgba(255,255,255,.025);
     --ink:#F4F6F7; --muted:#9AA0A9; --dim:#6A6F78; --hair:rgba(255,255,255,.09);
-    --verify-bg:rgba(31,185,138,.10); --red-bg:rgba(240,85,91,.09);
+    --verify-bg:rgba(31,185,138,.10); --red-bg:rgba(196,33,33,.09);
     --sans:'Inter',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
   }
   *{margin:0;box-sizing:border-box}
   body{display:flex;align-items:center;justify-content:center;background:#0A0B0D;font-family:var(--sans)}
-  .frame{position:relative;width:1280px;height:640px;overflow:hidden;color:var(--ink);
+  .frame{position:relative;width:1200px;height:630px;overflow:hidden;color:var(--ink);
     padding:76px 84px;display:flex;flex-direction:column;justify-content:space-between;
     background:
       radial-gradient(110% 80% at 78% -10%, rgba(110,121,224,.16), transparent 55%),
@@ -44,7 +44,7 @@
   .hero p{margin-top:20px;font-size:23px;line-height:1.42;color:var(--muted);max-width:44ch;font-weight:400}
   .rows{display:flex;gap:16px}
   .chip{display:flex;align-items:center;gap:12px;padding:15px 20px;border-radius:14px;font-size:19px;font-weight:540}
-  .chip.block{background:var(--red-bg);color:var(--red);border:1px solid rgba(240,85,91,.28)}
+  .chip.block{background:var(--red-bg);color:var(--red);border:1px solid rgba(196,33,33,.28)}
   .chip.ok{background:var(--verify-bg);color:var(--verify);border:1px solid rgba(31,185,138,.28)}
   .chip .mk{font-family:var(--mono);font-weight:700;font-size:22px}
   .foot{display:flex;align-items:center;justify-content:space-between;color:var(--dim);font-size:17px}
