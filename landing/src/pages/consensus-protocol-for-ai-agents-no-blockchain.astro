@@ -167,7 +167,7 @@ const jsonLd = JSON.stringify({
           Options every agent accepted stay. Among those, the one with the highest minimum score wins, ties broken by
           total score. With no such option the result is an honest deadlock, never a forced pick.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`result = run_consensus(agents, options)
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`result = run_consensus(agents, options)
 result.status                       # "agreed" or "deadlock"
 result.transcript.hash()            # SHA-256 over the canonical record
 result.transcript.verify_non_betrayal(my_sheet, result.decision)   # True, run on your machine`}</code></pre>

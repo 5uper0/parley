@@ -166,7 +166,7 @@ const jsonLd = JSON.stringify({
           the second says <code class={code}>ok</code> with the real score. Neither verdict contains the number 700,
           and the sheet object never leaves the process that holds it.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`sheet = PreferenceSheet("bob",
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`sheet = PreferenceSheet("bob",
     hard=[HardConstraint("budget", lambda o: o["price"] <= 700)],
     utility=lambda o: 1 - o["price"] / 1000)
 bob = Agent("bob", sheet)

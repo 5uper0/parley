@@ -169,7 +169,7 @@ const jsonLd = JSON.stringify({
           acceptable only if the predicate returns the literal <code class={code}>True</code>.
           Any other return value, truthy or not, crosses it.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`@dataclass(frozen=True)
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`@dataclass(frozen=True)
 class HardConstraint:
     name: str
     predicate: Callable[[Any], bool]
@@ -224,7 +224,7 @@ HardConstraint("budget", lambda o: o["cost"] <= 700)`}</code></pre>
           not. The sheet is never handed to the coordinator, and the coordinator is untrusted
           by construction: it sees that a line was crossed, never which one.
         </p>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`def consider(self, option):
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`def consider(self, option):
     ev = self.sheet.evaluate(option)
     return Verdict(
         owner=self.owner,

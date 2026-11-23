@@ -183,7 +183,7 @@ const jsonLd = JSON.stringify({
             </tbody>
           </table>
         </div>
-        <pre class={`${deviceBlock} mt-5 whitespace-pre`}><code>{`result = run_consensus([ana, bob], options)
+        <pre class={`${deviceBlock} mt-5 whitespace-pre`} tabindex="0" aria-label="Code example, scrollable code"><code>{`result = run_consensus([ana, bob], options)
 result.status      # "deadlock"
 result.decision    # None
 verify_outcome(result.transcript, expected_owners=["ana", "bob"])   # True
