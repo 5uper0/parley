@@ -58,6 +58,7 @@ _ES = {
     "said": "Qué dijo cada agente",
     "option": "Opción",
     "acceptable": "aceptable, puntuación",
+    "legend": "Un número es la puntuación de una opción aceptable para esa parte; «límite privado» significa que la rechaza.",
     "redline": "límite privado",
     "masked": "Solo estos veredictos enmascarados salen de un agente. El coordinador nunca ve la hoja de preferencias ni qué límite se activó; la tabla muestra quién objetó, no por qué.",
     "receipt": "Recibo",
@@ -81,14 +82,15 @@ _EN = {
     "parties": "rival parties",
     "private": "each with private red lines",
     "agreed": "Agreed",
-    "agreed_sub": "max-min consensus — the least-happy party lifted. No one was betrayed.",
-    "ok": "✓ verified · tamper-evident · every red line held",
+    "agreed_sub": "max-min consensus — the least-happy party lifted. No party's red line was crossed; each owner can check their own.",
+    "ok": "✓ checked on the sample's sheets · tamper-evident · no red line crossed",
     "bad": "unverified",
     "foot": "parley · decisions between parties with private limits · self-hosted · no crypto · replay it yourself",
     "title": "Parley proof card",
     "said": "What each agent said",
     "option": "Option",
     "acceptable": "acceptable, score",
+    "legend": "A number is the score of an option that party accepts; “red line” means it rejects the option.",
     "redline": "red line",
     "masked": "Only these masked verdicts leave an agent. The coordinator never sees a preference sheet or which red line fired.",
     "receipt": "Receipt",
@@ -205,7 +207,7 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
         label = html.escape(str(opt.get("label", opt.get("id"))))
         cells = "".join(
             f'<td class="{"y" if v["acceptable"] else "n"}">'
-            f'{T["acceptable"] + " " + (str(v["score"]).replace(".", ",") if lang == "es" else str(v["score"])) if v["acceptable"] else T["redline"]}</td>'
+            f'{"<span class=lbl>" + T["acceptable"] + " </span>" + (str(v["score"]).replace(".", ",") if lang == "es" else str(v["score"])) if v["acceptable"] else T["redline"]}</td>'
             for v in e["verdicts"])
         rows.append(f"<tr><th>{label}</th>{cells}</tr>")
     heads = "".join(f'<th>{html.escape(p["owner"])}</th>' for p in data["parties"])
@@ -216,6 +218,8 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
              ".wrap td,.wrap th{border:1px solid var(--n200);padding:7px 9px;text-align:left}"
              ".wrap td.n{color:var(--redline-600)}.wrap td.y{color:var(--verify-600)}"
              ".skip{position:absolute;left:12px;top:-100px;z-index:10;background:var(--n900);color:#fff;padding:12px 18px;border-radius:8px}.skip:focus{top:12px}"
+             ".lg{display:none}"
+             "@media(max-width:480px){.wrap td,.wrap th{padding:7px 5px}.wrap tr:first-child th:first-child{width:32%}.wrap td .lbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.lg{display:block}}"
              ".wrap h1{font-size:22px;margin:0 0 16px;line-height:1.25}"
              ".wrap nav{display:flex;flex-wrap:wrap;gap:0 14px;margin:0 0 14px;font-size:14px}"
              ".wrap nav a{color:var(--indigo-600);display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:0 4px}"
@@ -233,7 +237,7 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
             f'{nav}<main id="main"><h1>{html.escape(str(data["title"]))}</h1>{legal}{card}'
             f'<h2>{T["said"]}</h2>'
             f'<table><tr><th>{T["option"]}</th>{heads}</tr>{"".join(rows)}</table>'
-            f'<p>{T["masked"]}</p>'
+            f'<p>{T["masked"]}</p><p class="lg">{T["legend"]}</p>'
             f'<h2>{T["receipt"]}</h2><p>{T["fullhash"]}</p>'
             f'<p><code class="h">{data["hash"]}</code></p>'
             f'<p>{T["notauth"]}</p>'

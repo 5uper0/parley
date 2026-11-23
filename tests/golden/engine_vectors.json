@@ -601,7 +601,7 @@
   {
    "name": "recipe_dao_treasury.json",
    "spec": {
-    "title": "Settle a DAO treasury fight without an insider rig (real case)",
+    "title": "Settle a DAO treasury fight without an insider rig (sample from a public report)",
     "options": [
      {
       "id": "full",
@@ -1235,7 +1235,7 @@
   {
    "name": "recipe_estate_valuation.json",
    "spec": {
-    "title": "Split an inherited house without a coerced waiver (real case)",
+    "title": "Split an inherited house without a coerced waiver (sample from a public thread)",
     "options": [
      {
       "id": "market",
@@ -3216,7 +3216,7 @@
   {
    "name": "recipe_partnership_buyout.json",
    "spec": {
-    "title": "Break a 3-partner squeeze-out (real case)",
+    "title": "Break a 3-partner squeeze-out (sample from a public thread)",
     "options": [
      {
       "id": "keep-equal",

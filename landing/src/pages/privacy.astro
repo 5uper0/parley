@@ -9,10 +9,17 @@ import Footer from "../components/Footer.astro";
   description="What the hosted site at parleyprotocol.com collects and why: standard GA4 page-view and click-event analytics plus Microsoft Clarity session recordings, both loaded only after you accept, no ads, no data resale, no tracking in the self-hosted core."
   path="/privacy/"
 >
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-full focus:bg-indigo-solid focus:px-5 focus:py-3.5 focus:text-sm focus:font-semibold focus:text-white"
+  >
+    Skip to content
+  </a>
+
   <div class="mx-auto flex min-h-screen max-w-[720px] flex-col px-6 md:px-16">
     <Header />
 
-    <main class="flex-1 pb-16">
+    <main id="main" class="flex-1 pb-16">
       <h1 class="font-display text-3xl tracking-[-0.02em] text-ink">Privacy</h1>
       <p class="mt-1.5 text-[12.5px] text-subtle">Last updated 2026-11-23</p>
 
