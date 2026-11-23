@@ -234,7 +234,7 @@ def replay_html(data: dict, path: str, recipe: str, lang: str = "en") -> str:
             f'<h2>{T["receipt"]}</h2><p>{T["fullhash"]}</p>'
             f'<p><code class="h">{data["hash"]}</code></p>'
             f'<p>{T["notauth"]}</p>'
-            f'<h2>{T["run"]}</h2><pre>git clone https://github.com/5uper0/parley\n'
+            f'<h2>{T["run"]}</h2><pre tabindex="0" aria-label="{T["run"]}">git clone https://github.com/5uper0/parley\n'
             f'cd parley &amp;&amp; pip install -e .\n'
             f'python examples/demo/proofcard.py examples/demo/{recipe} card.html</pre>'
             f'<p>{T["match"]} '
