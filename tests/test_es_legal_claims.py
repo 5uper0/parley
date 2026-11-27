@@ -24,7 +24,7 @@ _ARTICLE_LIST = re.compile(
     re.IGNORECASE,
 )
 _RANGE_SEP = re.compile(r"\s*(?:–|-|al|a|to|до)\s*", re.IGNORECASE)
-_LAW = re.compile(rf"(?<![\d/])\d{{1,3}}/\d{{4}}\b")
+_LAW = re.compile(r"(?<![\d/])\d{1,3}/\d{4}\b")
 
 
 def cited_articles(text: str) -> set[str]:

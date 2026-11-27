@@ -11,7 +11,6 @@ AC2 and AC3 need a browser and are not here.
 import re
 from pathlib import Path
 
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"

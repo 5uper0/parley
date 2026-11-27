@@ -29,6 +29,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           # No branch protection available on this plan, so GitHub's native
           # --auto merge (which requires it) is not usable. Poll sibling
@@ -37,14 +38,15 @@ jobs:
           for i in $(seq 1 40); do
             STATE=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
               [.statusCheckRollup[]? | select(.workflowName != "Dependabot auto-merge")] as $c
-              | if ($c | length) == 0 then "ready"
+              | if ($c | length) == 0 then "pending"
                 elif ($c | any(.status? == "IN_PROGRESS" or .status? == "QUEUED" or .status? == "PENDING" or .state? == "PENDING")) then "pending"
                 elif ($c | any(.conclusion? == "FAILURE" or .conclusion? == "TIMED_OUT" or .conclusion? == "CANCELLED" or .state? == "FAILURE" or .state? == "ERROR")) then "failed"
+                elif ($c | map(select(.conclusion? == "SUCCESS" and (.name == "docker" or (.name | startswith("test "))))) | length) < 5 then "pending"
                 else "ready" end
             ')
             echo "poll $i: $STATE"
             if [ "$STATE" = "ready" ]; then
-              gh pr merge --squash "$PR_URL"
+              gh pr merge --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
               exit 0
             elif [ "$STATE" = "failed" ]; then
               echo "a sibling check failed — leaving for manual review"

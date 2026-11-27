@@ -20,7 +20,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from parley.agent import Agent, Verdict
+from parley.agent import Agent
 from parley.net.identity import Identity
 from parley.net.profiles import PROFILES
 from parley.preferences import UtilityError

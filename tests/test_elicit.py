@@ -5,7 +5,7 @@ Every test drives the module through a deterministic stub Elicitor — no networ
 import pytest
 
 from parley.elicit import (
-    PROMPTS, Clarification, ConfirmedSheet, ElicitError, Elicitation, http_elicitor,
+    PROMPTS, ConfirmedSheet, ElicitError, Elicitation, http_elicitor,
 )
 from parley.spec import Constraint, PartySpec, UtilityTerm
 

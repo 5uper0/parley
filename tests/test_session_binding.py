@@ -6,7 +6,7 @@ import pytest
 
 pytest.importorskip("nacl")
 
-from parley.agent import Agent, Verdict  # noqa: E402
+from parley.agent import Verdict  # noqa: E402
 from parley.consensus import run_consensus  # noqa: E402
 from parley.net.bot import serve  # noqa: E402
 from parley.net.client import RemoteAgent  # noqa: E402
