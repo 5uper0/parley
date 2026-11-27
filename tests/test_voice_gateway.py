@@ -91,3 +91,33 @@ def test_missing_bearer_is_unauthorized():
             assert e.code == 401
     finally:
         httpd.shutdown()
+
+
+import pytest
+
+
+@pytest.mark.parametrize("host", ["0.0.0.0", "192.168.1.5", "example.com"])
+def test_a_non_loopback_host_without_a_bearer_refuses_to_start(host):
+    with pytest.raises(ValueError):
+        serve(RECIPE, OWNER, None, host=host, port=0)
+
+
+def test_an_empty_bearer_refuses_to_start():
+    with pytest.raises(ValueError):
+        serve(RECIPE, OWNER, "", port=0)
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1", "localhost"])
+def test_a_loopback_host_without_a_bearer_still_starts(host):
+    httpd = serve(RECIPE, OWNER, None, host=host, port=0)
+    httpd.server_close()
+
+
+def test_a_bearer_lifts_the_loopback_restriction():
+    httpd = serve(RECIPE, OWNER, "s3cret", host="0.0.0.0", port=0)
+    httpd.server_close()
+
+
+def test_ipv6_loopback_is_recognised():
+    from voice.gateway import _is_loopback
+    assert _is_loopback("::1") and not _is_loopback("::")

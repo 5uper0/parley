@@ -18,6 +18,7 @@ Run (from the repo root, so the `voice` package resolves):
       PARLEY_GATEWAY_BEARER=dev PARLEY_VOICE_RECIPE=examples/demo/recipe_estate.json \
       PARLEY_VOICE_OWNER="Heir 2" python -m voice.gateway
 """
+import ipaddress
 import json
 import os
 import re
@@ -158,7 +159,20 @@ def make_handler(gateway: "_Gateway", bearer: str | None):
     return _Handler
 
 
+def _is_loopback(host: str) -> bool:
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
 def serve(recipe_path: str, owner: str, bearer: str | None, host="127.0.0.1", port=8013):
+    if bearer == "":  # "" is falsy, so it would silently turn auth off
+        raise ValueError("bearer is empty; pass None to run without auth")
+    if bearer is None and not _is_loopback(host):
+        raise ValueError(f"bearer is required to listen on non-loopback host {host!r}")
     gateway = _Gateway(recipe_path, owner)
     httpd = ThreadingHTTPServer((host, port), make_handler(gateway, bearer))
     print(f"[parley voice] http://{host}:{port}/v1/chat/completions  owner={owner!r}  (Ctrl-C to stop)", flush=True)
