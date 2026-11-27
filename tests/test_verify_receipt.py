@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 import real_decision as rd  # noqa: E402
 
 from parley.consensus import verify_outcome  # noqa: E402
-from parley.ratify import Acceptance, ratify  # noqa: E402
+from parley.ratify import ratify  # noqa: E402
 from parley.transcript import Transcript  # noqa: E402
 from parley.spec import Constraint, DecisionSpec, PartySpec, UtilityTerm  # noqa: E402
 

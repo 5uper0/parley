@@ -1,12 +1,11 @@
 """Opus review of the P0 hardening (2026-11-05): bypasses that failed open, and the strict-compare
 change that loosened negative red lines. Each test fails on the previous commit."""
 import importlib.util
-import json
 import os
 
 import pytest
 
-from parley.spec import Constraint, DecisionSpec
+from parley.spec import Constraint
 from parley.transcript import Transcript
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")

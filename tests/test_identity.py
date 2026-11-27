@@ -9,7 +9,7 @@ import pytest
 
 pytest.importorskip("nacl")
 
-from parley.net.identity import Identity, AgentCard, verdict_payload
+from parley.net.identity import Identity, verdict_payload
 
 
 def test_card_exposes_owner_and_pubkey_only():

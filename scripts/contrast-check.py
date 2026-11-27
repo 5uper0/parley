@@ -36,7 +36,7 @@ for name, sel in (("dark", ":root{"), ("light", ':root[data-theme="light"]{')):
     i = demo.index(sel)
     t = {k.lower(): v.upper() for k, v in re.findall(r"--([a-z-]+):\s*(#[0-9a-fA-F]{6})", demo[i:demo.index("}", i)])}
     if name == "light":
-        t = {**dark_demo, **t}
+        t = {**dark_demo, **t}  # noqa: F821
     else:
         dark_demo = t
     for fg in ("ink", "muted", "dim"):
