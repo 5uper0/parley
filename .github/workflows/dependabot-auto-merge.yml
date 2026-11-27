@@ -35,6 +35,7 @@ jobs:
           # --auto merge (which requires it) is not usable. Poll sibling
           # checks ourselves (excluding this workflow's own run) and merge
           # directly once they're all green. Give up after ~10 minutes.
+          # The 5 below = ci.yml test matrix size (4) + docker. Keep in sync.
           for i in $(seq 1 40); do
             STATE=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
               [.statusCheckRollup[]? | select(.workflowName != "Dependabot auto-merge")] as $c

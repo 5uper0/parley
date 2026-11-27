@@ -25,7 +25,7 @@ jobs:
           pip install -e ".[dev]"
       - name: Lint
         run: |
-          pip install ruff
+          pip install ruff==0.17.6
           ruff check parley tests scripts examples
       - name: Test
         run: pytest -q
